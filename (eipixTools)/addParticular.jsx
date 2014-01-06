@@ -2,6 +2,7 @@
 // 
 // Name: addParticular
 // Version: 1.0
+// Author: Aleksandar Kocic
 // 
 // Description:     
 // This script creates a new solid and adds Trapcode Particular to it.

@@ -2,6 +2,7 @@
 // 
 // Name: clearCachePurgeMem
 // Version: 1.1
+// Author: Aleksandar Kocic
 // 
 // Description:
 // This script purges all RAM memory taken by After Effects and

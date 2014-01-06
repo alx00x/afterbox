@@ -2,6 +2,7 @@
 // 
 // Name: addControl
 // Version: 0.1
+// Author: Aleksandar Kocic
 // 
 // Description:     
 // This script ...

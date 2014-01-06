@@ -2,6 +2,7 @@
 // 
 // Name: setMaterialOptions
 // Version: 1.2
+// Author: Aleksandar Kocic
 // 
 // Description:
 // This script provides a GUI to quickly change material options

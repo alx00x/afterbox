@@ -1,12 +1,12 @@
 @echo off
 
 set epxsrc="C:\Program Files\Adobe\Adobe After Effects CS6\Support Files\Scripts\ScriptUI Panels\(eipixTools)\src"
-set epxelm="C:\Program Files\Adobe\Adobe After Effects CS6\Support Files\Scripts\ScriptUI Panels\(eipixTools)\elm"
+set csvpath="C:\"
 
 set pm=%epxsrc%\procmon.exe
 set config=%epxsrc%\elemconfig.pmc
-set backing=%epxelm%\afterfx.pml
-set saving=%epxelm%\afterfx.csv
+set backing=%csvpath%\afterfx.pml
+set saving=%csvpath%\afterfx.csv
 
 del %saving%
 del %backing%

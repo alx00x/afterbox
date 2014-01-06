@@ -2,6 +2,8 @@
 // 
 // Name: eipixTools
 // Version: 1.1
+// Author: Aleksandar Kocic
+// Based on: Launch Pad.jsx script by After Effects crew
 // 
 // Description:
 // This is a modified script originally created by Jeff Almasol.

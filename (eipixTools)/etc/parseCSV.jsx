@@ -1,4 +1,4 @@
-var myFile = new File("C://Program Files//Adobe//Adobe After Effects CS6//Support Files//Scripts//ScriptUI Panels//(eipixTools)//elm//afterfx.csv");
+var myFile = new File("C://afterfx.csv");
 var fileOK = myFile.open("r", "TEXT", "????");
 
 var arrayLinesRaw = [];
