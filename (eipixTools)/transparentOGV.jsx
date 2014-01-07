@@ -1,12 +1,24 @@
-//Make OGV ready composition for ingame use
+// transparentOGV.jsx
+// 
+// Name: transparentOGV
+// Version: 1.0
+// Author: Aleksandar Kocic
+// 
+// Description:     
+// This script prepares a composition and adds render items
+// for engine use. Script checks if dimensions are dividable 
+// by 16 and offers an option to reduce unnecessarily space 
+// around the object.
+//  
 
-(function createAlphaComp(thisObj)
+
+(function transparentOGV(thisObj)
 {
     var activeComp = app.project.activeItem;
-    if(activeComp != null && activeComp instanceof CompItem) {
+    if((activeComp != null) && (activeComp instanceof CompItem)) {
         app.beginUndoGroup("Make OGV ready composition for ingame use");
         try {       
-            var newCompName = "ALPHA COMP (" + activeComp.name + ")";
+            var newCompName = "OGV(" + activeComp.name + ")";
             var newCompWidth = activeComp.width * 2;
             var offsetLeft = activeComp.width / 2;
             var offsetRight = (activeComp.width / 2) * 3;
@@ -21,9 +33,10 @@
             L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
             var newCompBG = newComp.layers.addSolid([0,0,0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
             newCompBG.moveToEnd();
-        } finally {
-            app.endUndoGroup();
+        } catch (err) {
+            alert("Something went wrong.");
         }
+        app.endUndoGroup();
     } else {
         alert("Please select a composition.");
     }
