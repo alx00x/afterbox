@@ -1,18 +1,16 @@
-// collectFilesAndReduce.jsx
+// moreFramesAtBeginning.jsx
 // 
-// Name: collectFilesAndReduce
-// Version: 0.3
+// Name: moreFramesAtBeginning
+// Version: 0.5
 // Author: Aleksandar Kocic
 // 
 // Description:
-// This script removes unused footage and collects files
-// at the location of the original project. It mimics the 
-// "Collect Files..." function. Parts based on a script
-// by duduf.net
-//  
-// Note: Might not be completely stable. Use with caution.
+// This script adds a specified number of frames at the 
+// beginning of the comp hierarchy.
+// 
 
-(function main(thisObj)
+
+(function moreFramesAtBeginning(thisObj)
 {
 
     // Define main variables
@@ -89,7 +87,7 @@
 
     // Main Functions:
     //
-    function moreFramesAtBeginning(theComp) {
+    function moreFramesAtBeginning_main(theComp) {
 
         var numOfSec = addFrames / theComp.frameRate;
         var newDuration = theComp.duration + numOfSec;
@@ -114,16 +112,13 @@
                     theComp.layer(i).startTime = curLayerStartTime + numOfSec;
                 }
             } else if (curLayer.source instanceof CompItem) {
-                theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                theComp.layer(i).inPoint = curLayerInPoint + numOfSec;
+                theComp.layer(i).startTime = curLayerStartTime;
+                theComp.layer(i).inPoint = curLayerInPoint;
     
-                moreFramesAtBeginning(curLayerSource);
+                moreFramesAtBeginning_main(curLayerSource);
     
             } else {
-                if ((curLayerInPoint == 0) && (curLayerStartTime == 0)) {
-                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                    theComp.layer(i).inPoint = 0;
-                } else if ((curLayerInPoint == 0) && (curLayerStartTime < 0)) {
+                if (curLayerInPoint == 0) {
                     theComp.layer(i).startTime = curLayerStartTime + numOfSec;
                     theComp.layer(i).inPoint = 0;
                 } else {
@@ -140,7 +135,7 @@
         if ((activeItem != null) && (activeItem instanceof CompItem)) {
             var activeComp = activeItem;
             addFrames = this.parent.parent.opts.numFrames.numFramesField.text;
-            moreFramesAtBeginning(activeComp);
+            moreFramesAtBeginning_main(activeComp);
         } else {
             alert("Please select a single composition.");
         }
