@@ -6,12 +6,10 @@
 
 INSTALLER:
  - Executable provided in this folder only works for After Effects CS6 64-bit.
- - You can copy this installer to your desktop for easier access.
 
 UPDATING SCRIPTS:
  - Just rerun the installer.
- - Note that this will delete all custom scripts you may have placed inside 
-   "(eipixTools)" folder.
+ - You can make a shortcut to the installer on your desktop for easier access.
 
 MANUAL INSTALATION:
  - Copy both the "eipixTools.jsx" script and "(eipixTools)" folder to:
