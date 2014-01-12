@@ -1,7 +1,7 @@
 ﻿// eipixTools.jsx
 // 
 // Name: eipixTools
-// Version: 1.1
+// Version: 2.0
 // Based on: Launch Pad.jsx script by After Effects crew
 // 
 // Description:
@@ -20,7 +20,7 @@
 	function eipixTools(thisObj) {
 		var eipixToolsData = new Object();
 		eipixToolsData.scriptName = "Eipix Tools";
-		eipixToolsData.version = "1.1";
+		eipixToolsData.version = "2.0";
 		eipixToolsData.scriptsPath = Folder.startup.fsName + "\\Scripts\\ScriptUI Panels\\(eipixTools)\\";
 		eipixToolsData.scriptsFolderAlert = "Scripts folder was not found at the expected location.";
 
@@ -39,8 +39,21 @@
 		eipixToolsData.strRefreshPanel = "Please close and then reopen the script to refresh the panel's script buttons.";
 		eipixToolsData.strErrCantLaunchScript = "Could not launch script '%s' because it no longer exists on disk."
 		eipixToolsData.strErrMinAE90 = "This script requires Adobe After Effects CS4 or later.";
-
+		eipixToolsData.strErrAccessDenied = "Unable to write files on disc.\n" + 
+			"Go to Edit > Preferences > General and make sure\n" +
+			"\"Allow Scripts to Write Files and Access Network\" is checked.\n" +
+			"\n";
 		eipixToolsData.btnSize = 36;
+
+
+    	function isNetworkAccessAllowed() {
+    	    var securitySetting = app.preferences.getPrefAsLong("Main Pref Section", "Pref_SCRIPTING_FILE_NETWORK_SECURITY");
+    	    if (securitySetting != 1) {
+    	        return false;
+    	    } else if (securitySetting == 1) {
+    	    	return true;
+    		}
+    	}
 
 
 		// eipixTools_buildUI()
@@ -131,7 +144,7 @@
 			}
 
 			// Add the settings and help buttons
-			var settingsBtnIconFile = new File(eipixToolsData.thisScriptsFolder.fsName + "/eipixTools_settings.png");
+			var settingsBtnIconFile = new File(eipixToolsData.thisScriptsFolder.fsName + "/(eipixTools)/eipixTools_settings.png");
 			if (settingsBtnIconFile.exists)
 				palObj.settingsBtn = palObj.btnGroup.add("iconbutton", [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize / 2], settingsBtnIconFile, {
 					style: "toolbutton"
@@ -143,7 +156,8 @@
 				// Get the scripts in the selected scripts folder
 				var scriptsFolder = Folder.selectDialog(eipixToolsData.strSelScriptsFolder, Folder(eipixToolsData.scriptsFolder));
 				if ((scriptsFolder != null) && scriptsFolder.exists) {
-					eipixToolsData.scriptsFolder = scriptsFolder;
+					scriptsFolderCategory = scriptsFolder + "/1/";
+					eipixToolsData.scriptsFolder = scriptsFolderCategory;
 					// Get all scripts in the selected folder, but not this one, cuz that would be weird :-)
 					eipixToolsData.scripts = scriptsFolder.getFiles(eipixTools_filterJSXFiles);
 
@@ -159,7 +173,7 @@
 				}
 			}
 
-			var helpBtnIconFile = new File(eipixToolsData.thisScriptsFolder.fsName + "/help.png");
+			var helpBtnIconFile = new File(eipixToolsData.thisScriptsFolder.fsName + "/(eipixTools)/eipixTools_help.png");
 			if (helpBtnIconFile.exists)
 				palObj.helpBtn = palObj.btnGroup.add("iconbutton", [leftEdge, topEdge + btnSize / 2, leftEdge + btnSize, topEdge + btnSize], helpBtnIconFile, {
 					style: "toolbutton"
@@ -210,6 +224,9 @@
 		if (parseFloat(app.version) < 9) {
 			alert(eipixToolsData.strErrMinAE90, eipixToolsData.scriptName);
 			return;
+		} else if (isNetworkAccessAllowed() == false) {
+			alert(eipixToolsData.strErrAccessDenied);
+			return;
 		} else {
 			// Keep track of this script's folder so we know where to find the icons used by the script
 			eipixToolsData.thisScriptsFolder = new Folder((new File($.fileName)).path);
@@ -219,19 +236,28 @@
 			if (app.settings.haveSetting("Adobe", "eipixTools_scriptsFolder")) {
 				eipixToolsData.scriptsFolder = new Folder(app.settings.getSetting("Adobe", "eipixTools_scriptsFolder").toString());
 				if ((eipixToolsData.scriptsFolder != null) && eipixToolsData.scriptsFolder.exists)
-					eipixToolsData.scripts = eipixToolsData.scriptsFolder.getFiles(eipixTools_filterJSXFiles);
+
+					scriptsFolderCategory = new Folder(eipixToolsData.scriptsFolder.fsName + "\\1\\");
+
+					eipixToolsData.scripts = scriptsFolderCategory.getFiles(eipixTools_filterJSXFiles);
 			} else {
-				eipixToolsData.scriptsFolder = new Folder(Folder.startup.fsName + "\\Scripts\\ScriptUI Panels\\(eipixTools)\\");
+				eipixToolsData.scriptsFolder = new Folder(eipixToolsData.thisScriptsFolder + "\\(eipixTools)\\");
 				if ((eipixToolsData.scriptsFolder != null) && eipixToolsData.scriptsFolder.exists) {
-					eipixToolsData.scripts = eipixToolsData.scriptsFolder.getFiles(eipixTools_filterJSXFiles);
+
+					scriptsFolderCategory = new Folder(eipixToolsData.scriptsFolder.fsName + "\\1\\");
+
+					eipixToolsData.scripts = scriptsFolderCategory.getFiles(eipixTools_filterJSXFiles);
 
 					// Remember the scripts folder for the next session
 					app.settings.saveSetting("Adobe", "eipixTools_scriptsFolder", eipixToolsData.scriptsFolder.fsName);
 				} else {
 					alert(eipixToolsData.scriptsFolderAlert);
-					eipixToolsData.scriptsFolder = Folder.selectDialog(eipixToolsData.strSelScriptsFolder, new Folder(Folder.startup.fsName + "\\Scripts\\ScriptUI Panels\\"));
+					eipixToolsData.scriptsFolder = Folder.selectDialog(eipixToolsData.strSelScriptsFolder, new Folder(eipixToolsData.thisScriptsFolder + "\\(eipixTools)\\"));
 					if ((eipixToolsData.scriptsFolder != null) && eipixToolsData.scriptsFolder.exists) {
-						eipixToolsData.scripts = eipixToolsData.scriptsFolder.getFiles(eipixTools_filterJSXFiles);
+
+						scriptsFolderCategory = new Folder(eipixToolsData.scriptsFolder.fsName + "\\1\\");
+
+						eipixToolsData.scripts = scriptsFolderCategory.getFiles(eipixTools_filterJSXFiles);
 
 						// Remember the scripts folder for the next session
 						app.settings.saveSetting("Adobe", "eipixTools_scriptsFolder", eipixToolsData.scriptsFolder.fsName);
