@@ -9,7 +9,6 @@ INSTALLER:
 
 UPDATING SCRIPTS:
  - Just rerun the installer.
- - You can make a shortcut to the installer on your desktop for easier access.
 
 MANUAL INSTALATION:
  - Copy both the "eipixTools.jsx" script and "(eipixTools)" folder to:
