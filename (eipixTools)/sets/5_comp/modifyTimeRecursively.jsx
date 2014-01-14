@@ -19,11 +19,14 @@
     mtrData.scriptVersion = "0.6";
     mtrData.scriptTitle = mtrData.scriptName + " v" + mtrData.scriptVersion;
 
+    mtrData.timeUnit;
+    mtrData.operationApply;
+
     mtrData.strOptions = {en: "Options"};
-    mtrData.strSetFrames = {en: "Frames:"};
-    mtrData.strSetSeconds = {en: "Seconds:"};
-    mtrData.strFramesStart = {en: "Beginning"};
-    mtrData.strFramesEnd = {en: "End"};
+    mtrData.strTimeText = {en: "Select time unit:"};
+    mtrData.strTimeOpts = {en: ["Frames", "Seconds"]};
+    mtrData.strOperationText = {en: "Select operation:"};
+    mtrData.strOperationOpts = {en: ["Add time at the beginning", "Add time at the end"]};
     mtrData.strExecute = {en: "Execute"};
 
     mtrData.strErrExecute = {en: "Please select a single composition."};
@@ -62,17 +65,16 @@
                 }, \
                 opts: Panel { \
                     text: '" + mtr_localize(mtrData.strOptions) + "', alignment:['fill','top'], \
-                    framesStart: Group { \
-                        alignment:['fill','top'], \
-                        framesStartBox: Checkbox { text:'" + mtr_localize(mtrData.strFramesStart) + "', value:true, preferredSize:[90,20]  }, \
-                        framesStartText: StaticText { text:'" + mtr_localize(mtrData.strSetFrames) + "', preferredSize:[-1,20] }, \
-                        framesStartField: EditText { text:'100', characters:5, justify:'center', preferredSize:[90,20] }, \
+                    timelist: Group { \
+                        txt: StaticText { text:'" + mtr_localize(mtrData.strTimeText) + "', preferredSize:[100,20] }, \
+                        lst: DropDownList { alignment:['fill','center'], preferredSize:[160,20] }, \
                     }, \
-                    framesEnd: Group { \
-                        alignment:['fill','top'], \
-                        framesEndBox: Checkbox { text:'" + mtr_localize(mtrData.strFramesEnd) + "', value:true, preferredSize:[90,20]  }, \
-                        framesEndText: StaticText { text:'" + mtr_localize(mtrData.strSetFrames) + "', preferredSize:[-1,20] }, \
-                        framesEndField: EditText { text:'100', characters:5, justify:'center', preferredSize:[90,20] }, \
+                    operationlist: Group { \
+                        txt: StaticText { text:'" + mtr_localize(mtrData.strOperationText) + "', preferredSize:[100,20] }, \
+                        lst: DropDownList { alignment:['fill','center'], preferredSize:[160,20] }, \
+                    }, \
+                    num: Group { \
+                        fld: EditText { text:'100', characters:5, justify:'center', preferredSize:[100,20] }, \
                     }, \
                 }, \
                 cmds: Group { \
@@ -87,22 +89,18 @@
             pal.layout.resize();
             pal.onResizing = pal.onResize = function () {this.layout.resize();}
 
-            pal.grp.opts.framesStart.framesStartBox.onClick = function () {
-                var state = this.value;
-                this.parent.framesStartField.enabled = state;
-                if (state)
-                    this.parent.framesStartField.active = true;
-            }
+            var timeItems = mtr_localize(mtrData.strTimeOpts);
+            for (var i=0; i<timeItems.length; i++)
+                pal.grp.opts.timelist.lst.add("item", timeItems[i]);
+            pal.grp.opts.timelist.lst.selection = 0;
 
-            pal.grp.opts.framesEnd.framesEndBox.onClick = function () {
-                var state = this.value;
-                this.parent.framesEndField.enabled = state;
-                if (state)
-                    this.parent.framesEndField.active = true;
-            }
+            var operationItems = mtr_localize(mtrData.strOperationOpts);
+            for (var i=0; i<operationItems.length; i++)
+                pal.grp.opts.operationlist.lst.add("item", operationItems[i]);
+            pal.grp.opts.operationlist.lst.selection = 0;
 
             pal.grp.header.help.onClick = function () {alert(mtrData.scriptTitle + "\n" + "\n" + mtr_localize(mtrData.strHelpText), mtr_localize(mtrData.strHelpTitle));}
-            pal.grp.cmds.executeBtn.onClick = modifyStartFrames_doExecute;
+            pal.grp.cmds.executeBtn.onClick = mtr_doExecute;
         }
         
         return pal;
@@ -110,9 +108,9 @@
 
     // Main Functions:
     //
-    function modifyStartFrames_main(theComp) {
+    function addStartFrames_main(theComp) {
 
-        var numOfSec = addFrames / theComp.frameRate;
+        var numOfSec = numField / theComp.frameRate;
         var newDuration = theComp.duration + numOfSec;
 
         theComp.duration = newDuration;
@@ -121,6 +119,76 @@
             var curLayer = theComp.layer(i);
             var curLayerSource = theComp.layer(i).source;
             var curLayerInPoint = theComp.layer(i).inPoint;
+            var curLayerOutPoint = theComp.layer(i).outPoint;
+            var curLayerStartTime = theComp.layer(i).startTime;
+
+            if ((curLayer.source instanceof FootageItem) && !(curLayer.source.mainSource instanceof SolidSource)) {
+                if ((curLayerInPoint == 0) && (curLayerStartTime == 0)) {
+                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
+                    try {
+                        theComp.layer(i).inPoint = 0;
+                    } catch (err) {
+                        // theComp.layer(i).inPoint = curLayerInPoint + numOfSec;
+                    }
+                } else {
+                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
+                }
+            } else if (curLayer.source instanceof CompItem) {
+                theComp.layer(i).startTime = curLayerStartTime;
+                theComp.layer(i).inPoint = curLayerInPoint;
+    
+                addStartFrames_main(curLayerSource);
+                theComp.layer(i).outPoint = curLayerOutPoint + numOfSec;
+            } else {
+                if (curLayerInPoint == 0) {
+                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
+                    theComp.layer(i).inPoint = 0;
+                } else {
+                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
+                }
+            }
+        }
+    }
+
+    function addEndFrames_main(theComp) {
+        var numOfSec = numField / theComp.frameRate;
+        var newDuration = theComp.duration + numOfSec;
+        var oldDuration = theComp.duration;
+
+        theComp.duration = newDuration;
+        
+        for (var i = 1; i <= theComp.numLayers; i++) {
+            var curLayer = theComp.layer(i);
+            var curLayerSource = theComp.layer(i).source;
+            var curLayerInPoint = theComp.layer(i).inPoint;
+            var curLayerOutPoint = theComp.layer(i).outPoint;
+            var curLayerStartTime = theComp.layer(i).startTime;
+
+            if ((curLayer.source instanceof FootageItem) && !(curLayer.source.mainSource instanceof SolidSource) && (curLayerOutPoint == oldDuration)) {
+                theComp.layer(i).outPoint = newDuration;
+            } else if ((curLayer.source instanceof CompItem) && (curLayerOutPoint == oldDuration)) {   
+                addEndFrames_main(curLayerSource);
+                theComp.layer(i).outPoint = curLayerOutPoint + numOfSec;
+            } else {
+                if (curLayerOutPoint == oldDuration) {
+                    theComp.layer(i).outPoint = newDuration;
+                }
+            }
+        }
+    }
+
+    function addStartSeconds_main(theComp) {
+
+        var numOfSec = numField;
+        var newDuration = theComp.duration + numOfSec;
+
+        theComp.duration = newDuration;
+        
+        for (var i = 1; i <= theComp.numLayers; i++) {
+            var curLayer = theComp.layer(i);
+            var curLayerSource = theComp.layer(i).source;
+            var curLayerInPoint = theComp.layer(i).inPoint;
+            var curLayerOutPoint = theComp.layer(i).outPoint;
             var curLayerStartTime = theComp.layer(i).startTime;
     
             if ((curLayer.source instanceof FootageItem) && !(curLayer.source.mainSource instanceof SolidSource)) {
@@ -138,8 +206,8 @@
                 theComp.layer(i).startTime = curLayerStartTime;
                 theComp.layer(i).inPoint = curLayerInPoint;
     
-                modifyStartFrames_main(curLayerSource);
-    
+                addStartSeconds_main(curLayerSource);
+                theComp.layer(i).outPoint = curLayerOutPoint + numOfSec;
             } else {
                 if (curLayerInPoint == 0) {
                     theComp.layer(i).startTime = curLayerStartTime + numOfSec;
@@ -151,10 +219,10 @@
         }
     }
 
-    function modifyEndFrames_main(theComp) {
-
-        var numOfSec = addFrames / theComp.frameRate;
+    function addEndSeconds_main(theComp) {
+        var numOfSec = numField;
         var newDuration = theComp.duration + numOfSec;
+        var oldDuration = theComp.duration;
 
         theComp.duration = newDuration;
         
@@ -162,64 +230,50 @@
             var curLayer = theComp.layer(i);
             var curLayerSource = theComp.layer(i).source;
             var curLayerInPoint = theComp.layer(i).inPoint;
+            var curLayerOutPoint = theComp.layer(i).outPoint;
             var curLayerStartTime = theComp.layer(i).startTime;
-    
-            if ((curLayer.source instanceof FootageItem) && !(curLayer.source.mainSource instanceof SolidSource)) {
-                if ((curLayerInPoint == 0) && (curLayerStartTime == 0)) {
-                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                    try {
-                        theComp.layer(i).inPoint = 0;
-                    } catch (err) {
-                        // theComp.layer(i).inPoint = curLayerInPoint + numOfSec;
-                    }
-                } else {
-                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                }
-            } else if (curLayer.source instanceof CompItem) {
-                theComp.layer(i).startTime = curLayerStartTime;
-                theComp.layer(i).inPoint = curLayerInPoint;
-    
-                modifyEndFrames_main(curLayerSource);
-    
+
+            if ((curLayer.source instanceof FootageItem) && !(curLayer.source.mainSource instanceof SolidSource) && (curLayerOutPoint == oldDuration)) {
+                theComp.layer(i).outPoint = newDuration;
+            } else if ((curLayer.source instanceof CompItem) && (curLayerOutPoint == oldDuration)) {   
+                addEndSeconds_main(curLayerSource);
+                theComp.layer(i).outPoint = curLayerOutPoint + numOfSec;
             } else {
-                if (curLayerInPoint == 0) {
-                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                    theComp.layer(i).inPoint = 0;
-                } else {
-                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
+                if (curLayerOutPoint == oldDuration) {
+                    theComp.layer(i).outPoint = newDuration;
                 }
             }
         }
     }
 
-    // modifyStartFrames_doExecute()
+    // mtr_doExecute()
     // Function to modify start of the comp
-    function modifyStartFrames_doExecute() {
-        app.beginUndoGroup("Add More Frames At Beginning");
-        var activeItem = app.project.activeItem;
-        if ((activeItem != null) && (activeItem instanceof CompItem)) {
-            var activeComp = activeItem;
-            addFrames = this.parent.parent.opts.framesStart.framesStartField.text;
-            modifyStartFrames_main(activeComp);
-        } else {
-            alert(mtr_localize(mtrData.strErrExecute));
-        }
-        app.endUndoGroup();
-    }
+    function mtr_doExecute() {
 
-    // modifyEndFrames_doExecute()
-    // Function to modify end of the comp
-    function modifyEndFrames_doExecute() {
-        app.beginUndoGroup("Add More Frames At End");
+        app.beginUndoGroup(mtrData.scriptName);
+
         var activeItem = app.project.activeItem;
         if ((activeItem != null) && (activeItem instanceof CompItem)) {
             var activeComp = activeItem;
-            addFrames = this.parent.parent.opts.framesEnd.framesEndField.text;
-            modifyStartFrames_main(activeComp);
+            numField = parseInt(this.parent.parent.opts.num.fld.text);
+            mtrData.timeUnit = this.parent.parent.opts.timelist.lst.selection.index;
+            mtrData.operationApply = this.parent.parent.opts.operationlist.lst.selection.index;
+
+            if ((mtrData.timeUnit == 0) && (mtrData.operationApply == 0)) {
+                addStartFrames_main(activeComp);
+            } else if ((mtrData.timeUnit == 0) && (mtrData.operationApply == 1)) {
+                addEndFrames_main(activeComp);
+            } else if ((mtrData.timeUnit == 1) && (mtrData.operationApply == 0)) {
+                addStartSeconds_main(activeComp);
+            } else if ((mtrData.timeUnit == 1) && (mtrData.operationApply == 1)) {
+                addEndSeconds_main(activeComp);
+            }
         } else {
             alert(mtr_localize(mtrData.strErrExecute));
         }
+
         app.endUndoGroup();
+
     }
     
 
@@ -234,17 +288,17 @@
     else
     {
         // Build and show the floating palette
-        var mfabPal = mtr_buildUI(thisObj);
-        if (mfabPal !== null)
+        var mtrPal = mtr_buildUI(thisObj);
+        if (mtrPal !== null)
         {
-            if (mfabPal instanceof Window)
+            if (mtrPal instanceof Window)
             {
                 // Show the palette
-                mfabPal.center();
-                mfabPal.show();
+                mtrPal.center();
+                mtrPal.show();
             }
             else
-                mfabPal.layout.layout(true);
+                mtrPal.layout.layout(true);
         }
     }
 })(this);
