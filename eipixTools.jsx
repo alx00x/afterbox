@@ -139,7 +139,7 @@
 				palObj.scriptBtns[i] = palObj.btnGroup.add("button", [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize], eipixToolsData.scripts[i].name.replace(/.jsx$/, "").replace(/%20/g, " "));
 			}
 			palObj.scriptBtns[i].scriptFile = eipixToolsData.scripts[i].fsName; // Store file name with button (sneaky that JavaScript is)
-			palObj.scriptBtns[i].helpTip = File(eipixToolsData.scripts[i]).name.replace(/.jsx(bin)?$/, "").replace(/%20/g, " ") + "\n\n(" + eipixToolsData.scripts[i].fsName + ")";
+			palObj.scriptBtns[i].helpTip = File(eipixToolsData.scripts[i]).name.replace(/.jsx(bin)?$/, "").replace(/%20/g, " ");
 			palObj.scriptBtns[i].onClick = function() {
 				var scriptFile = new File(this.scriptFile);
 				if (scriptFile.exists) {
