@@ -13,33 +13,48 @@
 (function backgroundRender(thisObj) {
 
     // Define main variables
-    var backgroundRenderData = new Object();
+    var bgrData = new Object();
 
-    backgroundRenderData.scriptNameShort = "BGR";
-    backgroundRenderData.scriptName = "Background Render";
-    backgroundRenderData.scriptVersion = "1.0";
-    backgroundRenderData.scriptTitle = backgroundRenderData.scriptName + " v" + backgroundRenderData.scriptVersion;
+    bgrData.scriptNameShort = "BGR";
+    bgrData.scriptName = "Background Render";
+    bgrData.scriptVersion = "1.0";
+    bgrData.scriptTitle = bgrData.scriptName + " v" + bgrData.scriptVersion;
 
-    backgroundRenderData.strRenderSettings = {en: "Render Settings"};
-    backgroundRenderData.strOutputModule = {en: "Output Module"};
-    backgroundRenderData.strOutputPath = {en: "Output Path"};
+    bgrData.strRenderSettings = {en: "Render Settings"};
+    bgrData.strOutputModule = {en: "Output Module"};
+    bgrData.strOutputPath = {en: "Output Path"};
 
-    backgroundRenderData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
-    backgroundRenderData.strActiveCompErr = {en: "Please select a composition."};
-    backgroundRenderData.strSaveActionMsg = {en: "Project needs to be saved now. Do you wish to continue?"};
-    backgroundRenderData.strInstructions = {en: "Rendering with following settings:"};
-    backgroundRenderData.strQuestion = {en: "Do you wish to proceed?"};
-    backgroundRenderData.strExecute = {en: "Yes"};
-    backgroundRenderData.strCancel = {en: "No"};
+    bgrData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
+    bgrData.strActiveCompErr = {en: "Please select a composition."};
+    bgrData.strSaveActionMsg = {en: "Project needs to be saved now. Do you wish to continue?"};
+    bgrData.strInstructions = {en: "Rendering with following settings:"};
+    bgrData.strQuestion = {en: "Do you wish to proceed?"};
+    bgrData.strExecute = {en: "Yes"};
+    bgrData.strCancel = {en: "No"};
 
-    backgroundRenderData.strHelp = {en: "?"};
-    backgroundRenderData.strHelpTitle = {en: "Help"};
-    backgroundRenderData.strHelpText = {en: "This script renders saves the project and renders the active composition in After Effecs native command-line renderer."};
+    bgrData.strHelp = {en: "?"};
+    bgrData.strHelpTitle = {en: "Help"};
+    bgrData.strHelpText = {en: "This script renders saves the project and renders the active composition in After Effecs native command-line renderer."};
 
-    // Define secondary variables
-    backgroundRenderData.activeItem = app.project.activeItem;
-    backgroundRenderData.activeItemName = app.project.activeItem.name;
-    backgroundRenderData.
+    // Define project variables
+    bgrData.activeItem = app.project.activeItem;
+    bgrData.activeItemName = app.project.activeItem.name;
+    bgrData.activeItemRes = bgrData.activeItem.width + " x " + bgrData.activeItem.height;
+    bgrData.projectName = app.project.file.name;
+    bgrData.projectFile = app.project.file.fsName;
+    bgrData.projectRoot = bgrData.projectFile.replace(projectName, "");
+
+    // Define render queue variables
+    bgrData.renderSettingsTemplate = "Best Settings";
+    bgrData.outputModuleTemplate = "Lossless";
+    bgrData.timeSpanStart = 0;
+    bgrData.timeSpanDuration = bgrData.activeItem.duration;
+    bgrData.desktopPath = new Folder("~/Desktop");
+    bgrData.outputPath = bgrData.desktopPath.fsName;
+
+    // Init global variables
+    renderQueueItem;
+    renderQueueItemIndex;
 
     // Localize
     function backgroundRender_localize(strVar) {
@@ -48,15 +63,15 @@
 
     // Build UI
     function backgroundRender_buildUI(thisObj) {
-        var pal = new Window("dialog", backgroundRenderData.scriptName, undefined, {resizeable:false});
+        var pal = new Window("dialog", bgrData.scriptName, undefined, {resizeable:false});
         if (pal !== null) {
             var res =
                 "group { \
                     orientation:'column', alignment:['fill','fill'], \
                     header: Group { \
                         alignment:['fill','top'], \
-                        title: StaticText { text:'" + backgroundRenderData.scriptNameShort + "', alignment:['fill','center'] }, \
-                        help: Button { text:'" + backgroundRender_localize(backgroundRenderData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
+                        title: StaticText { text:'" + bgrData.scriptNameShort + "', alignment:['fill','center'] }, \
+                        help: Button { text:'" + backgroundRender_localize(bgrData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
                     sep: Group { \
                         orientation:'row', alignment:['fill','top'], \
@@ -64,11 +79,16 @@
                     }, \
                     inst: Group { \
                         alignment:['fill','top'], \
-                        stt: StaticText { text:'" + backgroundRender_localize(backgroundRenderData.strInstructions) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
+                        stt: StaticText { text:'" + backgroundRender_localize(bgrData.strInstructions) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
                     }, \
                     renderSettings: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + backgroundRender_localize(backgroundRenderData.strRenderSettings) + "', alignment:['fill','top'] \
+                        text: '" + backgroundRender_localize(bgrData.strRenderSettings) + "', alignment:['fill','top'] \
+                        temp: Group { \
+                            alignment:['fill','top'], \
+                            sst1: StaticText { text:'Template:', preferredSize:[80,20] }, \
+                            sst2: StaticText { text:'"+ bgrData.renderSettingsTemplate + "', preferredSize:[-1,20] }, \
+                        }, \
                         qual: Group { \
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Quality:', preferredSize:[80,20] }, \
@@ -77,7 +97,7 @@
                         res: Group { \
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Resolution:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'1024 x 512', preferredSize:[-1,20] }, \
+                            sst2: StaticText { text:'" + bgrData.activeItemRes + "', preferredSize:[-1,20] }, \
                         }, \
                         frbl: Group { \
                             alignment:['fill','top'], \
@@ -97,30 +117,30 @@
                     }, \
                     outputModules: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + backgroundRender_localize(backgroundRenderData.strOutputModule) + "', alignment:['fill','top'], \
+                        text: '" + backgroundRender_localize(bgrData.strOutputModule) + "', alignment:['fill','top'], \
                         temp: Group { \
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Template:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'Lossless', preferredSize:[-1,20] }, \
+                            sst2: StaticText { text:'"+ bgrData.outputModuleTemplate + "', preferredSize:[-1,20] }, \
                         }, \
                     }, \
                     outputPath: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + backgroundRender_localize(backgroundRenderData.strOutputPath) + "', alignment:['fill','top'], \
+                        text: '" + backgroundRender_localize(bgrData.strOutputPath) + "', alignment:['fill','top'], \
                         qual: Group { \
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Path:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'~/Desktop', preferredSize:[-1,20] }, \
+                            sst2: StaticText { text:'" + bgrData.outputPath + "', preferredSize:[-1,20] }, \
                         }, \
                     }, \
                     ques: Group { \
                         alignment:['fill','top'], \
-                        stt: StaticText { text:'" + backgroundRender_localize(backgroundRenderData.strQuestion) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
+                        stt: StaticText { text:'" + backgroundRender_localize(bgrData.strQuestion) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
                     }, \
                     cmds: Group { \
                         alignment:['fill','top'], \
-                        executeBtn: Button { text:'" + backgroundRender_localize(backgroundRenderData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
-                        cancelBtn: Button { text:'" + backgroundRender_localize(backgroundRenderData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        executeBtn: Button { text:'" + backgroundRender_localize(bgrData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        cancelBtn: Button { text:'" + backgroundRender_localize(bgrData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                     }, \
                 }, \
             }";
@@ -134,7 +154,7 @@
             }
 
             pal.grp.header.help.onClick = function() {
-                alert(backgroundRenderData.scriptTitle + "\n" + backgroundRender_localize(backgroundRenderData.strHelpText), backgroundRender_localize(backgroundRenderData.strHelpTitle));
+                alert(bgrData.scriptTitle + "\n" + backgroundRender_localize(bgrData.strHelpText), backgroundRender_localize(bgrData.strHelpTitle));
             }
 
             pal.grp.cmds.executeBtn.onClick = backgroundRender_doExecute;
@@ -147,17 +167,19 @@
     // Main Functions:
     //
 
-    function defineRenderSettings() {
-        
-    }
-
     // Dialog to let users define render location
     // function setRenderLocation() {
     //     // code
     // }
 
     function addToRenderQueue() {
-        // add the queue
+        renderQueueItem = app.project.renderQueue.items.add(bgrData.activeItem);
+        renderQueueItemIndex = app.project.renderQueue.numItems;
+        renderQueueItem.applyTemplate(bgrData.renderSettingsTemplate);
+        renderQueueItem.startTime = bgrData.timeSpanStart;
+        renderQueueItem.timeSpanDuration = bgrData.timeSpanDuration;
+        renderQueueItem.outputModules[1].applyTemplate(bgrData.outputModuleTemplate);
+        renderQueueItem.outputModules[1].file = new File(bgrData.outputPath.toString() + "/" + bgrData.activeItemName + "_raw.avi";
     }
 
     function saveTheProject() {
@@ -170,9 +192,9 @@
 
     // Execute
     function backgroundRender_doExecute() {
-        var saveAction = confirm(backgroundRender_localize(backgroundRenderData.strSaveActionMsg));
+        var saveAction = confirm(backgroundRender_localize(bgrData.strSaveActionMsg));
         if (saveAction == true) {
-            app.beginUndoGroup(backgroundRenderData.scriptName);
+            app.beginUndoGroup(bgrData.scriptName);
 
             addToRenderQueue();
             saveTheProject();
@@ -194,11 +216,11 @@
 
     // Warning
     if (parseFloat(app.version) < 9.0) {
-        alert(backgroundRender_localize(backgroundRenderData.strMinAE));
+        alert(backgroundRender_localize(bgrData.strMinAE));
     // } else if ( condition ) { // check if project is not saved
-    //     alert(backgroundRenderData.strSaveProj);
-    } else if (!(backgroundRenderData.activeItem instanceof CompItem) || (backgroundRenderData.activeItem == null)) {
-        alert(backgroundRender_localize(backgroundRenderData.strActiveCompErr));
+    //     alert(bgrData.strSaveProj);
+    } else if (!(bgrData.activeItem instanceof CompItem) || (bgrData.activeItem == null)) {
+        alert(backgroundRender_localize(bgrData.strActiveCompErr));
     } else {
         // Build and show the floating palette
         var bgrPal = backgroundRender_buildUI(thisObj);
