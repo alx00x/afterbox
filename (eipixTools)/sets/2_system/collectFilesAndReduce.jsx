@@ -25,8 +25,8 @@
     collectFilesAndReduceData.scriptTitle = collectFilesAndReduceData.scriptName + " v" + collectFilesAndReduceData.scriptVersion;
 
     collectFilesAndReduceData.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
-    collectFilesAndReduceData.strExecute = {en: "Execute"};
-    collectFilesAndReduceData.strCancel = {en: "Cancel"};
+    collectFilesAndReduceData.strExecute = {en: "Yes"};
+    collectFilesAndReduceData.strCancel = {en: "No"};
     collectFilesAndReduceData.strInstructions = {en: "This script removes unused footage and collects files at the location of the original project.\\n \\nAre you sure you want to proceed?"};
     collectFilesAndReduceData.strHelp = {en: "?"};
     collectFilesAndReduceData.strHelpTitle = {en: "Help"};
@@ -39,7 +39,7 @@
 
     // Build UI
     function collectFilesAndReduce_buildUI(thisObj) {
-        var pal = new Window("dialog", collectFilesAndReduceData.scriptName, undefined);
+        var pal = new Window("dialog", collectFilesAndReduceData.scriptName, undefined, {resizeable:false});
         if (pal !== null) {
             var res =
                 "group { \
@@ -49,29 +49,26 @@
                     title: StaticText { text:'" + collectFilesAndReduceData.scriptNameShort + "', alignment:['fill','center'] }, \
                     help: Button { text:'" + collectFilesAndReduce_localize(collectFilesAndReduceData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                 }, \
+                sep: Group { \
+                    orientation:'row', alignment:['fill','top'], \
+                    rule: Panel { height: 2, alignment:['fill','center'] }, \
+                }, \
                 main: Group { \
                     alignment:['fill','top'], \
                     instructions: StaticText { text:'" + collectFilesAndReduce_localize(collectFilesAndReduceData.strInstructions) + "', alignment:['left','fill'], preferredSize:[200,80], properties:{multiline:true} }, \
                 }, \
                 cmds: Group { \
                     alignment:['fill','bottom'], \
-                    executeBtn: Button { text:'" + collectFilesAndReduce_localize(collectFilesAndReduceData.strExecute) + "', alignment:['left','bottom'], preferredSize:[-1,20] }, \
-                    cancelBtn: Button { text:'" + collectFilesAndReduce_localize(collectFilesAndReduceData.strCancel) + "', alignment:['right','bottom'], preferredSize:[-1,20] }, \
+                    executeBtn: Button { text:'" + collectFilesAndReduce_localize(collectFilesAndReduceData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                    cancelBtn: Button { text:'" + collectFilesAndReduce_localize(collectFilesAndReduceData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                 }, \
             }";
             pal.grp = pal.add(res);
-
-            pal.layout.layout(true);
-            pal.grp.minimumSize = pal.grp.size;
-            pal.layout.resize();
-            pal.onResizing = pal.onResize = function() {
-                this.layout.resize();
-            }
-
             pal.grp.header.help.onClick = function() {
                 alert(collectFilesAndReduceData.scriptTitle + "\n" + collectFilesAndReduce_localize(collectFilesAndReduceData.strHelpText), collectFilesAndReduce_localize(collectFilesAndReduceData.strHelpTitle));
             }
             pal.grp.cmds.executeBtn.onClick = collectFilesAndReduce_doExecute;
+            pal.grp.cmds.executeBtn.onClick = collectFilesAndReduce_doCancel;
         }
 
         return pal;
@@ -150,6 +147,11 @@
         cfarPal.close();
     }
 
+    // Cancel
+    function collectFilesAndReduce_doCancel() {
+        cfarPal.close();
+    }
+
     // Main code:
     //
 
@@ -164,8 +166,9 @@
                 // Show the palette
                 cfarPal.center();
                 cfarPal.show();
-            } else
+            } else {
                 cfarPal.layout.layout(true);
+            }
         }
     }
 })(this);

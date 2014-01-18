@@ -1,7 +1,7 @@
 // eipixTools.jsx
 // 
 // Name: eipixTools
-// Version: 2.0
+// Version: 2.1
 // Based on: Launch Pad.jsx script by After Effects crew
 // 
 // Description:
@@ -20,7 +20,7 @@
 	// Global variables
 	var eipixToolsData = new Object();
 	eipixToolsData.scriptName = "Eipix Tools";
-	eipixToolsData.version = "2.0";
+	eipixToolsData.version = "2.1";
 	eipixToolsData.thisScriptsFolder = new Folder((new File($.fileName)).path);
 	eipixToolsData.scriptsPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\sets\\";
 	eipixToolsData.scriptsFolderAlert = "Scripts folder was not found at the expected location.";
@@ -34,7 +34,7 @@
 		"This script provides a button launcher for scripts located in:\n" +
 		eipixToolsData.scriptsPath + "\n" +
 		"\n";
-	eipixToolsData.strErrCantLaunchScript = "Could not launch script '%s' because it no longer exists on disk."
+	eipixToolsData.strErrCantLaunchScript = "Could not launch %s because it no longer exists on disk."
 	eipixToolsData.strErrMinAE90 = "This script requires Adobe After Effects CS4 or later.";
 	eipixToolsData.strErrAccessDenied = "Unable to write files on disc.\n" +
 		"Go to Edit > Preferences > General and make sure\n" +
@@ -150,7 +150,7 @@
 					//aftereffects.executeScript(scriptContent);
 					//$.evalFile(scriptFile);
 				} else {
-					alert(eipixToolsData.strErrCantLaunchScript.replace(/%s/, this.scriptFile.fsName), eipixToolsData.scriptName);
+					alert(eipixToolsData.strErrCantLaunchScript.replace(/%s/, this.scriptFile), eipixToolsData.scriptName);
 				}
 			}
 			leftEdge += (btnSize + 5);
@@ -230,7 +230,7 @@
 		eipixToolsData.scripts = [];
 		eipixToolsData.setsFolder = new Folder(eipixToolsData.scriptsPath);
 		myFiles = [];
-		eipixToolsData.scripts = getScriptsInSubfolders(path);
+		eipixToolsData.scripts = getScriptsInSubfolders(eipixToolsData.setsFolder);
 		// Build buttons
 
 		// Show the UI

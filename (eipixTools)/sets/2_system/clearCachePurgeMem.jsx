@@ -1,7 +1,7 @@
 ﻿// clearCachePurgeMem.jsx
 // 
 // Name: clearCachePurgeMem
-// Version: 1.1
+// Version: 1.2
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -24,7 +24,7 @@
     PurgeMem.scriptName = "Clear Cache Purge Memory";
     PurgeMem.scriptVersion = "1.1";
     PurgeMem.scriptTitle = PurgeMem.scriptName + " v" + PurgeMem.scriptVersion;
-    PurgeMem.strExecute = {en: "Execute"};
+    PurgeMem.strExecute = {en: "Clear Cache"};
 
     PurgeMem.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
     PurgeMem.strHelp = {en: "?"}
