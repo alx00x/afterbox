@@ -34,18 +34,16 @@
 
     bgrData.strHelp = {en: "?"};
     bgrData.strHelpTitle = {en: "Help"};
-    bgrData.strHelpText = {en: "This script renders saves the project and renders the active composition in After Effecs native command-line renderer."};
+    bgrData.strHelpText = {en: "This script saves the project and renders the active composition in After Effects native command-line renderer."};
 
     // Define project variables
     bgrData.activeItem = app.project.activeItem;
     bgrData.activeItemName = app.project.activeItem.name;
     bgrData.activeItemRes = bgrData.activeItem.width + " x " + bgrData.activeItem.height;
-
     bgrData.projectName = app.project.file.name;
     bgrData.projectNameFix = bgrData.projectName.replace("%20", " ")
     bgrData.projectFile = app.project.file;
     bgrData.projectRoot = app.project.file.fsName.replace(bgrData.projectNameFix, "");
-    alert(bgrData.projectRoot);
 
     // Define render queue variables
     bgrData.renderSettingsTemplate = "Best Settings";
@@ -164,6 +162,7 @@
         return pal;
     }
 
+
     // Main Functions:
     //
 
@@ -192,21 +191,21 @@
         // Write bat file
         var aerenderEXE = new File(Folder.appPackage.fullName + "/aerender.exe");
 
-        var batContent  = "@echo off\r\n";
+        var batContent = "@echo off\r\n";
         batContent += "title Please Wait\r\n"
         batContent += "start \"\" /b " + "/low" + " /wait "
         batContent += addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(bgrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
         batContent += "title Rendering Finished\r\n"
         batContent += "pause";
 
-        var batFile = new File( bgrData.projectRoot + "aerender.bat");
-        if ( batFile.exists==true) {
+        var batFile = new File(app.project.file.fsName.replace(".aep", ".bat"));
+        if (batFile.exists == true) {
             batFile.remove();
         }
         if (batFile.open("w")) {
             try {
                 batFile.write(batContent);
-            } catch(err) {
+            } catch (err) {
                 alert(err.toString());
             } finally {
                 batFile.close();
@@ -214,7 +213,15 @@
         }
 
         // Start rendering
-        // system.callSystem("cmd /c \"" + systemCommand + "\"");
+        if (batFile.exists == true) {
+            batFile.execute();
+        }
+
+        // Remove queue item
+        app.project.renderQueue.item(renderQueueItemIndex).remove()
+
+        // Close interface
+        bgrPal.close();
     }
 
     // Execute
@@ -242,8 +249,6 @@
     // Warning
     if (parseFloat(app.version) < 9.0) {
         alert(backgroundRender_localize(bgrData.strMinAE));
-    // } else if ( condition ) { // check if project is not saved
-    //     alert(bgrData.strSaveProj);
     } else if (!(bgrData.activeItem instanceof CompItem) || (bgrData.activeItem == null)) {
         alert(backgroundRender_localize(bgrData.strActiveCompErr));
     } else {
