@@ -40,9 +40,12 @@
     bgrData.activeItem = app.project.activeItem;
     bgrData.activeItemName = app.project.activeItem.name;
     bgrData.activeItemRes = bgrData.activeItem.width + " x " + bgrData.activeItem.height;
+
     bgrData.projectName = app.project.file.name;
-    bgrData.projectFile = app.project.file.fsName;
-    bgrData.projectRoot = bgrData.projectFile.replace(projectName, "");
+    bgrData.projectNameFix = bgrData.projectName.replace("%20", " ")
+    bgrData.projectFile = app.project.file;
+    bgrData.projectRoot = app.project.file.fsName.replace(bgrData.projectNameFix, "");
+    alert(bgrData.projectRoot);
 
     // Define render queue variables
     bgrData.renderSettingsTemplate = "Best Settings";
@@ -52,9 +55,6 @@
     bgrData.desktopPath = new Folder("~/Desktop");
     bgrData.outputPath = bgrData.desktopPath.fsName;
 
-    // Init global variables
-    renderQueueItem;
-    renderQueueItemIndex;
 
     // Localize
     function backgroundRender_localize(strVar) {
@@ -121,7 +121,7 @@
                         temp: Group { \
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Template:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'"+ bgrData.outputModuleTemplate + "', preferredSize:[-1,20] }, \
+                            sst2: StaticText { text:'" + bgrData.outputModuleTemplate + "', preferredSize:[-1,20] }, \
                         }, \
                     }, \
                     outputPath: Panel { \
@@ -130,7 +130,7 @@
                         qual: Group { \
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Path:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'" + bgrData.outputPath + "', preferredSize:[-1,20] }, \
+                            sst2: StaticText { text:'" + bgrData.desktopPath.toString() + "', preferredSize:[-1,20] }, \
                         }, \
                     }, \
                     ques: Group { \
@@ -172,22 +172,49 @@
     //     // code
     // }
 
-    function addToRenderQueue() {
-        renderQueueItem = app.project.renderQueue.items.add(bgrData.activeItem);
-        renderQueueItemIndex = app.project.renderQueue.numItems;
+    function addQuotes(string) { 
+        return "\""+ string + "\"";
+    }
+
+    function backgroundRender_main() {
+        // Add to render queue
+        var renderQueueItem = app.project.renderQueue.items.add(bgrData.activeItem);
+        var renderQueueItemIndex = app.project.renderQueue.numItems;
         renderQueueItem.applyTemplate(bgrData.renderSettingsTemplate);
-        renderQueueItem.startTime = bgrData.timeSpanStart;
+        renderQueueItem.timeSpanStart = bgrData.timeSpanStart;
         renderQueueItem.timeSpanDuration = bgrData.timeSpanDuration;
         renderQueueItem.outputModules[1].applyTemplate(bgrData.outputModuleTemplate);
-        renderQueueItem.outputModules[1].file = new File(bgrData.outputPath.toString() + "/" + bgrData.activeItemName + "_raw.avi";
-    }
+        renderQueueItem.outputModules[1].file = new File(bgrData.outputPath.toString() + "/" + bgrData.activeItemName + "_" + renderQueueItemIndex + "_raw.avi");
 
-    function saveTheProject() {
-        app.project.save()
-    }
+        // Save the project
+        app.project.save();
 
-    function sendSystemCommands() {
-        // code
+        // Write bat file
+        var aerenderEXE = new File(Folder.appPackage.fullName + "/aerender.exe");
+
+        var batContent  = "@echo off\r\n";
+        batContent += "title Please Wait\r\n"
+        batContent += "start \"\" /b " + "/low" + " /wait "
+        batContent += addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(bgrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
+        batContent += "title Rendering Finished\r\n"
+        batContent += "pause";
+
+        var batFile = new File( bgrData.projectRoot + "aerender.bat");
+        if ( batFile.exists==true) {
+            batFile.remove();
+        }
+        if (batFile.open("w")) {
+            try {
+                batFile.write(batContent);
+            } catch(err) {
+                alert(err.toString());
+            } finally {
+                batFile.close();
+            }
+        }
+
+        // Start rendering
+        // system.callSystem("cmd /c \"" + systemCommand + "\"");
     }
 
     // Execute
@@ -196,9 +223,7 @@
         if (saveAction == true) {
             app.beginUndoGroup(bgrData.scriptName);
 
-            addToRenderQueue();
-            saveTheProject();
-            sendSystemCommands();
+            backgroundRender_main()
 
             app.endUndoGroup();
             bgrPal.close();
