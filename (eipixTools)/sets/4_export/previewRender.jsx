@@ -71,7 +71,7 @@
                         title: StaticText { text:'" + prrData.scriptNameShort + "', alignment:['fill','center'] }, \
                         help: Button { text:'" + previewRender_localize(prrData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
-                    sep: Group { \
+                    sepr: Group { \
                         orientation:'row', alignment:['fill','top'], \
                         rule: Panel { height: 2, alignment:['fill','center'] }, \
                     }, \

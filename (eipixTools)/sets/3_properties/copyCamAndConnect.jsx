@@ -75,7 +75,6 @@
                     help: Button { text:'" + copyCamAndConnect_localize(copyCamAndConnectData.strHelp) +"', maximumSize:[30,20], alignment:['right','center'] }, \
                 }, \
                 opts: Panel { \
-                    text: '" + copyCamAndConnect_localize(copyCamAndConnectData.strSelect) + "', alignment:['fill','top'], \
                     getCamera: Group { \
                         alignment:['fill','top'], \
                         camName: EditText { alignment:['fill','center'], preferredSize:[200,20] },  \
