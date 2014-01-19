@@ -1,7 +1,7 @@
 // transparentOGV.jsx
 // 
 // Name: transparentOGV
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -14,7 +14,13 @@
 
 (function transparentOGV(thisObj)
 {
+    var projectFile = app.project.file;
+    var desktopPath = new Folder("~/Desktop");
     var activeComp = app.project.activeItem;
+    var timeSliderPos = activeComp.time;
+    var oneFrame = activeComp.frameDuration;
+    var newComp;
+
     if((activeComp != null) && (activeComp instanceof CompItem)) {
         app.beginUndoGroup("Make OGV ready composition for ingame use");
         try {       
@@ -23,7 +29,7 @@
             var offsetLeft = activeComp.width / 2;
             var offsetRight = (activeComp.width / 2) * 3;
             var offsetHight = activeComp.height / 2;
-            var newComp = app.project.items.addComp(newCompName, newCompWidth, activeComp.height, activeComp.pixelAspect, activeComp.duration, activeComp.frameRate);
+            newComp = app.project.items.addComp(newCompName, newCompWidth, activeComp.height, activeComp.pixelAspect, activeComp.duration, activeComp.frameRate);
             newComp.layers.add(activeComp);
             newComp.layers[1].duplicate();
             var L1 = newComp.layers[1];
@@ -33,11 +39,38 @@
             L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
             var newCompBG = newComp.layers.addSolid([0,0,0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
             newCompBG.moveToEnd();
+
+            addToRenderQueue()
+
         } catch (err) {
-            alert("Something went wrong.");
+            alert(err.toString());
         }
         app.endUndoGroup();
     } else {
         alert("Please select a composition.");
     }
+
+    function addQuotes(string) { 
+        return "\""+ string + "\"";
+    }
+
+    function addToRenderQueue() {
+        // Add items to render queue
+        var renderQueueComp = app.project.renderQueue.items.add(newComp);
+        var renderQueueCompIndex = app.project.renderQueue.numItems;
+        renderQueueComp.applyTemplate("Best Settings");
+        renderQueueComp.timeSpanStart = 0;
+        renderQueueComp.timeSpanDuration = newComp.duration;
+        renderQueueComp.outputModules[1].applyTemplate("Lossless");
+        renderQueueComp.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + newComp.name + ".avi");
+
+        var renderQueueThumb = app.project.renderQueue.items.add(activeComp);
+        var renderQueueThumbIndex = app.project.renderQueue.numItems;
+        renderQueueThumb.applyTemplate("Best Settings");
+        renderQueueThumb.timeSpanStart = timeSliderPos;
+        renderQueueThumb.timeSpanDuration = oneFrame;
+        renderQueueThumb.outputModules[1].applyTemplate("TIFF Sequence with Alpha");
+        renderQueueThumb.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + newComp.name + "_[#####].tif");
+    }
+
 })(this);

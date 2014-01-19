@@ -183,7 +183,7 @@
         renderQueueItem.timeSpanStart = bgrData.timeSpanStart;
         renderQueueItem.timeSpanDuration = bgrData.timeSpanDuration;
         renderQueueItem.outputModules[1].applyTemplate(bgrData.outputModuleTemplate);
-        renderQueueItem.outputModules[1].file = new File(bgrData.outputPath.toString() + "/" + bgrData.activeItemName + "_[" + renderQueueItemIndex + "]_raw.avi");
+        renderQueueItem.outputModules[1].file = new File(bgrData.outputPath.toString() + "\\" + bgrData.activeItemName + "_[" + renderQueueItemIndex + "]_raw.avi");
 
         // Save the project
         app.project.save();
@@ -218,7 +218,7 @@
         }
 
         // Remove queue item
-        app.project.renderQueue.item(renderQueueItemIndex).remove()
+        app.project.renderQueue.item(renderQueueItemIndex).remove();
 
         // Close interface
         bgrPal.close();

@@ -184,7 +184,7 @@
         renderQueueItem.timeSpanDuration = prrData.timeSpanDuration;
         renderQueueItem.skipFrames = 2;
         renderQueueItem.outputModules[1].applyTemplate(prrData.outputModuleTemplate);
-        renderQueueItem.outputModules[1].file = new File(prrData.outputPath.toString() + "/" + prrData.activeItemName + "_[" + renderQueueItemIndex + "]_preview.avi");
+        renderQueueItem.outputModules[1].file = new File(prrData.outputPath.toString() + "\\" + prrData.activeItemName + "_[" + renderQueueItemIndex + "]_preview.avi");
 
         // Save the project
         app.project.save();
@@ -219,7 +219,7 @@
         }
 
         // Remove queue item
-        app.project.renderQueue.item(renderQueueItemIndex).remove()
+        app.project.renderQueue.item(renderQueueItemIndex).remove();
 
         // Close interface
         prrPal.close();
