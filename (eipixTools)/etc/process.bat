@@ -36,7 +36,7 @@ rem ----------process csv
 del %backing%
 del %terminateProc%
 
-afterfx.exe -s "alert("Collecting done. If you got an error, tough luck.")"
+afterfx.exe -s "alert("Gathering done. If you got an error, tough luck.")"
 
 title Done
 echo Done

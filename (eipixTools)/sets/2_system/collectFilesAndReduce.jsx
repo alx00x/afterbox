@@ -35,13 +35,17 @@
     cfarData.strQuestion = {en: "Are you sure you want to proceed?"};
 
     cfarData.strElem = {en: "Element 3D"};
-    cfarData.strGetElemBtn = {en: "Get Files"};
-    cfarData.strGetElemInst = {en: "This could take a minute. Be patient!"};
+    cfarData.strGatherBtn = {en: "Gather"};
+    cfarData.strParseBtn = {en: "Parse"};
+    cfarData.strGetElemInst = {en: "Gathering resources could take a minute. Be patient!"};
     // cfarData.strAddlPath = {en: "Additional"};
     // cfarData.strAddlPathBtn = {en: "Add Path"};
     // cfarData.strAddlPathInst = {en: "You can specify additional paths to be collected."};
 
     cfarData.runprocessMissing = {en: "runprocess.vbs script is missing"};
+
+    // Global arrays
+    cfarData.elementFilesArray;
 
     // Localize
     function collectFilesAndReduce_localize(strVar) {
@@ -77,8 +81,9 @@
                     }, \
                     btn: Group { \
                         orientation:'column', alignment:['left','fill'], \
-                        getElemBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strGetElemBtn) + "', preferredSize:[100,20] }, \
+                        gatherBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strGatherBtn) + "', preferredSize:[100,20] }, \
                         getElemInst: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strGetElemInst) + "', preferredSize:[100,40], properties:{multiline:true} }, \
+                        parseBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strParseBtn) + "', preferredSize:[100,20] }, \
                     }, \
                 }, \
                 ques: Group { \
@@ -108,7 +113,17 @@
                 alert(cfarData.scriptTitle + "\n" + collectFilesAndReduce_localize(cfarData.strHelpText), collectFilesAndReduce_localize(cfarData.strHelpTitle));
             }
 
-            pal.grp.elem.btn.getElemBtn.onClick = collectFilesAndReduce_doGetElement;
+            pal.grp.elem.btn.parseBtn.enabled = false;
+
+            pal.grp.elem.btn.gatherBtn.onClick = function() {
+                collectFilesAndReduce_doGather();
+                pal.grp.elem.btn.gatherBtn.enabled = false;
+            }
+
+            pal.grp.elem.btn.parseBtn.onClick = function() {
+                collectFilesAndReduce_doParse();
+            }
+
             pal.grp.cmds.executeBtn.onClick = collectFilesAndReduce_doExecute;
             pal.grp.cmds.cancelBtn.onClick = collectFilesAndReduce_doCancel;
         }
@@ -124,6 +139,10 @@
             if (app.project != null && app.project.item(i) instanceof CompItem) {
                 var curComp = app.project.item(i);
                 for (var f = 1; f <= curComp.numLayers; f++) {
+
+                    //unsolo all
+                    curComp.layer(f).solo = false;
+
                     if (curComp.layer(f) instanceof AVLayer && curComp.layer(f).property("ADBE Effect Parade") !=null && curComp.layer(f).property("ADBE Effect Parade").numProperties !=0)  {
                         var curLayer = curComp.layer(f);
                         for (var j = 1; j <= curLayer.property("ADBE Effect Parade").numProperties; j++) {
@@ -171,7 +190,7 @@
 
             //render settings, fog color
             var renderSettingsFogColor = elemProperty.property("VIDEOCOPILOT 3DArray-1203").value;
-            elemProperty.property("VIDEOCOPILOT 3DArray-1203").setValue([1,0.2758756,0.2799746,0]);
+            elemProperty.property("VIDEOCOPILOT 3DArray-1203").setValue([1,0.2718715,0.2719715,0]);
             
             var elemCompDuration = elemComp.workAreaDuration;
             elemComp.workAreaDuration = elemComp.frameDuration*4;
@@ -205,8 +224,6 @@
         }
         return c;
     }
-
-    //alert(elemArray);
 
     // Parse CSV
     //
@@ -332,8 +349,8 @@
     // Button onclick functions:
     //
 
-    // Get element
-    function collectFilesAndReduce_doGetElement() {
+    // Gather element files with procmon
+    function collectFilesAndReduce_doGather() {
         //start procmon
         var collectScriptFolder = new Folder(File($.fileName).parent.parent);
         var etcFolder = new Folder(collectScriptFolder.fsName.replace("sets", "etc"));
@@ -358,6 +375,35 @@
         terminateProc.open("w");
         terminateProc.write("terminate");
         terminateProc.close();
+
+        var csvFilePath = new File(desktopPath.fsName + "/afterfx.csv");
+        for (var i = 1; i < 10; i++) {
+            
+            if (csvFilePath.exists == true) {
+                cfarPal.grp.elem.btn.parseBtn.enabled = true;
+            } else {
+                $.sleep(2000);
+                i = i + 1;
+            }
+        }
+        cfarPal.grp.elem.btn.parseBtn.enabled = true;
+    }
+
+    // Parse the newly created csv
+    function collectFilesAndReduce_doParse() {
+        var desktopPath = new Folder("~/Desktop");
+        var csvFilePath = new File(desktopPath.fsName + "/afterfx.csv");
+
+        var elementFiles = parseCSV(csvFilePath);
+
+        cfarData.elementFilesArray = elementFiles;
+
+        for (var i = 0; i < cfarData.elementFilesArray.length; i++) {
+            var myItem = cfarPal.grp.elem.lst.dispElemList.add("item", i+1);
+            myItem.subItems[0].text = cfarData.elementFilesArray[i].replace(/"/g, "");           
+        }
+
+        csvFilePath.remove();
     }
 
     // Execute
