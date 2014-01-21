@@ -41,6 +41,8 @@
     // cfarData.strAddlPathBtn = {en: "Add Path"};
     // cfarData.strAddlPathInst = {en: "You can specify additional paths to be collected."};
 
+    cfarData.runprocessMissing = {en: "runprocess.vbs script is missing"};
+
     // Localize
     function collectFilesAndReduce_localize(strVar) {
         return strVar["en"];
@@ -51,63 +53,62 @@
         var pal = new Window("dialog", cfarData.scriptName, undefined, {resizeable:false});
         if (pal !== null) {
             var res =
-                "group { \
-                    orientation:'column', alignment:['fill','fill'], \
-                    header: Group { \
-                        alignment:['fill','top'], \
-                        title: StaticText { text:'" + cfarData.scriptNameShort + "', alignment:['fill','center'] }, \
-                        help: Button { text:'" + collectFilesAndReduce_localize(cfarData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
-                    }, \
-                    sepr: Group { \
-                        orientation:'row', alignment:['fill','top'], \
-                        rule: Panel { height: 2, alignment:['fill','center'] }, \
-                    }, \
-                    inst: Group { \
+            "group { \
+                orientation:'column', alignment:['fill','fill'], \
+                header: Group { \
+                    alignment:['fill','top'], \
+                    title: StaticText { text:'" + cfarData.scriptNameShort + "', alignment:['fill','center'] }, \
+                    help: Button { text:'" + collectFilesAndReduce_localize(cfarData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
+                }, \
+                sepr: Group { \
+                    orientation:'row', alignment:['fill','top'], \
+                    rule: Panel { height: 2, alignment:['fill','center'] }, \
+                }, \
+                inst: Group { \
+                    orientation:'column', alignment:['left','fill'], \
+                    instructions: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strInstructions) + "', minimumSize:[360,20], alignment:['left','fill'], properties:{multiline:true} }, \
+                }, \
+                elem: Panel { \
+                    text: '" + collectFilesAndReduce_localize(cfarData.strElem) + "', alignment:['fill','top'], \
+                    orientation:'row', alignment:['left','fill'], \
+                    lst: Group { \
                         orientation:'column', alignment:['left','fill'], \
-                        instructions: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strInstructions) + "', minimumSize:[360,20], alignment:['left','fill'], properties:{multiline:true} }, \
+                        dispElemList: ListBox { alignment:['fill','fill'], minimumSize:[220,60], maximumSize:[220,120], properties:{numberOfColumns:2, showHeaders:true, columnTitles: ['#', 'Path'], columnWidths:[20,180]} }, \
                     }, \
-                    elem: Panel { \
-                        text: '" + collectFilesAndReduce_localize(cfarData.strElem) + "', alignment:['fill','top'], \
-                        orientation:'row', alignment:['left','fill'], \
-                        lst: Group { \
-                            orientation:'column', alignment:['left','fill'], \
-                            dispElemList: ListBox { alignment:['fill','fill'], minimumSize:[220,60], maximumSize:[220,120], properties:{numberOfColumns:2, showHeaders:true, columnTitles: ['#', 'Path'], columnWidths:[20,180]} }, \
-                        }, \
-                        btn: Group { \
-                            orientation:'column', alignment:['left','fill'], \
-                            getElemBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strGetElemBtn) + "', preferredSize:[100,20] }, \
-                            getElemInst: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strGetElemInst) + "', preferredSize:[100,40], properties:{multiline:true} }, \
-                        }, \
+                    btn: Group { \
+                        orientation:'column', alignment:['left','fill'], \
+                        getElemBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strGetElemBtn) + "', preferredSize:[100,20] }, \
+                        getElemInst: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strGetElemInst) + "', preferredSize:[100,40], properties:{multiline:true} }, \
                     }, \
-                    ques: Group { \
-                        alignment:['fill','top'], \
-                        instructions: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strQuestion) + "', alignment:['left','fill'], preferredSize:[-1,20], properties:{multiline:true} }, \
-                    }, \
-                    cmds: Group { \
-                        alignment:['fill','bottom'], \
-                        executeBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
-                        cancelBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
-                    }, \
-                }";
+                }, \
+                ques: Group { \
+                    alignment:['fill','top'], \
+                    instructions: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strQuestion) + "', alignment:['left','fill'], preferredSize:[-1,20], properties:{multiline:true} }, \
+                }, \
+                cmds: Group { \
+                    alignment:['fill','bottom'], \
+                    executeBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                    cancelBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                }, \
+            }";
 
 
-                    // addl: Panel { \
-                    //     alignment:['fill','top'], \
-                    //     text: '" + collectFilesAndReduce_localize(cfarData.strAddlPath) + "', alignment:['fill','top'], \
-                    //     temp: Group { \
-                    //         alignment:['fill','top'], \
-                    //         sst1: StaticText { text:'"+ collectFilesAndReduce_localize(cfarData.strAddlPathBtn) + ":', preferredSize:[80,20] }, \
-                    //         sst2: StaticText { text:'List', preferredSize:[-1,20] }, \
-                    //     }, \
-                    // }, \
+                // addl: Panel { \
+                //     alignment:['fill','top'], \
+                //     text: '" + collectFilesAndReduce_localize(cfarData.strAddlPath) + "', alignment:['fill','top'], \
+                //     temp: Group { \
+                //         alignment:['fill','top'], \
+                //         sst1: StaticText { text:'"+ collectFilesAndReduce_localize(cfarData.strAddlPathBtn) + ":', preferredSize:[80,20] }, \
+                //         sst2: StaticText { text:'List', preferredSize:[-1,20] }, \
+                //     }, \
+                // }, \
 
             pal.grp = pal.add(res);
             pal.grp.header.help.onClick = function() {
                 alert(cfarData.scriptTitle + "\n" + collectFilesAndReduce_localize(cfarData.strHelpText), collectFilesAndReduce_localize(cfarData.strHelpTitle));
             }
 
-            pal.grp.elem.btn.getElemBtn.onClick = collectFilesAndReduce_doGetElement();
-
+            pal.grp.elem.btn.getElemBtn.onClick = collectFilesAndReduce_doGetElement;
             pal.grp.cmds.executeBtn.onClick = collectFilesAndReduce_doExecute;
             pal.grp.cmds.cancelBtn.onClick = collectFilesAndReduce_doCancel;
         }
@@ -154,9 +155,36 @@
             newSolid.moveToEnd();
             var newSolidIndex = elemComp.numLayers;
             
+            var elemLayerSolo = elemLayer.solo;
             elemLayer.solo = true;
-            elemLayer.openInViewer();
+            //elemLayer.openInViewer();
+            //elemComp.openInViewer();
+            
+            //custom map texture 10
+            var texMap10 = elemProperty.property("VIDEOCOPILOT 3DArray-1861").value;
             elemProperty.property("VIDEOCOPILOT 3DArray-1861").setValue(newSolidIndex);
+            elemProperty.property("VIDEOCOPILOT 3DArray-1861").setValue(newSolidIndex);
+
+            //render settings, fog
+            var renderSettingsFog = elemProperty.property("VIDEOCOPILOT 3DArray-1202").value;
+            elemProperty.property("VIDEOCOPILOT 3DArray-1202").setValue(1);
+
+            //render settings, fog color
+            var renderSettingsFogColor = elemProperty.property("VIDEOCOPILOT 3DArray-1203").value;
+            elemProperty.property("VIDEOCOPILOT 3DArray-1203").setValue([1,0.2758756,0.2799746,0]);
+            
+            var elemCompDuration = elemComp.workAreaDuration;
+            elemComp.workAreaDuration = elemComp.frameDuration*4;
+            elemComp.ramPreviewTest("",.25,"");
+            elemComp.workAreaDuration = elemCompDuration;
+            
+            //reset element settings
+            elemProperty.property("VIDEOCOPILOT 3DArray-1860").setValue(texMap10);
+            elemProperty.property("VIDEOCOPILOT 3DArray-1202").setValue(renderSettingsFog);
+            elemProperty.property("VIDEOCOPILOT 3DArray-1203").setValue(renderSettingsFogColor);
+
+            //other cleanup
+            //elemLayer.solo = elemLayerSolo;
             newSolid.source.remove();
         }
     }
@@ -215,7 +243,7 @@
         return pathColumn;
     }
 
-    // Gets number of subarrays
+    // Gets number of properties (sub-arrays)
     function numProps(obj) {
         var c = 0;
         for (var key in obj) {
@@ -306,8 +334,30 @@
 
     // Get element
     function collectFilesAndReduce_doGetElement() {
+        //start procmon
+        var collectScriptFolder = new Folder(File($.fileName).parent.parent);
+        var etcFolder = new Folder(collectScriptFolder.fsName.replace("sets", "etc"));
+        var desktopPath = new Folder("~/Desktop");
+        var terminateProc = new File(desktopPath.fsName + "/terminateProcess.txt");
+
+        var runprocess = new File(etcFolder.fsName + "/runprocess.vbs");
+
+        if (runprocess.exists == true) {
+            runprocess.execute();
+        } else {
+            alert(collectFilesAndReduce_localize(cfarData.runprocessMissing));
+        }
+
+        alert("Ready to collect element resources. Click OK and wait.");
+
+        //trigger element resources
         var elemArray = collectElementInstances();
         triggerElementResources(elemArray);
+
+        //terminate procmon
+        terminateProc.open("w");
+        terminateProc.write("terminate");
+        terminateProc.close();
     }
 
     // Execute
@@ -332,7 +382,7 @@
 
     // Warning
     if (parseFloat(app.version) < 10.0) {
-        alert(cfarData.strMinAE);
+        alert(collectFilesAndReduce_localize(cfarData.strMinAE));
     } else {
         // Build and show the floating palette
         var cfarPal = collectFilesAndReduce_buildUI(thisObj);

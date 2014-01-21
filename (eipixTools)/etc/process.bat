@@ -1,24 +1,32 @@
 @echo off
+title Plase Wait
 
-set epxsrc="C:\Program Files\Adobe\Adobe After Effects CS6\Support Files\Scripts\ScriptUI Panels\(eipixTools)\src"
-set csvpath="C:\"
+set etcpath=%~dp0
 
-set pm=%epxsrc%\procmon.exe
-set config=%epxsrc%\elemconfig.pmc
-set backing=%csvpath%\afterfx.pml
-set saving=%csvpath%\afterfx.csv
+set pm="%etcpath%procmon.exe"
+set config="%etcpath%elemconfig.pmc"
+set backing="%userprofile%\desktop\afterfx.pml"
+set saving="%userprofile%\desktop\afterfx.csv"
+set terminateProc="%userprofile%\desktop\terminateProcess.txt"
 
-del %saving%
-del %backing%
+IF EXIST %saving% (del %saving%)
+IF EXIST %backing% (del %backing%)
+IF EXIST %terminateProc% (del %terminateProc%)
 
 echo Starting Process Monitor
 echo   - loading configuration and filter from %config%
 echo   - logging to file %backing%
-start "" %pm% /accepteula /quiet /minimized /backingfile %backing% /loadconfig %config%
+start "" /b %pm% /accepteula /quiet /minimized /backingfile %backing% /loadconfig %config%
 
 %pm% /waitforidle
 afterfx.exe
-pause
+
+:file_check
+IF EXIST %terminateProc% (GOTO file_exists) ELSE (PING 127.0.0.1 -w 1000 -n 10 >NUL)
+GOTO file_check
+
+:file_exists
+
 %pm% /terminate
 
 %pm% /openlog %backing% /saveas %saving%
@@ -26,5 +34,11 @@ pause
 rem ----------process csv
 
 del %backing%
+del %terminateProc%
 
+afterfx.exe -s "alert("Collecting done. If you got an error, tough luck.")"
+
+title Done
 echo Done
+
+:eof

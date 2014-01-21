@@ -7,7 +7,7 @@
 // Description:
 // This is a modified script originally created by Jeff Almasol.
 // It provides a button launcher for scripts located in:
-// \Support Files\Scripts\ScriptUI Panels\(eipixTools)
+// \Support Files\Scripts\ScriptUI Panels\(eipixTools)\sets\
 // 
 // Button icons must be 30x30 PNG image or smaller.
 //  
