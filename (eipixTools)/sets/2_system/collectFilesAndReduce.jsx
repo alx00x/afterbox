@@ -1,7 +1,7 @@
 ﻿// collectFilesAndReduce.jsx
 // 
 // Name: collectFilesAndReduce
-// Version: 0.6
+// Version: 0.9
 // Author: Aleksandar Kocic
 // Based on: Collect Files function by duduf.net
 // 
@@ -21,7 +21,7 @@
 
     cfarData.scriptNameShort = "CFAR";
     cfarData.scriptName = "Collect Files And Reduce";
-    cfarData.scriptVersion = "0.4";
+    cfarData.scriptVersion = "0.9";
     cfarData.scriptTitle = cfarData.scriptName + " v" + cfarData.scriptVersion;
 
     cfarData.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
@@ -46,6 +46,9 @@
 
     // Global arrays
     cfarData.elementFilesArray;
+    cfarData.elementFilesArrayClean;
+    cfarData.nonElementFilesArray = [];
+    cfarData.doCollectElementFiles = false;
 
     // Localize
     function collectFilesAndReduce_localize(strVar) {
@@ -182,15 +185,19 @@
             //custom map texture 10
             var texMap10 = elemProperty.property("VIDEOCOPILOT 3DArray-1861").value;
             elemProperty.property("VIDEOCOPILOT 3DArray-1861").setValue(newSolidIndex);
-            elemProperty.property("VIDEOCOPILOT 3DArray-1861").setValue(newSolidIndex);
 
             //render settings, fog
             var renderSettingsFog = elemProperty.property("VIDEOCOPILOT 3DArray-1202").value;
             elemProperty.property("VIDEOCOPILOT 3DArray-1202").setValue(1);
 
             //render settings, fog color
+            var randomNumberA = Math.floor(Math.random()*1001);
+            var randomNumberB = Math.floor(Math.random()*1001);
+            var fogColorA = "0.2718" + randomNumberA;
+            var fogColorB = "0.2719" + randomNumberB;
+
             var renderSettingsFogColor = elemProperty.property("VIDEOCOPILOT 3DArray-1203").value;
-            elemProperty.property("VIDEOCOPILOT 3DArray-1203").setValue([1,0.2718715,0.2719715,0]);
+            elemProperty.property("VIDEOCOPILOT 3DArray-1203").setValue([1,fogColorA,fogColorB,0]);
             
             var elemCompDuration = elemComp.workAreaDuration;
             elemComp.workAreaDuration = elemComp.frameDuration*4;
@@ -203,7 +210,7 @@
             elemProperty.property("VIDEOCOPILOT 3DArray-1203").setValue(renderSettingsFogColor);
 
             //other cleanup
-            //elemLayer.solo = elemLayerSolo;
+            elemLayer.solo = elemLayerSolo;
             newSolid.source.remove();
         }
     }
@@ -284,6 +291,18 @@
         return out;
     }
 
+    // Removes arrat A from array B
+    function diffArray(a, b) {
+        var seen = [],
+            diff = [];
+        for (var i = 0; i < b.length; i++)
+            seen[b[i]] = true;
+        for (var i = 0; i < a.length; i++)
+            if (!seen[a[i]])
+                diff.push(a[i]);
+        return diff;
+    }
+
     // Main functions:
     //
 
@@ -295,6 +314,7 @@
 
     // Collect files function
     function collectFilesAction() {
+
         var projectName = app.project.file.name;
         var projectNameNoExt = projectName.replace(".aep", "");
         var projectFile = app.project.file.fsName;
@@ -302,20 +322,23 @@
         var folderProject = projectFile.replace(projectName, "");
         var folderCollectPath = folderProject + projectNameNoExt + "_folder";
         var folderFootagePath = folderCollectPath + "\\(footage)\\";
+        var folderElement3DPath = folderCollectPath + "\\(element)\\";
 
         var folderCollect = new Folder(folderCollectPath);
         var folderFootage = new Folder(folderFootagePath);
+        var folderElement3D = new Folder(folderElement3DPath);
 
         folderCollect.create();
         folderFootage.create();
 
-        for (i = 1; i <= app.project.numItems; i++) {
+        for (var i = 1; i <= app.project.numItems; i++) {
             if (app.project.item(i) instanceof FootageItem) {
                 var folderElement = new Folder(folderFootage.absoluteURI + "\\" + app.project.item(i).parentFolder.name + "\\");
                 folderElement.create();
 
                 if (app.project.item(i).file != null && !app.project.item(i).footageMissing) {
-                    var extension = app.project.item(i).file.name.substring(app.project.item(i).file.name.lastIndexOf(".") + 1).toLowerCase();
+                    var extension = app.project.item(i).file.name
+                    .substring(app.project.item(i).file.name.lastIndexOf(".") + 1).toLowerCase();
                     if (app.project.item(i).mainSource.isStill) {
                         app.project.item(i).file.copy(folderElement.absoluteURI + "\\" + app.project.item(i).file.name);
                         app.project.item(i).replace(new File(folderElement.absoluteURI + "\\" + app.project.item(i).file.name));
@@ -342,8 +365,18 @@
                 delete folderElement;
             }
         }
+
         var savePath = new File(folderCollectPath + "\\" + projectName);
         app.project.save(savePath);
+        
+        if (cfarData.doCollectElementFiles == true) {
+            folderElement3D.create();
+            for (var f = 0; f < cfarData.elementFilesArrayClean.length; f++) {
+                var elementFile = new File(cfarData.elementFilesArrayClean[f]);
+                var elementFileName = elementFile.name;
+                elementFile.copy(folderElement3D.absoluteURI + "\\" + elementFileName);
+            }
+        }
     }
 
     // Button onclick functions:
@@ -352,8 +385,7 @@
     // Gather element files with procmon
     function collectFilesAndReduce_doGather() {
         //start procmon
-        var collectScriptFolder = new Folder(File($.fileName).parent.parent);
-        var etcFolder = new Folder(collectScriptFolder.fsName.replace("sets", "etc"));
+        var etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/etc");
         var desktopPath = new Folder("~/Desktop");
         var terminateProc = new File(desktopPath.fsName + "/terminateProcess.txt");
 
@@ -377,7 +409,7 @@
         terminateProc.close();
 
         var csvFilePath = new File(desktopPath.fsName + "/afterfx.csv");
-        for (var i = 1; i < 10; i++) {
+        for (var i = 1; i < 20; i++) {
             
             if (csvFilePath.exists == true) {
                 cfarPal.grp.elem.btn.parseBtn.enabled = true;
@@ -394,15 +426,29 @@
         var desktopPath = new Folder("~/Desktop");
         var csvFilePath = new File(desktopPath.fsName + "/afterfx.csv");
 
-        var elementFiles = parseCSV(csvFilePath);
-
-        cfarData.elementFilesArray = elementFiles;
-
-        for (var i = 0; i < cfarData.elementFilesArray.length; i++) {
-            var myItem = cfarPal.grp.elem.lst.dispElemList.add("item", i+1);
-            myItem.subItems[0].text = cfarData.elementFilesArray[i].replace(/"/g, "");           
+        var parseArray = parseCSV(csvFilePath);
+        for (var j = 0; j < parseArray.length; j++) {
+            parseArray[j] = parseArray[j].slice(1, -1);
         }
 
+        cfarData.elementFilesArray = parseArray;
+
+        for (var i = 1; i <= app.project.numItems; i++) {
+            if (app.project.item(i) instanceof FootageItem) {
+                if (app.project.item(i).file != null && !app.project.item(i).footageMissing) {
+                    cfarData.nonElementFilesArray.push(app.project.item(i).file.fsName);
+                }
+            }
+        }
+
+        cfarData.elementFilesArrayClean = diffArray(cfarData.elementFilesArray, cfarData.nonElementFilesArray);
+
+        for (var i = 0; i < cfarData.elementFilesArrayClean.length; i++) {
+            var myItem = cfarPal.grp.elem.lst.dispElemList.add("item", i + 1);
+            myItem.subItems[0].text = cfarData.elementFilesArrayClean[i];
+        }
+
+        cfarData.doCollectElementFiles = true;
         csvFilePath.remove();
     }
 
