@@ -1,7 +1,7 @@
 ﻿// addVignetteLayer.jsx
 // 
 // Name: addVignetteLayer
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -38,7 +38,9 @@
     var newSolid = activeItem.layers.addSolid([0, 0, 0], solidName, solidW, solidH, solidPixelAspectRatio, solidDuration);
 
     newSolid.property("ADBE Transform Group").property("ADBE Opacity").setValue(60);
-    newSolid.moveBefore(selectedLayer);
+    if (selectedLayer != null) {
+        newSolid.moveBefore(selectedLayer);
+    }
     var ratio = .6;
     var h = newSolid.width/2;
     var v = newSolid.height/2;

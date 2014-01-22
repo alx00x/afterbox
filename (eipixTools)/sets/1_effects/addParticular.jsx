@@ -1,7 +1,7 @@
 ﻿// addParticular.jsx
 // 
 // Name: addParticular
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -36,7 +36,9 @@
     var solidPixelAspectRatio = activeItem.pixelAspect;
     var solidDuration = activeItem.duration;
     var newSolid = activeItem.layers.addSolid([0, 0, 0], solidName, solidW, solidH, solidPixelAspectRatio, solidDuration);
-    newSolid.moveBefore(selectedLayer);
+    if (selectedLayer != null) {
+        newSolid.moveBefore(selectedLayer);
+    }
     var addParticular = newSolid.property("Effects").addProperty("Particular");
 
     app.endUndoGroup();
