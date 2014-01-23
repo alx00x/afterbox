@@ -144,7 +144,9 @@
                 for (var f = 1; f <= curComp.numLayers; f++) {
 
                     //unsolo all
-                    curComp.layer(f).solo = false;
+                    // if (curComp.layer(f).enabled == true) {
+                    //     curComp.layer(f).solo = false;
+                    // }
 
                     if (curComp.layer(f) instanceof AVLayer && curComp.layer(f).property("ADBE Effect Parade") !=null && curComp.layer(f).property("ADBE Effect Parade").numProperties !=0)  {
                         var curLayer = curComp.layer(f);
