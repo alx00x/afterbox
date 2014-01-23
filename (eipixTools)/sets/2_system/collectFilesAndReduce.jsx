@@ -38,6 +38,10 @@
     cfarData.strGatherBtn = {en: "Gather"};
     cfarData.strParseBtn = {en: "Parse"};
     cfarData.strGetElemInst = {en: "Gathering resources could take a minute. Be patient!"};
+
+    cfarData.strOpts = {en: "Options"};
+    cfarData.strZipFileEnable = {en: "Collect as archive"};
+
     // cfarData.strAddlPath = {en: "Additional"};
     // cfarData.strAddlPathBtn = {en: "Add Path"};
     // cfarData.strAddlPathInst = {en: "You can specify additional paths to be collected."};
@@ -72,8 +76,15 @@
                     rule: Panel { height: 2, alignment:['fill','center'] }, \
                 }, \
                 inst: Group { \
-                    orientation:'column', alignment:['left','fill'], \
-                    instructions: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strInstructions) + "', minimumSize:[360,20], alignment:['left','fill'], properties:{multiline:true} }, \
+                    orientation:'row', alignment:['left','fill'], \
+                    instructions: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strInstructions) + "', alignment:['left','fill'], properties:{multiline:true} }, \
+                    opts: Panel { \
+                        text: '" + collectFilesAndReduce_localize(cfarData.strOpts) + "', alignment:['fill','top'], \
+                        orientation:'row', alignment:['left','fill'], minimumSize:[155,-1], \
+                        zip: Group { \
+                            box: Checkbox { text:'" + collectFilesAndReduce_localize(cfarData.strZipFileEnable) + "', alignment:['fill','top'] }, \
+                        }, \
+                    }, \
                 }, \
                 elem: Panel { \
                     text: '" + collectFilesAndReduce_localize(cfarData.strElem) + "', alignment:['fill','top'], \
@@ -117,6 +128,7 @@
             }
 
             pal.grp.elem.btn.parseBtn.enabled = false;
+            pal.grp.inst.opts.zip.box.value = true;
 
             pal.grp.elem.btn.gatherBtn.onClick = function() {
                 collectFilesAndReduce_doGather();
@@ -321,6 +333,8 @@
         var projectNameNoExt = projectName.replace(".aep", "");
         var projectFile = app.project.file.fsName;
 
+        var currentProjectFile = new File(app.project.file);
+
         var folderProject = projectFile.replace(projectName, "");
         var folderCollectPath = folderProject + projectNameNoExt + "_folder";
         var folderFootagePath = folderCollectPath + "\\(footage)\\";
@@ -378,6 +392,16 @@
                 var elementFileName = elementFile.name;
                 elementFile.copy(folderElement3D.absoluteURI + "\\" + elementFileName);
             }
+        }
+
+        //reopen project file
+        app.open(currentProjectFile);
+
+        if (cfarPal.grp.inst.opts.zip.box.value == true) {
+            var zipFile = folderProject + projectNameNoExt + "_folder.zip";
+            var zipScript = new File(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/etc/zipscript.vbs");
+            var cmdLineToExecute = "\"" + zipScript.fsName + "\"" + " " + "\"" + folderCollectPath + "\"" + " " + "\"" + zipFile + "\"";
+            system.callSystem("cmd.exe /c \"" + cmdLineToExecute + "\"");
         }
     }
 
@@ -462,6 +486,7 @@
 
         app.beginUndoGroup(collectFilesAction);
         collectFilesAction();
+
         app.endUndoGroup();
         cfarPal.close();
     }
