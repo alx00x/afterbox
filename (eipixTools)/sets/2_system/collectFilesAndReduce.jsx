@@ -3,7 +3,7 @@
 // Name: collectFilesAndReduce
 // Version: 0.9
 // Author: Aleksandar Kocic
-// Based on: Collect Files function by duduf.net
+// Based on: Collect function based on work by duduf.net
 // 
 // Description:
 // This script removes unused footage and collects files

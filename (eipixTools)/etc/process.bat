@@ -1,5 +1,5 @@
 @echo off
-title Plase Wait
+title Please Wait
 
 set etcpath=%~dp0
 
