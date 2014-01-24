@@ -131,8 +131,8 @@
             pal.grp.inst.opts.zip.box.value = true;
 
             pal.grp.elem.btn.gatherBtn.onClick = function() {
-                collectFilesAndReduce_doGather();
                 pal.grp.elem.btn.gatherBtn.enabled = false;
+                collectFilesAndReduce_doGather();
             }
 
             pal.grp.elem.btn.parseBtn.onClick = function() {
