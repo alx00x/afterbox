@@ -16,6 +16,7 @@ IF EXIST %terminateProc% (del %terminateProc%)
 echo Starting Process Monitor
 echo   - loading configuration and filter from %config%
 echo   - logging to file %backing%
+
 start "" /b %pm% /accepteula /quiet /minimized /backingfile %backing% /loadconfig %config%
 
 %pm% /waitforidle
@@ -26,9 +27,7 @@ IF EXIST %terminateProc% (GOTO file_exists) ELSE (PING 127.0.0.1 -w 1000 -n 10 >
 GOTO file_check
 
 :file_exists
-
 %pm% /terminate
-
 %pm% /openlog %backing% /saveas %saving%
 
 rem ----------process csv
