@@ -1,9 +1,8 @@
 ﻿// collectFilesAndReduce.jsx
 // 
 // Name: collectFilesAndReduce
-// Version: 0.9
+// Version: 0.10
 // Author: Aleksandar Kocic
-// Based on: Collect function based on work by duduf.net
 // 
 // Description:
 // This script removes unused footage and collects files
@@ -21,7 +20,7 @@
 
     cfarData.scriptNameShort = "CFAR";
     cfarData.scriptName = "Collect Files And Reduce";
-    cfarData.scriptVersion = "0.9";
+    cfarData.scriptVersion = "0.10";
     cfarData.scriptTitle = cfarData.scriptName + " v" + cfarData.scriptVersion;
 
     cfarData.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
@@ -110,8 +109,6 @@
                     cancelBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                 }, \
             }";
-
-
                 // addl: Panel { \
                 //     alignment:['fill','top'], \
                 //     text: '" + collectFilesAndReduce_localize(cfarData.strAddlPath) + "', alignment:['fill','top'], \
@@ -305,7 +302,7 @@
         return out;
     }
 
-    // Removes arrat A from array B
+    // Removes array A from array B
     function diffArray(a, b) {
         var seen = [],
             diff = [];
@@ -330,48 +327,57 @@
     function collectFilesAction() {
 
         var projectName = app.project.file.name;
-        var projectNameNoExt = projectName.replace(".aep", "");
+        var projectNameNoExt = projectName.replace(".aepx", "").replace(".aep", "");
         var projectFile = app.project.file.fsName;
 
         var currentProjectFile = new File(app.project.file);
 
         var folderProject = projectFile.replace(projectName, "");
         var folderCollectPath = folderProject + projectNameNoExt + "_folder";
-        var folderFootagePath = folderCollectPath + "\\(footage)\\";
-        var folderElement3DPath = folderCollectPath + "\\(element)\\";
+        var folderFootagePath = folderCollectPath + "/(footage)/";
+        var folderElement3DPath = folderCollectPath + "/(element)/";
 
         var folderCollect = new Folder(folderCollectPath);
         var folderFootage = new Folder(folderFootagePath);
         var folderElement3D = new Folder(folderElement3DPath);
+        
+        var psdFileData = [];
+        var psdFileDataWithDuplicates = [];
 
         folderCollect.create();
         folderFootage.create();
 
         for (var i = 1; i <= app.project.numItems; i++) {
             if (app.project.item(i) instanceof FootageItem) {
-                var folderElement = new Folder(folderFootage.absoluteURI + "\\" + app.project.item(i).parentFolder.name + "\\");
+                var folderElement = new Folder(folderFootage.absoluteURI + "/" + app.project.item(i).parentFolder.name + "/");
                 folderElement.create();
 
                 if (app.project.item(i).file != null && !app.project.item(i).footageMissing) {
                     var extension = app.project.item(i).file.name
                     .substring(app.project.item(i).file.name.lastIndexOf(".") + 1).toLowerCase();
-                    if (app.project.item(i).mainSource.isStill) {
-                        app.project.item(i).file.copy(folderElement.absoluteURI + "\\" + app.project.item(i).file.name);
-                        app.project.item(i).replace(new File(folderElement.absoluteURI + "\\" + app.project.item(i).file.name));
-                    } else if (extension != "jpg" && extension != "jpeg" && extension != "png" && extension != "tga" && extension != "tif" && extension != "tiff" && extension != "exr" && extension != "bmp" && extension != "pxr" && extension != "pct" && extension != "hdr" && extension != "rla" && extension != "ai" && extension != "cin" && extension != "dpx") {
-                        app.project.item(i).file.copy(folderElement.absoluteURI + "\\" + app.project.item(i).file.name);
-                        app.project.item(i).replace(new File(folderElement.absoluteURI + "\\" + app.project.item(i).file.name));
+                    if (app.project.item(i).mainSource.isStill && extension != "psd" ) {
+                        app.project.item(i).file.copy(folderElement.absoluteURI + "/" + app.project.item(i).file.name);
+                        app.project.item(i).replace(new File(folderElement.absoluteURI + "/" + app.project.item(i).file.name));
+                    } else if (extension == "psd") {
+                        var psdCurrentFile = new File(folderElement.absoluteURI + "/" + app.project.item(i).file.name);
+                        if (psdCurrentFile.exists == false) {
+                            app.project.item(i).file.copy(folderElement.absoluteURI + "/" + app.project.item(i).file.name);
+                        }
+                        psdFileDataWithDuplicates.push([app.project.item(i).file.fsName, (new File(folderElement.absoluteURI + "/" + app.project.item(i).file.name)).fsName]);
+                    } else if (extension != "psd" && extension != "jpg" && extension != "jpeg" && extension != "png" && extension != "tga" && extension != "tif" && extension != "tiff" && extension != "exr" && extension != "bmp" && extension != "pxr" && extension != "pct" && extension != "hdr" && extension != "rla" && extension != "ai" && extension != "cin" && extension != "dpx") {
+                        app.project.item(i).file.copy(folderElement.absoluteURI + "/" + app.project.item(i).file.name);
+                        app.project.item(i).replace(new File(folderElement.absoluteURI + "/" + app.project.item(i).file.name));
                     } else {
                         var folderSequence = app.project.item(i).file.parent;
                         var frameSequence = folderSequence.getFiles();
-                        var folderSequenceTarget = new Folder(folderElement.absoluteURI + "\\" + folderSequence.name + "\\");
+                        var folderSequenceTarget = new Folder(folderElement.absoluteURI + "/" + folderSequence.name + "/");
                         folderSequenceTarget.create();
 
                         for (j = 0; j < frameSequence.length; j++) {
-                            frameSequence[j].copy(folderSequenceTarget.absoluteURI + "\\" + frameSequence[j].name);
+                            frameSequence[j].copy(folderSequenceTarget.absoluteURI + "/" + frameSequence[j].name);
                         }
 
-                        app.project.item(i).replaceWithSequence(new File(folderSequenceTarget.absoluteURI + "\\" + app.project.item(i).file.name), true);
+                        app.project.item(i).replaceWithSequence(new File(folderSequenceTarget.absoluteURI + "/" + app.project.item(i).file.name), true);
                         delete folderSequence;
                         delete frameSequence;
                         delete folderSequenceTarget;
@@ -382,21 +388,50 @@
             }
         }
 
-        var savePath = new File(folderCollectPath + "\\" + projectName);
-        app.project.save(savePath);
-        
+        var psdFileData = removeDuplicatesFromArray(psdFileDataWithDuplicates);
+        alert(psdFileData);
+
+        // Collect Element files if requested
         if (cfarData.doCollectElementFiles == true) {
             folderElement3D.create();
             for (var f = 0; f < cfarData.elementFilesArrayClean.length; f++) {
                 var elementFile = new File(cfarData.elementFilesArrayClean[f]);
                 var elementFileName = elementFile.name;
-                elementFile.copy(folderElement3D.absoluteURI + "\\" + elementFileName);
+                elementFile.copy(folderElement3D.absoluteURI + "/" + elementFileName);
             }
         }
 
-        //reopen project file
+        // if (cfarData.doAdditionalFolder == true) {
+        //     //code
+        // }
+
+        // Save to XML
+        var xmlFile = new File(folderCollectPath + "/" + projectNameNoExt + ".aepx");
+        app.project.save(xmlFile);
+
+        // Close project
+        app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+
+        // Parse XML and replace PSD paths        
+        // xmlFile.open("r");
+        // var xmlString = xmlFile.read();
+        // var myXML = new XML(xmlString);
+        // default xml namespace = "http://www.adobe.com/products/aftereffects";
+        // xmlFile.close();
+
+        // var numOfReferences = myXML.Fold.Item.Sfdr.Item.Pin.Alas.fileReference.length();
+        // for (var i = 0; i < numOfReferences; i++) {
+        //     myXML.Fold.Item.Sfdr.Item.Pin.Alas.fileReference[i].@fullpath = "D:\\task\\test\\helloThere.psd";
+        // }
+        
+        // xmlFile.open("w");
+        // xmlFile.write(myXML);
+        // xmlFile.close();
+
+        // Reopen project file
         app.open(currentProjectFile);
 
+        // Zip collect folder
         if (cfarPal.grp.inst.opts.zip.box.value == true) {
             var zipFile = folderProject + projectNameNoExt + "_folder.zip";
             var zipScript = new File(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/etc/zipscript.vbs");
