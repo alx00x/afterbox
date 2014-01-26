@@ -126,7 +126,8 @@
             }
 
             pal.grp.elem.btn.parseBtn.enabled = false;
-            pal.grp.inst.opts.box1.value = true;
+            pal.grp.inst.opts.box1.value = false;
+            pal.grp.inst.opts.box1.enabled = false;
             pal.grp.inst.opts.box2.value = true;
 
             pal.grp.elem.btn.gatherBtn.onClick = function() {
@@ -440,16 +441,13 @@
             default xml namespace = "http://www.adobe.com/products/aftereffects";
             xmlFile.close();
     
-            var numOfReferences = myXML.Fold.Item.Sfdr.Item.Pin.Alas.fileReference.length();
-            alert(numOfReferences);
-            for (var i = 0; i < numOfReferences; i++) {
-                var referenceFullpath = myXML.Fold.Item.Sfdr.Item.Pin.Alas.fileReference[i].@fullpath;
+            var pathNodes = myXML.Fold.Item.xpath ("//*[@fullpath]");
 
-                alert(referenceFullpath);
-                
-                var xmlFileIndex = findInMulDimArray(psdFileData, 0, referenceFullpath.toString());
+            for (var i = 0; i < pathNodes.length(); i++) {
+                var referenceFullpath = pathNodes[i].@fullpath.toString();
+                var xmlFileIndex = findInMulDimArray(psdFileData, 0, referenceFullpath);
                 if (xmlFileIndex != -1) {
-                    myXML.Fold.Item.Sfdr.Item.Pin.Alas.fileReference[i].@fullpath = psdFileData[xmlFileIndex][1];
+                    pathNodes[i].@fullpath = psdFileData[xmlFileIndex][1];
                 }
             }
             
