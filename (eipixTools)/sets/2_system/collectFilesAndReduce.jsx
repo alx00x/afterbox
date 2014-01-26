@@ -30,15 +30,17 @@
 
     cfarData.strExecute = {en: "Yes"};
     cfarData.strCancel = {en: "No"};
-    cfarData.strInstructions = {en: "This script removes unused footage and collects files at the location of the original project. To collect element resources, click \"Get Files\" button."};
+    cfarData.strInstructions = {en: "This script removes unused footage and collects files at the location of the original project. To collect element resources, click \"Gather\" button, wait to finish and then press \"Parse\"."};
     cfarData.strQuestion = {en: "Are you sure you want to proceed?"};
 
     cfarData.strElem = {en: "Element 3D"};
     cfarData.strGatherBtn = {en: "Gather"};
     cfarData.strParseBtn = {en: "Parse"};
     cfarData.strGetElemInst = {en: "Gathering resources could take a minute. Be patient!"};
+    cfarData.strNoElementInProject = {en: "Could not detect Element3D in this project."};
 
     cfarData.strOpts = {en: "Options"};
+    cfarData.strGenerateReport = {en: "Generate report"};
     cfarData.strZipFileEnable = {en: "Collect as archive"};
 
     // cfarData.strAddlPath = {en: "Additional"};
@@ -79,10 +81,9 @@
                     instructions: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strInstructions) + "', alignment:['left','fill'], properties:{multiline:true} }, \
                     opts: Panel { \
                         text: '" + collectFilesAndReduce_localize(cfarData.strOpts) + "', alignment:['fill','top'], \
-                        orientation:'row', alignment:['left','fill'], minimumSize:[155,-1], \
-                        zip: Group { \
-                            box: Checkbox { text:'" + collectFilesAndReduce_localize(cfarData.strZipFileEnable) + "', alignment:['fill','top'] }, \
-                        }, \
+                        orientation:'column', alignment:['left','fill'], minimumSize:[155,-1], \
+                        box1: Checkbox { text:'" + collectFilesAndReduce_localize(cfarData.strGenerateReport) + "', alignment:['fill','top'] }, \
+                        box2: Checkbox { text:'" + collectFilesAndReduce_localize(cfarData.strZipFileEnable) + "', alignment:['fill','top'] }, \
                     }, \
                 }, \
                 elem: Panel { \
@@ -125,7 +126,8 @@
             }
 
             pal.grp.elem.btn.parseBtn.enabled = false;
-            pal.grp.inst.opts.zip.box.value = true;
+            pal.grp.inst.opts.box1.value = true;
+            pal.grp.inst.opts.box2.value = true;
 
             pal.grp.elem.btn.gatherBtn.onClick = function() {
                 pal.grp.elem.btn.gatherBtn.enabled = false;
@@ -173,8 +175,8 @@
     }
 
     function triggerElementResources(array) {
-        var arrayLenght = numProps(array);
-        for (var i = 0; i < arrayLenght; i++) {
+        var arrayLength = numProps(array);
+        for (var i = 0; i < arrayLength; i++) {
             var elemCompId = array[i][0];
             var elemCompIdx = itemIndexFromId(elemCompId);
             var elemLayerIdx = array[i][1];
@@ -260,15 +262,15 @@
         }
         
         var arrayLines = [];
-        var arrayLinesRawLenght = numProps(arrayLinesRaw);
-        for (var i = 0; i < arrayLinesRawLenght; i++) {
+        var arrayLinesRawLength = numProps(arrayLinesRaw);
+        for (var i = 0; i < arrayLinesRawLength; i++) {
             a = arrayLinesRaw[i].split(",");
             arrayLines.push(a);
         }
         
         var pathColumnAll = [];
-        var arrayLinesLenght = numProps(arrayLines);
-        for (var i = 0; i < arrayLinesLenght; i++) {
+        var arrayLinesLength = numProps(arrayLines);
+        for (var i = 0; i < arrayLinesLength; i++) {
             pathColumnAll.push(arrayLines[i][4]);
         }
         
@@ -314,6 +316,16 @@
         return diff;
     }
 
+    // Find a match in an element of a subarray
+    function findInMulDimArray(searchArray, searchIndex, searchString) {
+        for (var i = 0; i < searchArray.length; i++) {
+            if (searchArray[i][searchIndex] === searchString) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     // Main functions:
     //
 
@@ -325,7 +337,6 @@
 
     // Collect files function
     function collectFilesAction() {
-
         var projectName = app.project.file.name;
         var projectNameNoExt = projectName.replace(".aepx", "").replace(".aep", "");
         var projectFile = app.project.file.fsName;
@@ -362,8 +373,8 @@
                         var psdCurrentFile = new File(folderElement.absoluteURI + "/" + app.project.item(i).file.name);
                         if (psdCurrentFile.exists == false) {
                             app.project.item(i).file.copy(folderElement.absoluteURI + "/" + app.project.item(i).file.name);
+                            psdFileDataWithDuplicates.push([app.project.item(i).file.fsName, (new File(folderElement.absoluteURI + "/" + app.project.item(i).file.name)).fsName]);
                         }
-                        psdFileDataWithDuplicates.push([app.project.item(i).file.fsName, (new File(folderElement.absoluteURI + "/" + app.project.item(i).file.name)).fsName]);
                     } else if (extension != "psd" && extension != "jpg" && extension != "jpeg" && extension != "png" && extension != "tga" && extension != "tif" && extension != "tiff" && extension != "exr" && extension != "bmp" && extension != "pxr" && extension != "pct" && extension != "hdr" && extension != "rla" && extension != "ai" && extension != "cin" && extension != "dpx") {
                         app.project.item(i).file.copy(folderElement.absoluteURI + "/" + app.project.item(i).file.name);
                         app.project.item(i).replace(new File(folderElement.absoluteURI + "/" + app.project.item(i).file.name));
@@ -388,8 +399,17 @@
             }
         }
 
-        var psdFileData = removeDuplicatesFromArray(psdFileDataWithDuplicates);
-        alert(psdFileData);
+        var psdFileData = psdFileDataWithDuplicates;
+        if (psdFileData.length > 0) {
+            var i = psdFileData.length - 1,
+                prev = '';
+            do {
+                if (psdFileData[i].join('/') === prev) {
+                    psdFileData.splice(i, 1);
+                }
+                prev = psdFileData[i].join('/');
+            } while (i-- && i > -1);
+        }
 
         // Collect Element files if requested
         if (cfarData.doCollectElementFiles == true) {
@@ -412,27 +432,42 @@
         // Close project
         app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
 
-        // Parse XML and replace PSD paths        
-        // xmlFile.open("r");
-        // var xmlString = xmlFile.read();
-        // var myXML = new XML(xmlString);
-        // default xml namespace = "http://www.adobe.com/products/aftereffects";
-        // xmlFile.close();
+        // Parse XML and replace PSD paths
+        if (psdFileData.length > 0) {
+            xmlFile.open("r");
+            var xmlString = xmlFile.read();
+            var myXML = new XML(xmlString);
+            default xml namespace = "http://www.adobe.com/products/aftereffects";
+            xmlFile.close();
+    
+            var numOfReferences = myXML.Fold.Item.Sfdr.Item.Pin.Alas.fileReference.length();
+            alert(numOfReferences);
+            for (var i = 0; i < numOfReferences; i++) {
+                var referenceFullpath = myXML.Fold.Item.Sfdr.Item.Pin.Alas.fileReference[i].@fullpath;
 
-        // var numOfReferences = myXML.Fold.Item.Sfdr.Item.Pin.Alas.fileReference.length();
-        // for (var i = 0; i < numOfReferences; i++) {
-        //     myXML.Fold.Item.Sfdr.Item.Pin.Alas.fileReference[i].@fullpath = "D:\\task\\test\\helloThere.psd";
-        // }
-        
-        // xmlFile.open("w");
-        // xmlFile.write(myXML);
-        // xmlFile.close();
-
+                alert(referenceFullpath);
+                
+                var xmlFileIndex = findInMulDimArray(psdFileData, 0, referenceFullpath.toString());
+                if (xmlFileIndex != -1) {
+                    myXML.Fold.Item.Sfdr.Item.Pin.Alas.fileReference[i].@fullpath = psdFileData[xmlFileIndex][1];
+                }
+            }
+            
+            xmlFile.open("w");
+            xmlFile.write(myXML);
+            xmlFile.close();
+        }
+    
         // Reopen project file
         app.open(currentProjectFile);
 
+        // Generate report
+        if (cfarPal.grp.inst.opts.box1.value == true) {
+            //code
+        }
+
         // Zip collect folder
-        if (cfarPal.grp.inst.opts.zip.box.value == true) {
+        if (cfarPal.grp.inst.opts.box2.value == true) {
             var zipFile = folderProject + projectNameNoExt + "_folder.zip";
             var zipScript = new File(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/etc/zipscript.vbs");
             var cmdLineToExecute = "\"" + zipScript.fsName + "\"" + " " + "\"" + folderCollectPath + "\"" + " " + "\"" + zipFile + "\"";
@@ -445,41 +480,45 @@
 
     // Gather element files with procmon
     function collectFilesAndReduce_doGather() {
-        //start procmon
-        var etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/etc");
-        var desktopPath = new Folder("~/Desktop");
-        var terminateProc = new File(desktopPath.fsName + "/terminateProcess.txt");
-
-        var runprocess = new File(etcFolder.fsName + "/runprocess.vbs");
-
-        if (runprocess.exists == true) {
-            runprocess.execute();
-        } else {
-            alert(collectFilesAndReduce_localize(cfarData.runprocessMissing));
-        }
-
-        alert("Ready to collect element resources. Click OK and wait.");
-
-        //trigger element resources
         var elemArray = collectElementInstances();
-        triggerElementResources(elemArray);
-
-        //terminate procmon
-        terminateProc.open("w");
-        terminateProc.write("terminate");
-        terminateProc.close();
-
-        var csvFilePath = new File(desktopPath.fsName + "/afterfx.csv");
-        for (var i = 1; i < 20; i++) {
-            
-            if (csvFilePath.exists == true) {
-                cfarPal.grp.elem.btn.parseBtn.enabled = true;
+        if (elemArray.length > 0) {
+            // Start procmon
+            var etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/etc");
+            var desktopPath = new Folder("~/Desktop");
+            var terminateProc = new File(desktopPath.fsName + "/terminateProcess.txt");
+    
+            var runprocess = new File(etcFolder.fsName + "/runprocess.vbs");
+    
+            if (runprocess.exists == true) {
+                runprocess.execute();
             } else {
-                $.sleep(2000);
-                i = i + 1;
+                alert(collectFilesAndReduce_localize(cfarData.runprocessMissing));
             }
+    
+            alert("Ready to collect element resources. Click OK and wait.");
+    
+            // Trigger element resources
+            triggerElementResources(elemArray);
+    
+            // Terminate procmon
+            terminateProc.open("w");
+            terminateProc.write("terminate");
+            terminateProc.close();
+    
+            var csvFilePath = new File(desktopPath.fsName + "/afterfx.csv");
+            for (var i = 1; i < 20; i++) {
+                
+                if (csvFilePath.exists == true) {
+                    cfarPal.grp.elem.btn.parseBtn.enabled = true;
+                } else {
+                    $.sleep(2000);
+                    i = i + 1;
+                }
+            }
+            cfarPal.grp.elem.btn.parseBtn.enabled = true;
+        } else {
+            alert(collectFilesAndReduce_localize(cfarData.strNoElementInProject));
         }
-        cfarPal.grp.elem.btn.parseBtn.enabled = true;
     }
 
     // Parse the newly created csv
