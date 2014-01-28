@@ -1,7 +1,7 @@
 ﻿// collectFilesAndReduce.jsx
 // 
 // Name: collectFilesAndReduce
-// Version: 0.10
+// Version: 1.0
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -20,7 +20,7 @@
 
     cfarData.scriptNameShort = "CFAR";
     cfarData.scriptName = "Collect Files And Reduce";
-    cfarData.scriptVersion = "0.10";
+    cfarData.scriptVersion = "1.0";
     cfarData.scriptTitle = cfarData.scriptName + " v" + cfarData.scriptVersion;
 
     cfarData.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
@@ -136,6 +136,7 @@
             }
 
             pal.grp.elem.btn.parseBtn.onClick = function() {
+                pal.grp.elem.btn.gatherBtn.enabled = false;
                 collectFilesAndReduce_doParse();
             }
 
@@ -361,7 +362,15 @@
 
         for (var i = 1; i <= app.project.numItems; i++) {
             if (app.project.item(i) instanceof FootageItem) {
-                var folderElement = new Folder(folderFootage.absoluteURI + "/" + app.project.item(i).parentFolder.name + "/");
+                var itemParentFolder = app.project.item(i).parentFolder;
+                var folderStructure = "/";
+                while (itemParentFolder != app.project.rootFolder) {
+                    var folderName =  "/" + itemParentFolder.name;
+                    folderStructure = folderName.concat(folderStructure);
+                    itemParentFolder = itemParentFolder.parentFolder;
+                }
+                var folderElement = new Folder(folderFootage.absoluteURI + folderStructure);
+
                 folderElement.create();
 
                 if (app.project.item(i).file != null && !app.project.item(i).footageMissing) {
@@ -396,6 +405,9 @@
                     }
                     delete extension;
                 }
+                delete itemParentFolder;
+                delete folderStructure;
+                delete folderName;
                 delete folderElement;
             }
         }
