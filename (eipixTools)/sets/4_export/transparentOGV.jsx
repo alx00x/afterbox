@@ -42,7 +42,7 @@
                 L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
                 var newCompBG = newComp.layers.addSolid([0,0,0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
                 newCompBG.moveToEnd();
-                addToRenderQueue()
+                addToRenderQueue();
             } catch (err) {
                 alert(err.toString());
             }
