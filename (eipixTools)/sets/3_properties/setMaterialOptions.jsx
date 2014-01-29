@@ -78,7 +78,7 @@
 
     //BuildUI
     function setMaterialOptions_createUI(thisObj) {
-        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", "Set Material Options");
+        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", setMaterialOptionsData.scriptTitle);
         var res =
             "group { \
                 orientation:'column', alignment:['fill','fill'], \

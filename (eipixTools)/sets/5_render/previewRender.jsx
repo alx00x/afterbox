@@ -1,7 +1,7 @@
 ﻿// previewRender.jsx
 // 
 // Name: previewRender
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -17,7 +17,7 @@
 
     prrData.scriptNameShort = "PRR";
     prrData.scriptName = "Preview Render";
-    prrData.scriptVersion = "1.0";
+    prrData.scriptVersion = "1.1";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strRenderSettings = {en: "Render Settings"};
@@ -90,7 +90,7 @@
                         qual: Group { \
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Quality:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'Quarter', preferredSize:[-1,20] }, \
+                            sst2: StaticText { text:'Half', preferredSize:[-1,20] }, \
                         }, \
                         res: Group { \
                             alignment:['fill','top'], \
