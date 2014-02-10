@@ -1,7 +1,7 @@
 // transparentOGV.jsx
 // 
 // Name: transparentOGV
-// Version: 1.2
+// Version: 1.3.
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -42,7 +42,25 @@
                 L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
                 var newCompBG = newComp.layers.addSolid([0,0,0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
                 newCompBG.moveToEnd();
-                addToRenderQueue();
+
+                // Add new composition to render queue
+                var renderQueueComp = app.project.renderQueue.items.add(newComp);
+                var renderQueueCompIndex = app.project.renderQueue.numItems;
+                renderQueueComp.applyTemplate("Best Settings");
+                renderQueueComp.timeSpanStart = 0;
+                renderQueueComp.timeSpanDuration = newComp.duration;
+                renderQueueComp.outputModules[1].applyTemplate("Lossless");
+                renderQueueComp.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + activeComp.name + ".avi");
+
+                // Add last frame of activeComp to render queue
+                var renderQueueThumb = app.project.renderQueue.items.add(activeComp);
+                var renderQueueThumbIndex = app.project.renderQueue.numItems;
+                renderQueueThumb.applyTemplate("Best Settings");
+                renderQueueThumb.timeSpanStart = endFrame;
+                renderQueueThumb.timeSpanDuration = oneFrame;
+                renderQueueThumb.outputModules[1].applyTemplate("Photoshop");
+                renderQueueThumb.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + activeComp.name + "_[#####].psd");
+
             } catch (err) {
                 alert(err.toString());
             }
@@ -58,23 +76,5 @@
     // Functions
     function addQuotes(string) { 
         return "\""+ string + "\"";
-    }
-
-    function addToRenderQueue() {
-        var renderQueueComp = app.project.renderQueue.items.add(newComp);
-        var renderQueueCompIndex = app.project.renderQueue.numItems;
-        renderQueueComp.applyTemplate("Best Settings");
-        renderQueueComp.timeSpanStart = 0;
-        renderQueueComp.timeSpanDuration = newComp.duration;
-        renderQueueComp.outputModules[1].applyTemplate("Lossless");
-        renderQueueComp.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + activeComp.name + ".avi");
-
-        var renderQueueThumb = app.project.renderQueue.items.add(activeComp);
-        var renderQueueThumbIndex = app.project.renderQueue.numItems;
-        renderQueueThumb.applyTemplate("Best Settings");
-        renderQueueThumb.timeSpanStart = endFrame;
-        renderQueueThumb.timeSpanDuration = oneFrame;
-        renderQueueThumb.outputModules[1].applyTemplate("Photoshop");
-        renderQueueThumb.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + activeComp.name + "_[#####].psd");
     }
 })(this);
