@@ -1,7 +1,7 @@
 ﻿// collectFilesAndReduce.jsx
 // 
 // Name: collectFilesAndReduce
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -20,7 +20,7 @@
 
     cfarData.scriptNameShort = "CFAR";
     cfarData.scriptName = "Collect Files And Reduce";
-    cfarData.scriptVersion = "1.0";
+    cfarData.scriptVersion = "1.1";
     cfarData.scriptTitle = cfarData.scriptName + " v" + cfarData.scriptVersion;
 
     cfarData.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
@@ -192,7 +192,9 @@
             newSolid.moveToEnd();
             var newSolidIndex = elemComp.numLayers;
             
+            var elemLayerVisibility = elemLayer.enabled;
             var elemLayerSolo = elemLayer.solo;
+            elemLayer.enabled = true;
             elemLayer.solo = true;
             //elemLayer.openInViewer();
             //elemComp.openInViewer();
@@ -226,6 +228,7 @@
 
             //other cleanup
             elemLayer.solo = elemLayerSolo;
+            elemLayer.enabled = elemLayerVisibility;
             newSolid.source.remove();
         }
     }
