@@ -1,13 +1,13 @@
 ﻿// collectFilesAndReduce.jsx
 // 
 // Name: collectFilesAndReduce
-// Version: 1.1
+// Version: 1.2
 // Author: Aleksandar Kocic
 // 
 // Description:
 // This script removes unused footage and collects files
 // at the location of the original project. It mimics the 
-// "Collect Files..." function. Heavily based on a script
+// "Collect Files..." function. Portion fo code based on a script
 // by duduf.net
 //  
 // Note: Might not be completely stable. Use with caution.
@@ -20,7 +20,7 @@
 
     cfarData.scriptNameShort = "CFAR";
     cfarData.scriptName = "Collect Files And Reduce";
-    cfarData.scriptVersion = "1.1";
+    cfarData.scriptVersion = "1.2";
     cfarData.scriptTitle = cfarData.scriptName + " v" + cfarData.scriptVersion;
 
     cfarData.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
@@ -334,7 +334,6 @@
     // Main functions:
     //
 
-
     // Reduce project function
     function reduceProjectAction() {
         app.project.removeUnusedFootage();
@@ -437,6 +436,7 @@
             }
         }
 
+        // Add additional paths
         // if (cfarData.doAdditionalFolder == true) {
         //     //code
         // }
@@ -455,7 +455,8 @@
             var myXML = new XML(xmlString);
             default xml namespace = "http://www.adobe.com/products/aftereffects";
             xmlFile.close();
-    
+
+            var relativeIndexIntoFullpathLength = (folderCollectPath + "/").length;
             var pathNodes = myXML.Fold.Item.xpath ("//*[@fullpath]");
 
             for (var i = 0; i < pathNodes.length(); i++) {
@@ -463,6 +464,8 @@
                 var xmlFileIndex = findInMulDimArray(psdFileData, 0, referenceFullpath);
                 if (xmlFileIndex != -1) {
                     pathNodes[i].@fullpath = psdFileData[xmlFileIndex][1];
+                    pathNodes[i].@relativeAscendCountFromProject = "1";
+                    pathNodes[i].@relativeIndexIntoFullpath = relativeIndexIntoFullpathLength;
                 }
             }
             
