@@ -37,24 +37,29 @@
         }
     
         // Check if PNG Sequenxce output template exists
-        var renderQ = app.project.renderQueue;
-        var tempComp = app.project.items.addComp("setProxyTempComp", 100, 100, 1, 1, 25);
-        var tempCompQueueItem = renderQ.items.add(tempComp)
-        var tempCompQueueItemIndex = renderQ.numItems;
-        var templateArray = renderQ.item(tempCompQueueItemIndex).outputModules[1].templates;
-        for (var i = 1; i <= renderQ.numItems; i++) {
-            var templateExists = false;
-            for (var j = 0; j <= templateArray.length; j++) {
-                if (templateArray[j] == outputTemplateName) {
-                    templateExists = true;
+        function checkTemplate(templateName) {
+            var renderQ = app.project.renderQueue;
+            var tempComp = app.project.items.addComp("setProxyTempComp", 100, 100, 1, 1, 25);
+            var tempCompQueueItem = renderQ.items.add(tempComp)
+            var tempCompQueueItemIndex = renderQ.numItems;
+            var templateArray = renderQ.item(tempCompQueueItemIndex).outputModules[1].templates;
+            for (var i = 1; i <= renderQ.numItems; i++) {
+                var templateExists = false;
+                for (var j = 0; j <= templateArray.length; j++) {
+                    if (templateArray[j] == templateName) {
+                        templateExists = true;
+                    }
                 }
             }
+            tempCompQueueItem.remove();
+            tempComp.remove();
+            
+            return templateExists;
         }
-        tempCompQueueItem.remove();
-        tempComp.remove();
     
         // Main code
-        if (templateExists == true) {
+        var checkPoint = checkTemplate(outputTemplateName);
+        if (checkPoint == true) {
 
             // Define render path 
             var renderPath = Folder.selectDialog();
@@ -69,7 +74,7 @@
 
         } else {
             // Something went wrong, cannot continue
-            alert("You don't have an Output Module Template called \"PNG Sequence\". Please run importOutputTemplates.jsx script.");
+            alert("You don't have an Output Module Template called " + outputTemplateName + ". Please run importOutputTemplates.jsx script.");
         }
     } else {
         alert("Select at least one item in project window.");

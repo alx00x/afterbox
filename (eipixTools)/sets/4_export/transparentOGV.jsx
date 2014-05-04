@@ -14,50 +14,30 @@
 
 (function transparentOGV(thisObj)
 {
-    var projectFile = app.project.file;
-    var desktopPath = new Folder("~/Desktop");
-    var activeComp = app.project.activeItem;
-    var timeSliderPos = activeComp.time;
-    var endFrame = activeComp.duration - activeComp.frameDuration;
-    var oneFrame = activeComp.frameDuration;
-    var newComp;
 
-    if ((activeComp != null) && (activeComp instanceof CompItem)) {
-        app.beginUndoGroup("Make OGV ready composition for ingame use");
-
-        if ((activeComp.width % 16 === 0) && (activeComp.height % 16 === 0)) {
-            try {       
-                var newCompName = "OGV(" + activeComp.name + ")";
-                var newCompWidth = activeComp.width * 2;
-                var offsetLeft = activeComp.width / 2;
-                var offsetRight = (activeComp.width / 2) * 3;
-                var offsetHight = activeComp.height / 2;
-                newComp = app.project.items.addComp(newCompName, newCompWidth, activeComp.height, activeComp.pixelAspect, activeComp.duration, activeComp.frameRate);
-                newComp.layers.add(activeComp);
-                newComp.layers[1].duplicate();
-                var L1 = newComp.layers[1];
-                var L2 = newComp.layers[2];
-                L1.property("ADBE Transform Group").property("ADBE Position").setValue([offsetLeft,offsetHight]);
-                L2.property("ADBE Transform Group").property("ADBE Position").setValue([offsetRight,offsetHight]);
-                L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
-                var newCompBG = newComp.layers.addSolid([0,0,0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
-                newCompBG.moveToEnd();
-                addToRenderQueue();
-            } catch (err) {
-                alert(err.toString());
-            }
-        } else {
-            alert("Composition dimensions are not divisible by 16.");
-        }
-
-        app.endUndoGroup();
-    } else {
-        alert("Please select a composition.");
-    }
+    // Define variables
+    var outputQuality = "Best Settings";
+    var outputTemplateName = "PNG Sequence";
 
     // Functions
-    function addQuotes(string) { 
-        return "\""+ string + "\"";
+    function checkTemplate(templateName) {
+        var renderQ = app.project.renderQueue;
+        var tempComp = app.project.items.addComp("setProxyTempComp", 100, 100, 1, 1, 25);
+        var tempCompQueueItem = renderQ.items.add(tempComp)
+        var tempCompQueueItemIndex = renderQ.numItems;
+        var templateArray = renderQ.item(tempCompQueueItemIndex).outputModules[1].templates;
+        for (var i = 1; i <= renderQ.numItems; i++) {
+            var templateExists = false;
+            for (var j = 0; j <= templateArray.length; j++) {
+                if (templateArray[j] == templateName) {
+                    templateExists = true;
+                }
+            }
+        }
+        tempCompQueueItem.remove();
+        tempComp.remove();
+
+        return templateExists;
     }
 
     function addToRenderQueue() {
@@ -71,10 +51,58 @@
 
         var renderQueueThumb = app.project.renderQueue.items.add(activeComp);
         var renderQueueThumbIndex = app.project.renderQueue.numItems;
-        renderQueueThumb.applyTemplate("Best Settings");
+        renderQueueThumb.applyTemplate(outputQuality);
         renderQueueThumb.timeSpanStart = endFrame;
         renderQueueThumb.timeSpanDuration = oneFrame;
-        renderQueueThumb.outputModules[1].applyTemplate("Photoshop");
-        renderQueueThumb.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + activeComp.name + "_[#####].psd");
+        renderQueueThumb.outputModules[1].applyTemplate(outputTemplateName);
+        renderQueueThumb.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + activeComp.name + "_[#####].png");
     }
+
+    // Main code
+    var checkPoint = checkTemplate(outputTemplateName);
+    if (checkPoint == true) {
+
+        var projectFile = app.project.file;
+        var desktopPath = new Folder("~/Desktop");
+        var activeComp = app.project.activeItem;
+        var timeSliderPos = activeComp.time;
+        var endFrame = activeComp.duration - activeComp.frameDuration;
+        var oneFrame = activeComp.frameDuration;
+        var newComp;
+
+        if ((activeComp != null) && (activeComp instanceof CompItem)) {
+            app.beginUndoGroup("Make OGV ready composition for ingame use");
+            if ((activeComp.width % 16 === 0) && (activeComp.height % 16 === 0)) {
+                try {       
+                    var newCompName = "OGV(" + activeComp.name + ")";
+                    var newCompWidth = activeComp.width * 2;
+                    var offsetLeft = activeComp.width / 2;
+                    var offsetRight = (activeComp.width / 2) * 3;
+                    var offsetHight = activeComp.height / 2;
+                    newComp = app.project.items.addComp(newCompName, newCompWidth, activeComp.height, activeComp.pixelAspect, activeComp.duration, activeComp.frameRate);
+                    newComp.layers.add(activeComp);
+                    newComp.layers[1].duplicate();
+                    var L1 = newComp.layers[1];
+                    var L2 = newComp.layers[2];
+                    L1.property("ADBE Transform Group").property("ADBE Position").setValue([offsetLeft,offsetHight]);
+                    L2.property("ADBE Transform Group").property("ADBE Position").setValue([offsetRight,offsetHight]);
+                    L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
+                    var newCompBG = newComp.layers.addSolid([0,0,0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
+                    newCompBG.moveToEnd();
+                    addToRenderQueue();
+                } catch (err) {
+                    alert(err.toString());
+                }
+            } else {
+                alert("Composition dimensions are not divisible by 16.");
+            }
+            app.endUndoGroup();
+        } else {
+            alert("Please select a composition.");
+        }
+    } else {
+        alert("You don't have an Output Module Template called " + outputTemplateName + ". Please run importOutputTemplates.jsx script.");
+    }
+
+
 })(this);
