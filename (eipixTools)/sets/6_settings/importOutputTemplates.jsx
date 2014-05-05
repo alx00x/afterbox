@@ -7,8 +7,6 @@
 var etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/etc");
 var templatePath = new File(etcFolder.fsName + "/outputTemplates.aep");
 
-alert(templatePath);
-
 function importFunction() {
 
     // Check to see if the project file is saved.
