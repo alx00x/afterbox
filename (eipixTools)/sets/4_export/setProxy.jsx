@@ -1,7 +1,7 @@
 // setProxy.jsx
 // 
 // Name: setProxy
-// Version: 0.1
+// Version: 0.2
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -22,6 +22,7 @@
         // Define variables
         var outputQuality = "Draft Settings";
         var outputTemplateName = "PNG Sequence";
+        var renderQ = app.project.renderQueue;
     
         // Functions
         function addToRenderQueue(item) {
@@ -38,7 +39,6 @@
     
         // Check if PNG Sequenxce output template exists
         function checkTemplate(templateName) {
-            var renderQ = app.project.renderQueue;
             var tempComp = app.project.items.addComp("setProxyTempComp", 100, 100, 1, 1, 25);
             var tempCompQueueItem = renderQ.items.add(tempComp)
             var tempCompQueueItemIndex = renderQ.numItems;
