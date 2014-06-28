@@ -1,14 +1,14 @@
 ﻿// collectFilesAndReduce.jsx
 // 
 // Name: collectFilesAndReduce
-// Version: 1.2
+// Version: 1.5
 // Author: Aleksandar Kocic
 // 
 // Description:
 // This script removes unused footage and collects files
 // at the location of the original project. It mimics the 
-// "Collect Files..." function. Portion fo code based on a script
-// by duduf.net
+// "Collect Files..." function. Portion of the code is 
+// based on a script by duduf.net
 //  
 // Note: Might not be completely stable. Use with caution.
 
@@ -20,17 +20,17 @@
 
     cfarData.scriptNameShort = "CFAR";
     cfarData.scriptName = "Collect Files And Reduce";
-    cfarData.scriptVersion = "1.2";
+    cfarData.scriptVersion = "1.5";
     cfarData.scriptTitle = cfarData.scriptName + " v" + cfarData.scriptVersion;
 
     cfarData.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
     cfarData.strHelp = {en: "?"};
     cfarData.strHelpTitle = {en: "Help"};
-    cfarData.strHelpText = {en: "Might not be completely stable. Use with caution."};
+    cfarData.strHelpText = {en: "This script removes unused footage and collects files at the location of the original project. Might not be completely stable. Use with caution."};
 
     cfarData.strExecute = {en: "Yes"};
     cfarData.strCancel = {en: "No"};
-    cfarData.strInstructions = {en: "This script removes unused footage and collects files at the location of the original project. To collect element resources, click \"Gather\" button, wait to finish and then press \"Parse\"."};
+    cfarData.strInstructions = {en: "To collect Element3D resources, click \"Gather\" button, wait to finish and then press \"Parse\"."};
     cfarData.strQuestion = {en: "Are you sure you want to proceed?"};
 
     cfarData.strElem = {en: "Element 3D"};
@@ -42,6 +42,8 @@
     cfarData.strOpts = {en: "Options"};
     cfarData.strGenerateReport = {en: "Generate report"};
     cfarData.strZipFileEnable = {en: "Collect as archive"};
+    cfarData.strObjSequence = {en: "Collect obj sequence"};
+    cfarData.strObjSequenceWarning = {en: "Enabling this option may significantly increase collecting time."};
 
     // cfarData.strAddlPath = {en: "Additional"};
     // cfarData.strAddlPathBtn = {en: "Add Path"};
@@ -50,8 +52,8 @@
     cfarData.runprocessMissing = {en: "runprocess.vbs script is missing"};
 
     // Global arrays
-    cfarData.elementFilesArray;
-    cfarData.elementFilesArrayClean;
+    cfarData.elementFilesArray = [];
+    cfarData.elementFilesArrayClean = [];
     cfarData.nonElementFilesArray = [];
     cfarData.doCollectElementFiles = false;
 
@@ -84,6 +86,7 @@
                         orientation:'column', alignment:['left','fill'], minimumSize:[155,-1], \
                         box1: Checkbox { text:'" + collectFilesAndReduce_localize(cfarData.strGenerateReport) + "', alignment:['fill','top'] }, \
                         box2: Checkbox { text:'" + collectFilesAndReduce_localize(cfarData.strZipFileEnable) + "', alignment:['fill','top'] }, \
+                        box3: Checkbox { text:'" + collectFilesAndReduce_localize(cfarData.strObjSequence) + "', alignment:['fill','top'] }, \
                     }, \
                 }, \
                 elem: Panel { \
@@ -129,6 +132,7 @@
             pal.grp.inst.opts.box1.value = false;
             pal.grp.inst.opts.box1.enabled = false;
             pal.grp.inst.opts.box2.value = true;
+            pal.grp.inst.opts.box3.value = false;
 
             pal.grp.elem.btn.gatherBtn.onClick = function() {
                 pal.grp.elem.btn.gatherBtn.enabled = false;
@@ -138,6 +142,10 @@
             pal.grp.elem.btn.parseBtn.onClick = function() {
                 pal.grp.elem.btn.gatherBtn.enabled = false;
                 collectFilesAndReduce_doParse();
+            }
+
+            pal.grp.inst.opts.box3.onClick = function() {
+                alert(collectFilesAndReduce_localize(cfarData.strObjSequenceWarning));
             }
 
             pal.grp.cmds.executeBtn.onClick = collectFilesAndReduce_doExecute;
@@ -176,7 +184,7 @@
         return elementInstancesArray;
     }
 
-    function triggerElementResources(array) {
+    function triggerElementResources(array, bool) {
         var arrayLength = numProps(array);
         for (var i = 0; i < arrayLength; i++) {
             var elemCompId = array[i][0];
@@ -216,10 +224,26 @@
             var renderSettingsFogColor = elemProperty.property("VIDEOCOPILOT 3DArray-1203").value;
             elemProperty.property("VIDEOCOPILOT 3DArray-1203").setValue([1,fogColorA,fogColorB,0]);
             
-            var elemCompDuration = elemComp.workAreaDuration;
-            elemComp.workAreaDuration = elemComp.frameDuration*4;
-            elemComp.ramPreviewTest("",.25,"");
-            elemComp.workAreaDuration = elemCompDuration;
+            //record work area properties
+            var elemCompWorkAreaStart = elemComp.workAreaStart;
+            var elemCompWorkAreaDuration = elemComp.workAreaDuration;
+            var elemCompDuration = elemComp.duration;
+
+            //do the gathering
+            if (bool == false) {
+                //regular
+                elemComp.workAreaDuration = elemComp.frameDuration*4;
+                elemComp.ramPreviewTest("",.25,"");
+            } else {
+                //sequence
+                elemComp.workAreaStart = "0";
+                elemComp.workAreaDuration = elemCompDuration;
+                elemComp.ramPreviewTest("",.25,"");
+            }
+
+            //reset work area
+            elemComp.workAreaStart = elemCompWorkAreaStart;
+            elemComp.workAreaDuration = elemCompWorkAreaDuration;
             
             //reset element settings
             elemProperty.property("VIDEOCOPILOT 3DArray-1860").setValue(texMap10);
@@ -501,36 +525,61 @@
             // Start procmon
             var etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/etc");
             var desktopPath = new Folder("~/Desktop");
+
+            var afterfxPML = new File(desktopPath.fsName + "/afterfx.pml");
+            var afterfxPML_seq = new File(desktopPath.fsName + "/afterfx_seq.pml");
+
+            var afterfxCSV = new File(desktopPath.fsName + "/afterfx.csv");
+            var afterfxCSV_seq = new File(desktopPath.fsName + "/afterfx_seq.csv");
+
             var terminateProc = new File(desktopPath.fsName + "/terminateProcess.txt");
-    
+            var terminateProc_seq = new File(desktopPath.fsName + "/terminateProcess_seq.txt");
+
+            var collectSequenceArgument = "false";
             var runprocess = new File(etcFolder.fsName + "/runprocess.vbs");
-    
+
             if (runprocess.exists == true) {
-                runprocess.execute();
+                var cmdLineToExecute = "\"" + runprocess.fsName + "\"" + " " + collectSequenceArgument;
+                system.callSystem("cmd.exe /c \"" + cmdLineToExecute + "\"");
             } else {
                 alert(collectFilesAndReduce_localize(cfarData.runprocessMissing));
             }
-    
-            alert("Ready to collect element resources. Click OK and wait.");
-    
-            // Trigger element resources
-            triggerElementResources(elemArray);
-    
-            // Terminate procmon
+
+            while (afterfxPML.exists == false) {
+                $.sleep(1000);
+            }
+
+            triggerElementResources(elemArray, false);
+            // Terminate regular procmon
             terminateProc.open("w");
             terminateProc.write("terminate");
             terminateProc.close();
-    
-            var csvFilePath = new File(desktopPath.fsName + "/afterfx.csv");
-            for (var i = 1; i < 20; i++) {
-                
-                if (csvFilePath.exists == true) {
-                    cfarPal.grp.elem.btn.parseBtn.enabled = true;
-                } else {
-                    $.sleep(2000);
-                    i = i + 1;
+
+            while (afterfxCSV.exists == false) {
+                $.sleep(1000);
+            }
+
+            if (cfarPal.grp.inst.opts.box3.value == true) {
+                collectSequenceArgument = "true";
+
+                var cmdLineToExecute = "\"" + runprocess.fsName + "\"" + " " + collectSequenceArgument;
+                system.callSystem("cmd.exe /c \"" + cmdLineToExecute + "\"");
+
+                while (afterfxPML_seq.exists == false) {
+                    $.sleep(1000);
+                }
+
+                triggerElementResources(elemArray, true);
+                // Terminate sequence procmon
+                terminateProc_seq.open("w");
+                terminateProc_seq.write("terminate");
+                terminateProc_seq.close();
+
+                while (afterfxCSV_seq.exists == false) {
+                    $.sleep(1000);
                 }
             }
+
             cfarPal.grp.elem.btn.parseBtn.enabled = true;
         } else {
             alert(collectFilesAndReduce_localize(cfarData.strNoElementInProject));
@@ -541,10 +590,24 @@
     function collectFilesAndReduce_doParse() {
         var desktopPath = new Folder("~/Desktop");
         var csvFilePath = new File(desktopPath.fsName + "/afterfx.csv");
+        var csvFilePath_seq = new File(desktopPath.fsName + "/afterfx_seq.csv");
 
-        var parseArray = parseCSV(csvFilePath);
-        for (var j = 0; j < parseArray.length; j++) {
-            parseArray[j] = parseArray[j].slice(1, -1);
+        if (csvFilePath.exists == true) {
+            var parseArray = parseCSV(csvFilePath);
+            for (var j = 0; j < parseArray.length; j++) {
+                parseArray[j] = parseArray[j].slice(1, -1);
+            }
+            csvFilePath.remove();
+        }
+
+        if (csvFilePath_seq.exists == true) {
+            var parseArray_seq = parseCSV(csvFilePath_seq);
+            for (var j = 0; j < parseArray_seq.length; j++) {
+                parseArray_seq[j] = parseArray_seq[j].slice(1, -1);
+            }
+            parseArray = parseArray.concat(parseArray_seq);
+            removeDuplicatesFromArray(parseArray);
+            csvFilePath_seq.remove();
         }
 
         cfarData.elementFilesArray = parseArray;
@@ -565,7 +628,7 @@
         }
 
         cfarData.doCollectElementFiles = true;
-        csvFilePath.remove();
+        cfarPal.grp.elem.btn.parseBtn.enabled = false;
     }
 
     // Execute
