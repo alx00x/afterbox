@@ -47,7 +47,7 @@
         renderQueueComp.timeSpanStart = 0;
         renderQueueComp.timeSpanDuration = newComp.duration;
         renderQueueComp.outputModules[1].applyTemplate("Lossless");
-        renderQueueComp.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + activeComp.name + ".avi");
+        renderQueueComp.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + activeComp.name + "_a.avi");
 
         var renderQueueThumb = app.project.renderQueue.items.add(activeComp);
         var renderQueueThumbIndex = app.project.renderQueue.numItems;

@@ -1,7 +1,7 @@
 ﻿// collectFilesAndReduce.jsx
 // 
 // Name: collectFilesAndReduce
-// Version: 1.6
+// Version: 1.7
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -20,7 +20,7 @@
 
     cfarData.scriptNameShort = "CFAR";
     cfarData.scriptName = "Collect Files And Reduce";
-    cfarData.scriptVersion = "1.6";
+    cfarData.scriptVersion = "1.7";
     cfarData.scriptTitle = cfarData.scriptName + " v" + cfarData.scriptVersion;
 
     cfarData.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
@@ -55,9 +55,6 @@
     cfarData.elementFilesArrayClean = [];
     cfarData.nonElementFilesArray = [];
     cfarData.doCollectElementFiles = false;
-
-    // Loader
-    cfarData.loader = new File("/c/Program Files/Adobe/Adobe After Effects CS6/Support Files/Scripts/ScriptUI Panels/(eipixTools)/etc/progressbar.swf");
 
     // Localize
     function collectFilesAndReduce_localize(strVar) {
@@ -115,8 +112,8 @@
                     text: '" + collectFilesAndReduce_localize(cfarData.strAddlPath) + "', alignment:['fill','top'], \
                     main: Group { \
                         alignment:['fill','top'], \
-                        sst1: EditText { alignment:['fill','center'], preferredSize:[200,20] },  \
-                        sst2: Button { text:'"+ collectFilesAndReduce_localize(cfarData.strAddlPathBtn) + "', preferredSize:[-1,20] }, \
+                        edt: EditText { alignment:['fill','center'], preferredSize:[200,20] },  \
+                        btn: Button { text:'"+ collectFilesAndReduce_localize(cfarData.strAddlPathBtn) + "', preferredSize:[-1,20] }, \
                     }, \
                 }, \
                 ques: Group { \
@@ -179,6 +176,10 @@
 
             pal.grp.inst.opts.box3.onClick = function() {
                 alert(collectFilesAndReduce_localize(cfarData.strObjSequenceWarning));
+            }
+
+            pal.grp.addl.main.btn.onClick = function() {
+                collectFilesAndReduce_doBrowse();
             }
 
             pal.grp.cmds.executeBtn.onClick = collectFilesAndReduce_doExecute;
@@ -515,10 +516,22 @@
             }
         }
 
-        // Add additional paths
-        // if (cfarData.doAdditionalFolder == true) {
-        //     //code
-        // }
+        // Add additional paths if requested
+        if (cfarPal.grp.addl.main.edt.text != "") {
+            var requestedPath = cfarPal.grp.addl.main.edt.text;
+            if (requestedPath == "element") {
+                var requestedFolder = new Folder(folderProject + "/element");
+                var destinationFolder = new Folder(folderCollect.fsName + "/element")
+                destinationFolder.create();
+                var cmdLineToExecute = "robocopy " + "\"" + requestedFolder.fsName + "\"" + "  " + "\"" + destinationFolder.fsName + "\"" + " /S";
+                system.callSystem("cmd.exe /c \"" + cmdLineToExecute + "\"");
+            } else {
+                var requestedFolder = new Folder(requestedPath);
+                var destinationFolder = new Folder(folderCollect.fsName + "/" + requestedFolder.name);
+                var cmdLineToExecute = "robocopy " + "\"" + requestedFolder.fsName + "\"" + "  " + "\"" + destinationFolder.fsName + "\"" + " /S";
+                system.callSystem("cmd.exe /c \"" + cmdLineToExecute + "\"");
+            }
+        }
 
         // Save to XML
         var xmlFile = new File(folderCollectPath + "/" + projectNameNoExt + ".aepx");
@@ -686,6 +699,12 @@
 
         cfarData.doCollectElementFiles = true;
         cfarPal.grp.elem.btn.parseBtn.enabled = false;
+    }
+
+    // Additional
+    function collectFilesAndReduce_doBrowse() {
+        var additionalPath = Folder.selectDialog().fsName;
+        cfarPal.grp.addl.main.edt.text = additionalPath.toString();
     }
 
     // Execute
