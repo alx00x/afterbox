@@ -547,10 +547,10 @@
             var myXML = new XML(xmlString);
             default xml namespace = "http://www.adobe.com/products/aftereffects";
             xmlFile.close();
-
+            
             var relativeIndexIntoFullpathLength = (folderCollectPath + "/").length;
             var pathNodes = myXML.Fold.Item.xpath ("//*[@fullpath]");
-
+            
             for (var i = 0; i < pathNodes.length(); i++) {
                 var referenceFullpath = pathNodes[i].@fullpath.toString();
                 var xmlFileIndex = findInMulDimArray(psdFileData, 0, referenceFullpath);
@@ -559,7 +559,7 @@
                     pathNodes[i].@relativeAscendCountFromProject = "1";
                     pathNodes[i].@relativeIndexIntoFullpath = relativeIndexIntoFullpathLength;
                 }
-
+                
                 updateProgressbar(cfarPal, 0, i+1, pathNodes.length());
             }
             
