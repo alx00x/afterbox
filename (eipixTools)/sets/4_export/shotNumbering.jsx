@@ -11,6 +11,16 @@
 
 (function shotNumbering(thisObj) {
 
+    if (app.project.file == null) {
+        alert("Save the project first.");
+        return;
+    }
+
+    if (!(app.project.activeItem instanceof CompItem) || (app.project.activeItem == null)) {
+        alert("Select your composition.");
+        return;
+    }
+
     // Define main variables
     var shnData = new Object();
 
@@ -105,11 +115,11 @@
             pal.grp.settings.opts.box1.value = false;
             pal.grp.settings.opts.box2.value = false;
 
-            pal.grp.settings.opts.box1.onClick = function() {
-                if (pal.grp.settings.opts.box1.value == true){
-                    shotNumbering_checkMarkers();
-                }
-            }
+            //pal.grp.settings.opts.box1.onClick = function() {
+            //    if (pal.grp.settings.opts.box1.value == true){
+            //        shotNumbering_checkMarkers();
+            //    }
+            //}
 
             pal.grp.settings.opts.box2.onClick = function() {
                 if (pal.grp.settings.opts.box2.value == true){
@@ -126,19 +136,19 @@
 
     // Helper Functions:
     //
-    function shotNumbering_checkMarkers() {
-        var markerNull = shnData.activeItem.layers.addNull(shnData.activeItem.duration);
-        var markerPos = markerNull.property("ADBE Transform Group").property("ADBE Position");
-        markerPos.expression = "x = thisComp.marker.numKeys;[x,0];";
-        var numberOfMarkers = markerPos.value[0];
-        markerNull.remove();
-        if (numberOfMarkers < 2) {
-            shnData.markerCheck = false;
-            alert(shotNumbering_localize(shnData.strNoMarkersErr), shnData.projectNameNoExt);
-        } else {
-            shnData.markerCheck = true;
-        }
-    }
+    //function shotNumbering_checkMarkers() {
+    //    var markerNull = shnData.activeItem.layers.addNull(shnData.activeItem.duration);
+    //    var markerPos = markerNull.property("ADBE Transform Group").property("ADBE Position");
+    //    markerPos.expression = "x = thisComp.marker.numKeys;[x,0];";
+    //    var numberOfMarkers = markerPos.value[0];
+    //    markerNull.remove();
+    //    if (numberOfMarkers < 2) {
+    //        shnData.markerCheck = false;
+    //        alert(shotNumbering_localize(shnData.strNoMarkersErr), shnData.projectNameNoExt);
+    //    } else {
+    //        shnData.markerCheck = true;
+    //    }
+    //}
 
     function shotNumbering_checkMetadata() {
         shnData.metadataFile = new File(shnData.projectFolder + "\\" + "metadata.xml");
@@ -158,25 +168,105 @@
     // Main Functions:
     //
     function shotNumbering_main() {
-
-        var activeItemName = app.project.activeItem.name;
-        var activeItemWidth = shnData.activeItem.width;
-        var activeItemHeight = shnData.activeItem.height;
+        var activeItem = app.project.activeItem;
+        var activeItemName = activeItem.name;
+        var activeItemWidth = activeItem.width;
+        var activeItemHeight = activeItem.height;
+        var activeItemPixelAspect = activeItem.pixelAspect;
+        var activeItemDuration = activeItem.duration;
+        var layerCollection = [];
 
         // Generate black bars
         if ((shnPal.grp.settings.opts.box1.value == true) || (shnPal.grp.settings.opts.box2.value == true)) {
-            //code
-        }
-
-        // Generate shot numbers
-        if ((shnPal.grp.settings.opts.box1.value == true) && (shnData.markerCheck == true)) {
-            //code
+            var newSolid = activeItem.layers.addSolid([0, 0, 0], "Black Bars", activeItemWidth, activeItemHeight, activeItemPixelAspect, activeItemDuration);
+            newSolid.label = 0;
+            newSolid.opacity.setValue(20);
+            var newMask = newSolid.Masks.addProperty("ADBE Mask Atom");
+            newMask.maskMode = MaskMode.SUBTRACT;
+            var maskShape = newMask.property("ADBE Mask Shape").value;
+            maskShape.vertices = [[0,activeItemHeight/10],[0,activeItemHeight/10*9],[activeItemWidth,activeItemHeight/10*9],[activeItemWidth,activeItemHeight/10]];
+            maskShape.closed = true;
+            newMask.property("ADBE Mask Shape").setValue(maskShape);
+            newSolid.locked = true;
         }
 
         // Generate metadata
         if ((shnPal.grp.settings.opts.box2.value == true) && (shnData.metadataCheck == true)) {
-            //code
+            shnData.metadataFile.open("r");
+            var xmlString = shnData.metadataFile.read();
+            var xmlData = new XML(xmlString);
+            shnData.metadataFile.close();
+            var gameName = xmlData.data.(@category == "main").game;
+            var taskName = xmlData.data.(@category == "main").task;
+            var taskWidth = xmlData.data.(@category == "main").width;
+            var taskHeight = xmlData.data.(@category == "main").height;
+
+            // gamename and taskname
+            var gameNameText = activeItem.layers.addText(gameName + "_" + taskName);
+            gameNameText.label = 0;
+            gameNameText.opacity.setValue(40);
+            var gameNameTextValue = gameNameText.sourceText.value;
+            gameNameTextValue.resetCharStyle();
+            gameNameTextValue.resetParagraphStyle()
+            gameNameTextValue.justification = ParagraphJustification.LEFT_JUSTIFY;
+            gameNameTextValue.fontSize = activeItemHeight/14;
+            gameNameTextValue.fillColor = [1, 1, 1];
+            gameNameTextValue.font = "Consolas";
+            gameNameText.sourceText.setValue(gameNameTextValue);
+            gameNameText.transform.anchorPoint.setValue([0,0]);
+            gameNameText.position.setValue([5,(activeItemHeight/100*5)+(activeItemHeight/14/3.2)]);
+            gameNameText.name = "Game Name";
+            gameNameText.locked = true;
+
+            // timecode
+            var timeCodeText = activeItem.layers.addText("0:00:00:00");
+            timeCodeText.label = 0;
+            timeCodeText.opacity.setValue(40);
+            var timeCodeTextValue = timeCodeText.sourceText.value;
+            timeCodeTextValue.resetCharStyle();
+            timeCodeTextValue.resetParagraphStyle()
+            timeCodeTextValue.justification = ParagraphJustification.RIGHT_JUSTIFY;
+            timeCodeTextValue.fontSize = activeItemHeight/16;
+            timeCodeTextValue.fillColor = [1, 1, 1];
+            timeCodeTextValue.font = "Consolas";
+            timeCodeText.sourceText.setValue(timeCodeTextValue);
+            timeCodeText.transform.anchorPoint.setValue([0,0]);
+            timeCodeText.position.setValue([activeItemWidth-5,(activeItemHeight/100*5)+(activeItemHeight/16/3.2)]);
+            timeCodeText.name = "Time Code";
+            var timeCodeExp = "timeToTimecode(t = time + thisComp.displayStartTime, timecodeBase = "+ activeItem.frameRate+", isDuration = true)";
+            timeCodeText.property("Source Text").expression = timeCodeExp;
+            timeCodeText.locked = true;
         }
+
+        // Generate shot numbers
+        if (shnPal.grp.settings.opts.box1.value == true) {
+            // shot number
+            //var shotNumberNull = activeItem.layers.addNull(activeItemDuration);
+            var shotNumberSolid = activeItem.layers.addSolid([1, 1, 1], "Markers", activeItemWidth, activeItemHeight, activeItemPixelAspect, activeItemDuration);
+            shotNumberSolid.enabled = false;
+            var shotNumberText = activeItem.layers.addText("sh000");
+            shotNumberText.label = 0;
+            shotNumberText.opacity.setValue(40);
+            var shotNumberTextValue = shotNumberText.sourceText.value;
+            shotNumberTextValue.resetCharStyle();
+            shotNumberTextValue.resetParagraphStyle()
+            shotNumberTextValue.justification = ParagraphJustification.LEFT_JUSTIFY;
+            shotNumberTextValue.fontSize = activeItemHeight/16;
+            shotNumberTextValue.fillColor = [1, 1, 1];
+            shotNumberTextValue.font = "Consolas";
+            shotNumberText.sourceText.setValue(shotNumberTextValue);
+            shotNumberText.transform.anchorPoint.setValue([0,0]);
+            shotNumberText.position.setValue([5,(activeItemHeight/100*95)+(activeItemHeight/16/3.2)]);
+            shotNumberText.name = "Shot Number";
+            var shotNumberTextExp = "m = thisComp.layer('Markers').marker;\rn = 0;\rif (m.numKeys > 0) {\r    ind = m.nearestKey(time).index;\r    if (m.nearestKey(time).time > time) {\r        ind--;\r    }\r    ind = ind<1 ? 1 : ind;\r    n = m.key(ind).index;\r}\rshot = 'sh???';\rif (n < 10) {\r    shot = 'sh0' + n + '0';\r} else {\r    shot = 'sh' + n + '0';\r}\r";
+            shotNumberText.property("Source Text").expression = shotNumberTextExp;
+            shotNumberSolid.moveToBeginning();
+            while (activeItem.selectedLayers.length) activeItem.selectedLayers[0].selected = false;
+            shotNumberSolid.selected = true;
+            shotNumberText.locked = true;
+        }
+
+        //activeItem.layers.precompose(layerCollection, "data", true);
     }
 
     // Execute
