@@ -559,7 +559,7 @@
                     pathNodes[i].@relativeAscendCountFromProject = "1";
                     pathNodes[i].@relativeIndexIntoFullpath = relativeIndexIntoFullpathLength;
                 }
-                
+
                 updateProgressbar(cfarPal, 0, i+1, pathNodes.length());
             }
             
