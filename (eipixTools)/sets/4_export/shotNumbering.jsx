@@ -237,6 +237,25 @@
             var timeCodeExp = "timeToTimecode(t = time + thisComp.displayStartTime, timecodeBase = "+ activeItem.frameRate+", isDuration = true)";
             timeCodeText.property("Source Text").expression = timeCodeExp;
             timeCodeText.locked = true;
+
+            // framecode
+            var frameCodeText = activeItem.layers.addText("0");
+            frameCodeText.label = 0;
+            frameCodeText.opacity.setValue(40);
+            var frameCodeTextValue = frameCodeText.sourceText.value;
+            frameCodeTextValue.resetCharStyle();
+            frameCodeTextValue.resetParagraphStyle()
+            frameCodeTextValue.justification = ParagraphJustification.RIGHT_JUSTIFY;
+            frameCodeTextValue.fontSize = activeItemHeight/16;
+            frameCodeTextValue.fillColor = [1, 1, 1];
+            frameCodeTextValue.font = "Consolas";
+            frameCodeText.sourceText.setValue(frameCodeTextValue);
+            frameCodeText.transform.anchorPoint.setValue([0,0]);
+            frameCodeText.position.setValue([activeItemWidth-5,(activeItemHeight/100*95)+(activeItemHeight/16/3.2)]);
+            frameCodeText.name = "Frame Code";
+            var frameCodeExp = "time * "+ activeItem.frameRate;
+            frameCodeText.property("Source Text").expression = frameCodeExp;
+            frameCodeText.locked = true;
         }
 
         // Generate shot numbers
