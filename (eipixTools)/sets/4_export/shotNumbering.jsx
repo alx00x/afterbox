@@ -33,7 +33,7 @@
     shnData.strActiveCompErr = {en: "Please select a composition."};
     shnData.strNoMarkersErr = {en: "Composition needs to have at least two markers."};
     shnData.strNoMetadataErr = {en: "Could not find metadata file, do you wish to locate it manually?"};
-    shnData.strInstructions = {en: "Maximum number of shots per sequence is 99. Numbers are incremented by 10 as naming convention rule."};
+    shnData.strInstructions = {en: "This script will create a layer called \"Markers\". Use it to mark the beggining of each shot. Numbers are incremented by 10 as naming convention rule."};
     shnData.strGenerateShotNumbers = {en: "    Generate shot numbers"};
     shnData.strGenerateMetaData = {en: "    Generate metadata"};
 
@@ -81,7 +81,7 @@
                     }, \
                     inst: Group { \
                         alignment:['fill','top'], \
-                        stt: StaticText { text:'" + shotNumbering_localize(shnData.strInstructions) + "', alignment:['left','fill'], preferredSize:[-1,40], properties:{multiline:true} }, \
+                        stt: StaticText { text:'" + shotNumbering_localize(shnData.strInstructions) + "', alignment:['left','fill'], preferredSize:[-1,-1], properties:{multiline:true} }, \
                     }, \
                     settings: Panel { \
                         alignment:['fill','top'], \
