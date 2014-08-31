@@ -157,6 +157,7 @@
             var locateManually = confirm(shotNumbering_localize(shnData.strNoMetadataErr));
             if (locateManually == true) {
                 shnData.metadataFile = File.openDialog("Find the metadata file","");
+                shnData.metadataCheck = true;
             } else {
                 return;
             }
