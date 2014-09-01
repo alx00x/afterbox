@@ -1,7 +1,7 @@
 ﻿// shotNumbering.jsx
 // 
 // Name: shotNumbering
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -26,7 +26,7 @@
 
     shnData.scriptNameShort = "SHN";
     shnData.scriptName = "Shot Numbering";
-    shnData.scriptVersion = "1.0";
+    shnData.scriptVersion = "1.1";
     shnData.scriptTitle = shnData.scriptName + " v" + shnData.scriptVersion;
 
     shnData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -34,8 +34,8 @@
     shnData.strNoMarkersErr = {en: "Composition needs to have at least two markers."};
     shnData.strNoMetadataErr = {en: "Could not find metadata file, do you wish to locate it manually?"};
     shnData.strInstructions = {en: "This script will create a layer called \"Markers\". Use it to mark the beggining of each shot. Numbers are incremented by 10 as naming convention rule."};
-    shnData.strGenerateShotNumbers = {en: "    Generate shot numbers"};
-    shnData.strGenerateMetaData = {en: "    Generate metadata"};
+    shnData.strGenerateShotNumbers = {en: "  Generate shot numbers"};
+    shnData.strGenerateMetaData = {en: "  Generate metadata"};
 
     shnData.strSettings = {en: "Settings"};
     shnData.strQuestion = {en: "Do you wish to proceed?"};
@@ -210,12 +210,12 @@
             gameNameTextValue.resetCharStyle();
             gameNameTextValue.resetParagraphStyle()
             gameNameTextValue.justification = ParagraphJustification.LEFT_JUSTIFY;
-            gameNameTextValue.fontSize = activeItemHeight/14;
+            gameNameTextValue.fontSize = activeItemHeight/16;
             gameNameTextValue.fillColor = [1, 1, 1];
             gameNameTextValue.font = "Consolas";
             gameNameText.sourceText.setValue(gameNameTextValue);
             gameNameText.transform.anchorPoint.setValue([0,0]);
-            gameNameText.position.setValue([5,(activeItemHeight/100*5)+(activeItemHeight/14/3.2)]);
+            gameNameText.position.setValue([5,(activeItemHeight/100*5)+(activeItemHeight/16/3.2)]);
             gameNameText.name = "Game Name";
             gameNameText.locked = true;
 
