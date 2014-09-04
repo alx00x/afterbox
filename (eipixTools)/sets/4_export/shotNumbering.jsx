@@ -1,7 +1,7 @@
 ﻿// shotNumbering.jsx
 // 
 // Name: shotNumbering
-// Version: 1.1
+// Version: 1.2
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -26,7 +26,7 @@
 
     shnData.scriptNameShort = "SHN";
     shnData.scriptName = "Shot Numbering";
-    shnData.scriptVersion = "1.1";
+    shnData.scriptVersion = "1.2";
     shnData.scriptTitle = shnData.scriptName + " v" + shnData.scriptVersion;
 
     shnData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -115,12 +115,6 @@
             pal.grp.settings.opts.box1.value = false;
             pal.grp.settings.opts.box2.value = false;
 
-            //pal.grp.settings.opts.box1.onClick = function() {
-            //    if (pal.grp.settings.opts.box1.value == true){
-            //        shotNumbering_checkMarkers();
-            //    }
-            //}
-
             pal.grp.settings.opts.box2.onClick = function() {
                 if (pal.grp.settings.opts.box2.value == true){
                     shotNumbering_checkMetadata();
@@ -134,22 +128,6 @@
         return pal;
     }
 
-    // Helper Functions:
-    //
-    //function shotNumbering_checkMarkers() {
-    //    var markerNull = shnData.activeItem.layers.addNull(shnData.activeItem.duration);
-    //    var markerPos = markerNull.property("ADBE Transform Group").property("ADBE Position");
-    //    markerPos.expression = "x = thisComp.marker.numKeys;[x,0];";
-    //    var numberOfMarkers = markerPos.value[0];
-    //    markerNull.remove();
-    //    if (numberOfMarkers < 2) {
-    //        shnData.markerCheck = false;
-    //        alert(shotNumbering_localize(shnData.strNoMarkersErr), shnData.projectNameNoExt);
-    //    } else {
-    //        shnData.markerCheck = true;
-    //    }
-    //}
-
     function shotNumbering_checkMetadata() {
         shnData.metadataFile = new File(shnData.projectFolder + "\\" + "metadata.xml");
         if (shnData.metadataFile.exists == false) {
@@ -157,7 +135,9 @@
             var locateManually = confirm(shotNumbering_localize(shnData.strNoMetadataErr));
             if (locateManually == true) {
                 shnData.metadataFile = File.openDialog("Find the metadata file","");
-                shnData.metadataCheck = true;
+                if (shnData.metadataFile != null) {
+                    shnData.metadataCheck = true;
+                }
             } else {
                 return;
             }
@@ -175,7 +155,6 @@
         var activeItemHeight = activeItem.height;
         var activeItemPixelAspect = activeItem.pixelAspect;
         var activeItemDuration = activeItem.duration;
-        var layerCollection = [];
 
         // Generate black bars
         if ((shnPal.grp.settings.opts.box1.value == true) || (shnPal.grp.settings.opts.box2.value == true)) {
@@ -199,8 +178,8 @@
             shnData.metadataFile.close();
             var gameName = xmlData.data.(@category == "main").game;
             var taskName = xmlData.data.(@category == "main").task;
-            var taskWidth = xmlData.data.(@category == "main").width;
-            var taskHeight = xmlData.data.(@category == "main").height;
+            //var taskWidth = xmlData.data.(@category == "main").width;
+            //var taskHeight = xmlData.data.(@category == "main").height;
 
             // gamename and taskname
             var gameNameText = activeItem.layers.addText(gameName + "_" + taskName);
@@ -218,7 +197,9 @@
             gameNameText.position.setValue([5,(activeItemHeight/100*5)+(activeItemHeight/16/3.2)]);
             gameNameText.name = "Game Name";
             gameNameText.locked = true;
+        }
 
+        if (shnPal.grp.settings.opts.box2.value == true) {
             // timecode
             var timeCodeText = activeItem.layers.addText("0:00:00:00");
             timeCodeText.label = 0;
@@ -285,8 +266,6 @@
             shotNumberSolid.selected = true;
             shotNumberText.locked = true;
         }
-
-        //activeItem.layers.precompose(layerCollection, "data", true);
     }
 
     // Execute
