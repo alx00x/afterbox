@@ -1,10 +1,10 @@
 ﻿// backgroundRender.jsx
 // 
 // Name: backgroundRender
-// Version: 1.0
+// Version: 1.2
 // Author: Aleksandar Kocic
 // 
-// Description:     
+// Description:
 // This script renders saves the project and renders the active composition
 // in after effects native command-line renderer.
 //  
@@ -12,18 +12,20 @@
 
 (function backgroundRender(thisObj) {
 
+    // Localize
+    function backgroundRender_localize(strVar) {
+        return strVar["en"];
+    }
+
     // Define main variables
     var bgrData = new Object();
 
     bgrData.scriptNameShort = "BGR";
     bgrData.scriptName = "Background Render";
-    bgrData.scriptVersion = "1.0";
+    bgrData.scriptVersion = "1.2";
     bgrData.scriptTitle = bgrData.scriptName + " v" + bgrData.scriptVersion;
 
-    bgrData.strRenderSettings = {en: "Render Settings"};
-    bgrData.strOutputModule = {en: "Output Module"};
-    bgrData.strOutputPath = {en: "Output Path"};
-
+    bgrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
     bgrData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     bgrData.strActiveCompErr = {en: "Please select a composition."};
     bgrData.strSaveActionMsg = {en: "Project needs to be saved now. Do you wish to continue?"};
@@ -32,9 +34,22 @@
     bgrData.strExecute = {en: "Yes"};
     bgrData.strCancel = {en: "No"};
 
+    bgrData.strOptions = {en: "Options"};
+    bgrData.strOutputPath = {en: "Output Path"};
+    bgrData.strRenderSettings = {en: "Render Settings"};
+    bgrData.strOutputModule = {en: "Output Module"};
+    bgrData.strTimeSpan = {en: "Time Span"};
+    bgrData.strBrowse = {en: "Browse"};
+    bgrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
+
     bgrData.strHelp = {en: "?"};
     bgrData.strHelpTitle = {en: "Help"};
     bgrData.strHelpText = {en: "This script saves the project and renders the active composition in After Effects native command-line renderer."};
+
+    if (!(app.project.activeItem instanceof CompItem) || (app.project.activeItem == null)) {
+        alert(backgroundRender_localize(bgrData.strActiveCompErr));
+        return;
+    }
 
     // Define project variables
     bgrData.activeItem = app.project.activeItem;
@@ -46,18 +61,45 @@
     bgrData.projectRoot = app.project.file.fsName.replace(bgrData.projectNameFix, "");
 
     // Define render queue variables
-    bgrData.renderSettingsTemplate = "Best Settings";
-    bgrData.outputModuleTemplate = "Lossless";
     bgrData.timeSpanStart = 0;
     bgrData.timeSpanDuration = bgrData.activeItem.duration;
     bgrData.desktopPath = new Folder("~/Desktop");
     bgrData.outputPath = bgrData.desktopPath.fsName;
 
+    bgrData.workAreaStart = bgrData.activeItem.workAreaStart;
+    bgrData.workAreaDuration = bgrData.activeItem.workAreaDuration;
 
-    // Localize
-    function backgroundRender_localize(strVar) {
-        return strVar["en"];
+    // Prototipe startsWith
+    if (typeof String.prototype.startsWith != 'function') {
+        String.prototype.startsWith = function(str) {
+            return this.slice(0, str.length) == str;
+        };
     }
+
+    // Create temp render queue item
+    var tempRenderQueueItem = app.project.renderQueue.items.add(bgrData.activeItem);
+    var tempRenderQueueItemIndex = app.project.renderQueue.numItems;
+
+    // Get Render Settings templates
+    var rsTemplates = [];
+    var rsTemplatesAll = app.project.renderQueue.item(tempRenderQueueItemIndex).templates;
+    for (var i = 0; i < rsTemplatesAll.length; i++) {
+        if (rsTemplatesAll[i].startsWith("_HIDDEN") == false) {
+            rsTemplates.push(rsTemplatesAll[i]);
+        }
+    }
+
+    // Get Output Module templates
+    var omTemplates = [];
+    var omTemplatesAll = app.project.renderQueue.item(tempRenderQueueItemIndex).outputModule(1).templates;
+    for (var i = 0; i < omTemplatesAll.length; i++) {
+        if (omTemplatesAll[i].startsWith("_HIDDEN") == false) {
+            omTemplates.push(omTemplatesAll[i]);
+        }
+    }
+
+    // Remove temp render queue item
+    app.project.renderQueue.item(tempRenderQueueItemIndex).remove();
 
     // Build UI
     function backgroundRender_buildUI(thisObj) {
@@ -79,61 +121,37 @@
                         alignment:['fill','top'], \
                         stt: StaticText { text:'" + backgroundRender_localize(bgrData.strInstructions) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
                     }, \
-                    renderSettings: Panel { \
+                    options: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + backgroundRender_localize(bgrData.strRenderSettings) + "', alignment:['fill','top'] \
-                        temp: Group { \
+                        text: '" + backgroundRender_localize(bgrData.strOptions) + "', alignment:['fill','top'] \
+                        rs: Group { \
                             alignment:['fill','top'], \
-                            sst1: StaticText { text:'Template:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'"+ bgrData.renderSettingsTemplate + "', preferredSize:[-1,20] }, \
+                            text: StaticText { text:'" + backgroundRender_localize(bgrData.strRenderSettings) + ":', preferredSize:[120,20] }, \
+                            list: DropDownList { alignment:['fill','center'], preferredSize:[120,20] }, \
                         }, \
-                        qual: Group { \
+                        om: Group { \
                             alignment:['fill','top'], \
-                            sst1: StaticText { text:'Quality:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'Best', preferredSize:[-1,20] }, \
-                        }, \
-                        res: Group { \
-                            alignment:['fill','top'], \
-                            sst1: StaticText { text:'Resolution:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'" + bgrData.activeItemRes + "', preferredSize:[-1,20] }, \
-                        }, \
-                        frbl: Group { \
-                            alignment:['fill','top'], \
-                            sst1: StaticText { text:'Frame Blending:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'On for Checked Layers', preferredSize:[-1,20] }, \
-                        }, \
-                        mblr: Group { \
-                            alignment:['fill','top'], \
-                            sst1: StaticText { text:'Motion Blur:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'On for Checked Layers', preferredSize:[-1,20] }, \
+                            text: StaticText { text:'" + backgroundRender_localize(bgrData.strOutputModule) + ":', preferredSize:[120,20] }, \
+                            list: DropDownList { alignment:['fill','center'], preferredSize:[120,20] }, \
                         }, \
                         time: Group { \
                             alignment:['fill','top'], \
-                            sst1: StaticText { text:'Time Span:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'Lenght of Comp', preferredSize:[-1,20] }, \
-                        }, \
-                    }, \
-                    outputModules: Panel { \
-                        alignment:['fill','top'], \
-                        text: '" + backgroundRender_localize(bgrData.strOutputModule) + "', alignment:['fill','top'], \
-                        temp: Group { \
-                            alignment:['fill','top'], \
-                            sst1: StaticText { text:'Template:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'" + bgrData.outputModuleTemplate + "', preferredSize:[-1,20] }, \
+                            text: StaticText { text:'" + backgroundRender_localize(bgrData.strTimeSpan) + ":', preferredSize:[120,20] }, \
+                            list: DropDownList { alignment:['fill','center'], preferredSize:[120,20] }, \
                         }, \
                     }, \
                     outputPath: Panel { \
                         alignment:['fill','top'], \
                         text: '" + backgroundRender_localize(bgrData.strOutputPath) + "', alignment:['fill','top'], \
-                        qual: Group { \
+                        main: Group { \
                             alignment:['fill','top'], \
-                            sst1: StaticText { text:'Path:', preferredSize:[80,20] }, \
-                            sst2: StaticText { text:'" + bgrData.desktopPath.toString() + "', preferredSize:[-1,20] }, \
+                            btn: Button { text:'" + backgroundRender_localize(bgrData.strBrowse) + "', preferredSize:[-1,20] }, \
+                            box: EditText { alignment:['fill','center'], preferredSize:[-1,20] },  \
                         }, \
                     }, \
                     ques: Group { \
                         alignment:['fill','top'], \
-                        stt: StaticText { text:'" + backgroundRender_localize(bgrData.strQuestion) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
+                        text: StaticText { text:'" + backgroundRender_localize(bgrData.strQuestion) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
                     }, \
                     cmds: Group { \
                         alignment:['fill','top'], \
@@ -155,6 +173,28 @@
                 alert(bgrData.scriptTitle + "\n" + backgroundRender_localize(bgrData.strHelpText), backgroundRender_localize(bgrData.strHelpTitle));
             }
 
+            var rsItems = rsTemplates;
+            for (var i = 0; i < rsItems.length; i++) {
+                pal.grp.options.rs.list.add("item", rsItems[i]);
+            }
+            pal.grp.options.rs.list.selection = 0;
+
+            var omItems = omTemplates;
+            for (var i = 0; i < omItems.length; i++) {
+                pal.grp.options.om.list.add("item", omItems[i]);
+            }
+            pal.grp.options.om.list.selection = 10;
+
+            var timeItems = backgroundRender_localize(bgrData.strTimeOpts);
+            for (var i = 0; i < timeItems.length; i++) {
+                pal.grp.options.time.list.add("item", timeItems[i]);
+            }
+            pal.grp.options.time.list.selection = 1;
+
+            pal.grp.outputPath.main.btn.onClick = function() {
+                backgroundRender_doBrowse();
+            }
+
             pal.grp.cmds.executeBtn.onClick = backgroundRender_doExecute;
             pal.grp.cmds.cancelBtn.onClick = backgroundRender_doCancel;
         }
@@ -162,28 +202,58 @@
         return pal;
     }
 
-
     // Main Functions:
     //
 
     // Dialog to let users define render location
-    // function setRenderLocation() {
-    //     // code
-    // }
+    function backgroundRender_doBrowse() {
+        var browseOutputPath = Folder.selectDialog();
+        if (browseOutputPath != null) {
+            bgrPal.grp.outputPath.main.box.text = browseOutputPath.toString();
+        }
+    }
 
+    // Add quotes
     function addQuotes(string) { 
         return "\""+ string + "\"";
     }
 
+    // Main
     function backgroundRender_main() {
         // Add to render queue
         var renderQueueItem = app.project.renderQueue.items.add(bgrData.activeItem);
         var renderQueueItemIndex = app.project.renderQueue.numItems;
-        renderQueueItem.applyTemplate(bgrData.renderSettingsTemplate);
-        renderQueueItem.timeSpanStart = bgrData.timeSpanStart;
-        renderQueueItem.timeSpanDuration = bgrData.timeSpanDuration;
-        renderQueueItem.outputModules[1].applyTemplate(bgrData.outputModuleTemplate);
-        renderQueueItem.outputModules[1].file = new File(bgrData.outputPath.toString() + "\\" + bgrData.activeItemName + "_[" + renderQueueItemIndex + "]_raw.avi");
+
+        // Assign Render Settings template
+        var renderSettingsTemplate = bgrPal.grp.options.rs.list.selection;
+        renderQueueItem.applyTemplate(renderSettingsTemplate);
+
+        // Assign Output Module template
+        var outputModuleTemplate = bgrPal.grp.options.om.list.selection;
+        renderQueueItem.outputModules[1].applyTemplate(outputModuleTemplate);
+
+        // Assign Time Span choice
+        if (bgrPal.grp.options.time.list.selection.index == 1) {
+            renderQueueItem.timeSpanStart = bgrData.workAreaStart;
+            renderQueueItem.timeSpanDuration = bgrData.workAreaDuration;
+        } else {
+            renderQueueItem.timeSpanStart = bgrData.timeSpanStart;
+            renderQueueItem.timeSpanDuration = bgrData.timeSpanDuration;
+        }
+        var usePath;
+        var editboxOutputPath = bgrPal.grp.outputPath.main.box.text;
+        if (editboxOutputPath == "") {
+            usePath = bgrData.outputPath;
+        } else {
+            var usePathFolder = new Folder(editboxOutputPath);
+            if (usePathFolder.exists == true) {
+                usePath = editboxOutputPath;
+            } else {
+                alert(backgroundRender_localize(bgrPal.strPathErr));
+                usePath = bgrData.outputPath;
+            }
+        }
+        renderQueueItem.outputModules[1].file = new File(usePath.toString() + "\\" + bgrData.activeItemName + "_[" + renderQueueItemIndex + "]" + "_[#####]");
 
         // Save the project
         app.project.save();
@@ -249,7 +319,7 @@
     // Warning
     if (parseFloat(app.version) < 9.0) {
         alert(backgroundRender_localize(bgrData.strMinAE));
-    } else if (!(bgrData.activeItem instanceof CompItem) || (bgrData.activeItem == null)) {
+    } else if (!(app.project.activeItem instanceof CompItem) || (app.project.activeItem == null)) {
         alert(backgroundRender_localize(bgrData.strActiveCompErr));
     } else {
         // Build and show the floating palette

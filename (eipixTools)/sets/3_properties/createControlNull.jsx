@@ -1,7 +1,7 @@
 // createControlNull.jsx
 // 
 // Name: createControlNull
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -12,6 +12,7 @@
 
     //Globals
     var activeItem = app.project.activeItem;
+    var xyCombined = false;
 
     // Define main variables
     var ccnData = new Object();
@@ -19,7 +20,7 @@
 
     createControlNullData.scriptNameShort = "CCN";
     createControlNullData.scriptName = "Create Control Null";
-    createControlNullData.scriptVersion = "1.0";
+    createControlNullData.scriptVersion = "1.1";
     createControlNullData.scriptTitle = createControlNullData.scriptName + " v" + createControlNullData.scriptVersion;
 
     createControlNullData.strSelect = {en: "Select"};
@@ -195,6 +196,7 @@
             if (selectedPropertyLenght == null) {
                 selectedPropertyValue = selectedPropertyItem.value;
             } else {
+                xyCombined = true;
                 selectedPropertyValue = selectedPropertyItem.value[0];
             }
 
@@ -247,6 +249,7 @@
             if (selectedPropertyLenght == null) {
                 selectedPropertyValue = selectedPropertyItem.value;
             } else {
+                xyCombined = true;
                 selectedPropertyValue = selectedPropertyItem.value[1];
             }
 
@@ -326,11 +329,19 @@
             addControlNull.name = controlNullName;
             addControlNull.transform.position.setValue([ccnData.xPropValue,ccnData.yPropValue,ccnData.zPropValue])
 
-            propertyExpression1 = "x = thisComp.layer('" + controlNullName + "').transform.position[0];\ry = thisComp.layer('" + controlNullName + "').transform.position[1];\r[x,y]";
-            propertyExpression2 = "z = thisComp.layer('" + controlNullName + "').transform.position[2];\r[z]";
-
-            activeItem.layer(ccnData.xLayerName).effect(ccnData.xPropIndex)(ccnData.xPropMatchName).expression = propertyExpression1;
-            activeItem.layer(ccnData.zLayerName).effect(ccnData.zPropIndex)(ccnData.zPropMatchName).expression = propertyExpression2;
+            if (xyCombined == true) {
+                propertyExpression1 = "x = thisComp.layer('" + controlNullName + "').transform.position[0];\ry = thisComp.layer('" + controlNullName + "').transform.position[1];\r[x,y]";
+                propertyExpression2 = "z = thisComp.layer('" + controlNullName + "').transform.position[2];\r[z]";
+                activeItem.layer(ccnData.xLayerName).effect(ccnData.xPropIndex)(ccnData.xPropMatchName).expression = propertyExpression1;
+                activeItem.layer(ccnData.zLayerName).effect(ccnData.zPropIndex)(ccnData.zPropMatchName).expression = propertyExpression2;
+            } else {
+                propertyExpression1 = "x = thisComp.layer('" + controlNullName + "').transform.position[0];\r[x]";
+                propertyExpression2 = "y = thisComp.layer('" + controlNullName + "').transform.position[1];\r[y]";
+                propertyExpression3 = "z = thisComp.layer('" + controlNullName + "').transform.position[2];\r[z]";
+                activeItem.layer(ccnData.xLayerName).effect(ccnData.xPropIndex)(ccnData.xPropMatchName).expression = propertyExpression1;
+                activeItem.layer(ccnData.yLayerName).effect(ccnData.yPropIndex)(ccnData.yPropMatchName).expression = propertyExpression2;
+                activeItem.layer(ccnData.zLayerName).effect(ccnData.zPropIndex)(ccnData.zPropMatchName).expression = propertyExpression3;
+            }
 
             ccnPal.close();
         } else {

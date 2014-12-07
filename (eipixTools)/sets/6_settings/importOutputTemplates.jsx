@@ -5,7 +5,7 @@
 // bjork.simon@gmail.com
 
 var etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/etc");
-var templatePath = new File(etcFolder.fsName + "/outputTemplates.aep");
+var templatePath = new File(etcFolder.fsName + "/outputTemplates.aet");
 
 function importFunction() {
 

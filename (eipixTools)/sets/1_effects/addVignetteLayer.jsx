@@ -1,7 +1,7 @@
 ﻿// addVignetteLayer.jsx
 // 
 // Name: addVignetteLayer
-// Version: 1.2
+// Version: 1.3
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -35,9 +35,9 @@
     var newLayerHeight = activeItem.height;
     var newLayerPixelAspect = activeItem.pixelAspect;
     var newLayerDuration = activeItem.duration;
-    var effectNameCollection = app.effects;
+
     var check = false;
-    
+    var effectNameCollection = app.effects;
     for (var i = 0; i < effectNameCollection.length; i++) {
         var name = effectNameCollection[i].displayName;
         if (name == "S_Vignette") {

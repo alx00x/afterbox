@@ -1,7 +1,7 @@
 ﻿// clearCachePurgeMem.jsx
 // 
 // Name: clearCachePurgeMem
-// Version: 1.2
+// Version: 1.3
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -16,7 +16,17 @@
 (function PurgeMem(thisObj) {
 
     // Startup
-    var diskCachePathAtStartup = app.preferences.getPrefAsString("Disk Cache Controls", "Folder 6");
+    var cacheControlsFolder;
+    if (parseInt(app.version) == 11) {
+        cacheControlsFolder = "Folder 6";
+    } else if ((parseInt(app.version) == 12) || (parseInt(app.version) == 13)) {
+        cacheControlsFolder = "Folder 7";
+    } else {
+        alert("Unfortunately, this script doesn't work this version of After Effects.");
+        return;
+    }
+
+    var diskCachePathAtStartup = app.preferences.getPrefAsString("Disk Cache Controls", cacheControlsFolder);
 
     // Globals    
     var PurgeMemData = new Object(); // Store globals in an object
@@ -84,7 +94,7 @@
     //
     function PurgeMem_doExecute(strVar) {
         var machineName = system.machineName;
-        var diskCachePath = app.preferences.getPrefAsString("Disk Cache Controls", "Folder 6");
+        var diskCachePath = app.preferences.getPrefAsString("Disk Cache Controls", cacheControlsFolder);
         var diskCachePathFull = diskCachePath + "\\Adobe After Effects Disk Cache - " + machineName + ".noindex\\*";
         var delCommand = 'for /D %I in ("' + diskCachePathFull + '") do rmdir /s/q "%I"';
         system.callSystem("cmd.exe /c \"" + delCommand + "\"");
@@ -95,7 +105,7 @@
     //
 
     // Prerequisites check
-    if (parseFloat(app.version) < 10.0) {
+    if (parseFloat(app.version) < 11.0) {
         alert(PurgeMem.strMinAE);
     } else {
         // Build and show the console's floating palette

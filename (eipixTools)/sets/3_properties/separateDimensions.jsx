@@ -1,7 +1,7 @@
 // separateDimensions.jsx
 // 
 // Name: separateDimensions
-// Version: 1.0
+// Version: 1.2
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -19,13 +19,12 @@
 
     separateDimensionsData.scriptNameShort = "SD";
     separateDimensionsData.scriptName = "Separate Dimensions";
-    separateDimensionsData.scriptVersion = "1.0";
+    separateDimensionsData.scriptVersion = "1.2";
     separateDimensionsData.scriptTitle = separateDimensionsData.scriptName + " v" + separateDimensionsData.scriptVersion;
 
     separateDimensionsData.strErrComp = {en: "Please select a composition."};
     separateDimensionsData.strErrProp = {en: "Please select property in timeline panel."};
     separateDimensionsData.strErrDim = {en: "Selected property is not multidimensional."};
-
     separateDimensionsData.strDoneMsg = {en: "Done."};
 
     separateDimensionsData.strHelp = {en: "?"};
@@ -47,9 +46,7 @@
             var selectedPropertyItem;
             var selectedPropertyEffectIndex;
             var selectedPropertyMatchName;
-
             var propertyExpression;
-
 
             if (selectedProperty.isEffect == true) {
                 for (var i = 1; i <= selectedProperty.numProperties; i++) {
@@ -72,8 +69,12 @@
             var selectedPropertyLenght = selectedPropertyItem.value.length;
       
             if (selectedPropertyLenght != null) {
-
+                var isEffect = false;
                 if (selectedProperty.isEffect == true) {
+                    isEffect = true;
+                }
+
+                if (isEffect == true) {
                     var addSlider1 = selectedLayer.Effects.addProperty("ADBE Slider Control");
                     addSlider1.name = selectedPropertyName + " [X]";
                     addSlider1.slider.setValue(selectedLayer.effect(selectedPropertyEffectIndex)(selectedPropertyMatchName).value[0]);
@@ -105,7 +106,7 @@
                     propertyExpression = "x = thisLayer.effect('" + selectedPropertyName + " [X]" + "')('Slider');\ry = thisLayer.effect('" + selectedPropertyName + " [Y]" + "')('Slider');\rz = thisLayer.effect('" + selectedPropertyName + " [Z]" + "')('Slider');\r[x,y,z]";
                 }
 
-                if (selectedProperty.isEffect == true) {
+                if (isEffect == true) {
                     selectedLayer.effect(selectedPropertyEffectIndex)(selectedPropertyMatchName).expression = propertyExpression;
                 } else {
                     selectedLayer.transform.property(selectedPropertyMatchName).expression = propertyExpression;
