@@ -1,7 +1,7 @@
 ﻿// shotNumbering.jsx
 // 
 // Name: shotNumbering
-// Version: 1.2
+// Version: 1.3
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -26,7 +26,7 @@
 
     shnData.scriptNameShort = "SHN";
     shnData.scriptName = "Shot Numbering";
-    shnData.scriptVersion = "1.2";
+    shnData.scriptVersion = "1.3";
     shnData.scriptTitle = shnData.scriptName + " v" + shnData.scriptVersion;
 
     shnData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -51,6 +51,7 @@
     shnData.projectNameNoExt = shnData.projectName.replace(".aepx", "").replace(".aep", "");
     shnData.projectFile = app.project.file.fsName;
     shnData.projectFolder = shnData.projectFile.replace(shnData.projectName, "");
+    shnData.metadataFolder = app.project.file.parent.parent.fsName;
     shnData.activeItem = app.project.activeItem;
 
     shnData.markerCheck = false;
@@ -112,7 +113,7 @@
                 alert(shnData.scriptTitle + "\n" + shotNumbering_localize(shnData.strHelpText), shotNumbering_localize(shnData.strHelpTitle));
             }
 
-            pal.grp.settings.opts.box1.value = false;
+            pal.grp.settings.opts.box1.value = true;
             pal.grp.settings.opts.box2.value = false;
 
             pal.grp.settings.opts.box2.onClick = function() {
@@ -129,7 +130,7 @@
     }
 
     function shotNumbering_checkMetadata() {
-        shnData.metadataFile = new File(shnData.projectFolder + "\\" + "metadata.xml");
+        shnData.metadataFile = new File(shnData.metadataFolder +  "\\" + "metadata.xml");
         if (shnData.metadataFile.exists == false) {
             shnData.metadataCheck = false;
             var locateManually = confirm(shotNumbering_localize(shnData.strNoMetadataErr));
@@ -176,10 +177,12 @@
             var xmlString = shnData.metadataFile.read();
             var xmlData = new XML(xmlString);
             shnData.metadataFile.close();
-            var gameName = xmlData.data.(@category == "main").game;
-            var taskName = xmlData.data.(@category == "main").task;
-            //var taskWidth = xmlData.data.(@category == "main").width;
-            //var taskHeight = xmlData.data.(@category == "main").height;
+
+            //select node
+            var node = xmlData.data.(@type == "animatic")[0];
+
+            var gameName = node.game;
+            var taskName = node.task;
 
             // gamename and taskname
             var gameNameText = activeItem.layers.addText(gameName + "_" + taskName);

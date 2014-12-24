@@ -22,8 +22,8 @@
     setMaterialOptionsData.scriptVersion = "1.2";
     setMaterialOptionsData.scriptTitle = setMaterialOptionsData.scriptName + " v" + setMaterialOptionsData.scriptVersion;
 
-    setMaterialOptionsData.strOn = {en: "on"};
-    setMaterialOptionsData.strOff = {en: "off"};
+    setMaterialOptionsData.strOn = {en: "ON"};
+    setMaterialOptionsData.strOff = {en: "OFF"};
     setMaterialOptionsData.strHelp = {en: "?"};
     setMaterialOptionsData.strHelpTitle = {en: "Help"};
     setMaterialOptionsData.strHelpText = {en: "This script provides a GUI to quickly change material options for selected layers."};

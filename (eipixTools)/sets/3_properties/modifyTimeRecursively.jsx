@@ -1,7 +1,7 @@
 ﻿// modifyTimeRecursively.jsx
 // 
 // Name: modifyTimeRecursively
-// Version: 0.6
+// Version: 0.8
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -16,7 +16,7 @@
     var mtrData = new Object(); // Store globals in an object
     mtrData.scriptNameShort = "MTR";
     mtrData.scriptName = "Modify Time Recursively";
-    mtrData.scriptVersion = "0.6";
+    mtrData.scriptVersion = "0.8";
     mtrData.scriptTitle = mtrData.scriptName + " v" + mtrData.scriptVersion;
 
     mtrData.timeUnit;
@@ -108,13 +108,15 @@
 
     // Main Functions:
     //
-    function addStartFrames_main(theComp) {
+    function addStart_main(theComp, timeFrames, extendLeft) {
+        if (timeFrames == true) {
+            var numOfSec = numField / theComp.frameRate;
+        } else {
+            var numOfSec = numField;
+        }
 
-        var numOfSec = numField / theComp.frameRate;
-        var newDuration = theComp.duration + numOfSec;
+        theComp.duration = theComp.duration + numOfSec;
 
-        theComp.duration = newDuration;
-        
         for (var i = 1; i <= theComp.numLayers; i++) {
             var curLayer = theComp.layer(i);
             var curLayerSource = theComp.layer(i).source;
@@ -125,10 +127,12 @@
             if ((curLayer.source instanceof FootageItem) && !(curLayer.source.mainSource instanceof SolidSource)) {
                 if ((curLayerInPoint == 0) && (curLayerStartTime == 0)) {
                     theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                    try {
-                        theComp.layer(i).inPoint = 0;
-                    } catch (err) {
-                        // theComp.layer(i).inPoint = curLayerInPoint + numOfSec;
+                    if  (extendLeft == true) {
+                        try {
+                            theComp.layer(i).inPoint = 0;
+                        } catch (err) {
+                            alert(err);
+                        }
                     }
                 } else {
                     theComp.layer(i).startTime = curLayerStartTime + numOfSec;
@@ -136,96 +140,36 @@
             } else if (curLayer.source instanceof CompItem) {
                 theComp.layer(i).startTime = curLayerStartTime;
                 theComp.layer(i).inPoint = curLayerInPoint;
-    
-                addStartFrames_main(curLayerSource);
+                if  (curLayerStartTime == 0) {
+                    addStart_main(curLayerSource, timeFrames, true);
+                } else {
+                    addStart_main(curLayerSource, timeFrames, false);
+                }
                 theComp.layer(i).outPoint = curLayerOutPoint + numOfSec;
             } else {
                 if (curLayerInPoint == 0) {
                     theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                    theComp.layer(i).inPoint = 0;
-                } else {
-                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                }
-            }
-        }
-    }
-
-    function addEndFrames_main(theComp) {
-        var numOfSec = numField / theComp.frameRate;
-        var newDuration = theComp.duration + numOfSec;
-        var oldDuration = theComp.duration;
-
-        theComp.duration = newDuration;
-        
-        for (var i = 1; i <= theComp.numLayers; i++) {
-            var curLayer = theComp.layer(i);
-            var curLayerSource = theComp.layer(i).source;
-            var curLayerInPoint = theComp.layer(i).inPoint;
-            var curLayerOutPoint = theComp.layer(i).outPoint;
-            var curLayerStartTime = theComp.layer(i).startTime;
-
-            if ((curLayer.source instanceof FootageItem) && !(curLayer.source.mainSource instanceof SolidSource) && (curLayerOutPoint == oldDuration)) {
-                theComp.layer(i).outPoint = newDuration;
-            } else if ((curLayer.source instanceof CompItem) && (curLayerOutPoint == oldDuration)) {   
-                addEndFrames_main(curLayerSource);
-                theComp.layer(i).outPoint = curLayerOutPoint + numOfSec;
-            } else {
-                if (curLayerOutPoint == oldDuration) {
-                    theComp.layer(i).outPoint = newDuration;
-                }
-            }
-        }
-    }
-
-    function addStartSeconds_main(theComp) {
-
-        var numOfSec = numField;
-        var newDuration = theComp.duration + numOfSec;
-
-        theComp.duration = newDuration;
-        
-        for (var i = 1; i <= theComp.numLayers; i++) {
-            var curLayer = theComp.layer(i);
-            var curLayerSource = theComp.layer(i).source;
-            var curLayerInPoint = theComp.layer(i).inPoint;
-            var curLayerOutPoint = theComp.layer(i).outPoint;
-            var curLayerStartTime = theComp.layer(i).startTime;
-    
-            if ((curLayer.source instanceof FootageItem) && !(curLayer.source.mainSource instanceof SolidSource)) {
-                if ((curLayerInPoint == 0) && (curLayerStartTime == 0)) {
-                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                    try {
+                    if  (extendLeft == true) {
                         theComp.layer(i).inPoint = 0;
-                    } catch (err) {
-                        // theComp.layer(i).inPoint = curLayerInPoint + numOfSec;
                     }
                 } else {
                     theComp.layer(i).startTime = curLayerStartTime + numOfSec;
                 }
-            } else if (curLayer.source instanceof CompItem) {
-                theComp.layer(i).startTime = curLayerStartTime;
-                theComp.layer(i).inPoint = curLayerInPoint;
-    
-                addStartSeconds_main(curLayerSource);
-                theComp.layer(i).outPoint = curLayerOutPoint + numOfSec;
-            } else {
-                if (curLayerInPoint == 0) {
-                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                    theComp.layer(i).inPoint = 0;
-                } else {
-                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
-                }
             }
         }
     }
 
-    function addEndSeconds_main(theComp) {
-        var numOfSec = numField;
+    function addEnd_main(theComp, timeFrames) {
+        if (timeFrames == true) {
+            var numOfSec = numField / theComp.frameRate;
+        } else {
+            var numOfSec = numField;
+        }
         var newDuration = theComp.duration + numOfSec;
         var oldDuration = theComp.duration;
 
         theComp.duration = newDuration;
-        
+
         for (var i = 1; i <= theComp.numLayers; i++) {
             var curLayer = theComp.layer(i);
             var curLayerSource = theComp.layer(i).source;
@@ -233,13 +177,13 @@
             var curLayerOutPoint = theComp.layer(i).outPoint;
             var curLayerStartTime = theComp.layer(i).startTime;
 
-            if ((curLayer.source instanceof FootageItem) && !(curLayer.source.mainSource instanceof SolidSource) && (curLayerOutPoint == oldDuration)) {
+            if ((curLayer.source instanceof FootageItem) && !(curLayer.source.mainSource instanceof SolidSource) && (curLayerOutPoint >= oldDuration)) {
                 theComp.layer(i).outPoint = newDuration;
-            } else if ((curLayer.source instanceof CompItem) && (curLayerOutPoint == oldDuration)) {   
-                addEndSeconds_main(curLayerSource);
+            } else if ((curLayer.source instanceof CompItem) && (curLayerOutPoint >= oldDuration)) {
+                addEnd_main(curLayerSource, timeFrames);
                 theComp.layer(i).outPoint = curLayerOutPoint + numOfSec;
             } else {
-                if (curLayerOutPoint == oldDuration) {
+                if (curLayerOutPoint >= oldDuration) {
                     theComp.layer(i).outPoint = newDuration;
                 }
             }
@@ -249,7 +193,6 @@
     // mtr_doExecute()
     // Function to modify start of the comp
     function mtr_doExecute() {
-
         app.beginUndoGroup(mtrData.scriptName);
 
         var activeItem = app.project.activeItem;
@@ -260,20 +203,23 @@
             mtrData.operationApply = this.parent.parent.opts.operationlist.lst.selection.index;
 
             if ((mtrData.timeUnit == 0) && (mtrData.operationApply == 0)) {
-                addStartFrames_main(activeComp);
+                // add frames at start
+                addStart_main(activeComp, true, true);
             } else if ((mtrData.timeUnit == 0) && (mtrData.operationApply == 1)) {
-                addEndFrames_main(activeComp);
+                // add frames at end
+                addEnd_main(activeComp, true, true);
             } else if ((mtrData.timeUnit == 1) && (mtrData.operationApply == 0)) {
-                addStartSeconds_main(activeComp);
+                // add seconds at start
+                addStart_main(activeComp, false);
             } else if ((mtrData.timeUnit == 1) && (mtrData.operationApply == 1)) {
-                addEndSeconds_main(activeComp);
+                // add seconds at end
+                addEnd_main(activeComp, false);
             }
         } else {
             alert(mtr_localize(mtrData.strErrExecute));
         }
 
         app.endUndoGroup();
-
     }
     
 
@@ -281,23 +227,17 @@
     //
 
     // Prerequisites check
-    if (parseFloat(app.version) < 9.0)
-    {
+    if (parseFloat(app.version) < 9.0) {
         alert(mtrData.strMinAE);
-    }
-    else
-    {
+    } else {
         // Build and show the floating palette
         var mtrPal = mtr_buildUI(thisObj);
-        if (mtrPal !== null)
-        {
-            if (mtrPal instanceof Window)
-            {
+        if (mtrPal !== null) {
+            if (mtrPal instanceof Window) {
                 // Show the palette
                 mtrPal.center();
                 mtrPal.show();
-            }
-            else
+            } else
                 mtrPal.layout.layout(true);
         }
     }

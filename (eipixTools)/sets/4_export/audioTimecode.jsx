@@ -1,7 +1,7 @@
 ﻿// audioTimecode.jsx
 // 
 // Name: audioTimecode
-// Version: 0.2
+// Version: 0.6
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -31,12 +31,14 @@
 
     atcData.scriptNameShort = "ATC";
     atcData.scriptName = "Audio Timecode";
-    atcData.scriptVersion = "0.2";
+    atcData.scriptVersion = "0.6";
     atcData.scriptTitle = atcData.scriptName + " v" + atcData.scriptVersion;
 
+    atcData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
     atcData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     atcData.strSaveProject = {en: "Save your project first.."};
     atcData.strActiveCompErr = {en: "Please select a composition."};
+    atcData.strBrowse = {en: "Browse"};
     atcData.strExecute = {en: "Export"};
     atcData.strCancel = {en: "Cancel"};
 
@@ -76,6 +78,15 @@
                         title: StaticText { text:'" + atcData.scriptNameShort + "', alignment:['fill','center'] }, \
                         help: Button { text:'" + audioTimecode_localize(atcData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
+                    outputPath: Panel { \
+                        alignment:['fill','top'], \
+                        text: '" + audioTimecode_localize(atcData.strOutputPath) + "', alignment:['fill','top'], \
+                        main: Group { \
+                            alignment:['fill','top'], \
+                            btn: Button { text:'" + audioTimecode_localize(atcData.strBrowse) + "', preferredSize:[50,20] }, \
+                            box: EditText { alignment:['fill','center'], preferredSize:[-1,20] },  \
+                        }, \
+                    }, \
                     opts: Panel { \
                         alignment:['fill','top'], \
                         text: '" + audioTimecode_localize(atcData.strRenderSettings) + "', alignment:['fill','top'] \
@@ -84,6 +95,10 @@
                             xml: RadioButton { text:'" + audioTimecode_localize(atcData.strXML) + "' }, \
                             txt: RadioButton { text:'" + audioTimecode_localize(atcData.strTXT) + "', value:true }, \
                         }, \
+                    }, \
+                    sepr: Group { \
+                        orientation:'row', alignment:['fill','top'], \
+                        rule: Panel { height: 2, alignment:['fill','center'] }, \
                     }, \
                     cmds: Group { \
                         alignment:['fill','top'], \
@@ -107,6 +122,10 @@
                 alert(atcData.scriptTitle + "\n" + audioTimecode_localize(atcData.strHelpText), audioTimecode_localize(atcData.strHelpTitle));
             }
 
+            pal.grp.outputPath.main.btn.onClick = function() {
+                audioTimecode_doBrowse();
+            }
+
             pal.grp.cmds.executeBtn.onClick = audioTimecode_doExecute;
             pal.grp.cmds.cancelBtn.onClick = audioTimecode_doCancel;
         }
@@ -114,37 +133,44 @@
         return pal;
     }
 
-    function secondsToTime(timeInSeconds) {
-        var sec_num = parseInt(timeInSeconds, 10);
-        if (timeInSeconds.toString().indexOf('.') === -1)  {
-            var mil_num = 00;
-        } else {
-            var mil_num_dec = timeInSeconds.toString().split(".")[1];
-            var mil_num = parseInt(mil_num_dec, 10);
-        }
-        var hours = Math.floor(sec_num / 3600);
-        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-        var seconds = sec_num - (hours * 3600) - (minutes * 60);
-        var milliseconds = parseInt(mil_num, 10);
+    // function secondsToTime(timeInSeconds) {
+    //     var sec_num = parseInt(timeInSeconds, 10);
+    //     if (timeInSeconds.toString().indexOf('.') === -1)  {
+    //         var mil_num = 00;
+    //     } else {
+    //         var mil_num_dec = timeInSeconds.toString().split(".")[1];
+    //         var mil_num = parseInt(mil_num_dec, 10);
+    //     }
+    //     var hours = Math.floor(sec_num / 3600);
+    //     var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    //     var seconds = sec_num - (hours * 3600) - (minutes * 60);
+    //     var milliseconds = parseInt(mil_num, 10);
 
-        if (hours < 10) {
-            hours = "0" + hours;
-        }
-        if (minutes < 10) {
-            minutes = "0" + minutes;
-        }
-        if (seconds < 10) {
-            seconds = "0" + seconds;
-        }
-        if (milliseconds < 10) {
-            milliseconds = "0" + milliseconds;
-        }
-        var time = hours + ':' + minutes + ':' + seconds + ":0" + milliseconds;
-        return time;
-    }
+    //     if (hours < 10) {
+    //         hours = "0" + hours;
+    //     }
+    //     if (minutes < 10) {
+    //         minutes = "0" + minutes;
+    //     }
+    //     if (seconds < 10) {
+    //         seconds = "0" + seconds;
+    //     }
+    //     if (milliseconds < 10) {
+    //         milliseconds = "0" + milliseconds;
+    //     }
+    //     var time = hours + ':' + minutes + ':' + seconds + ":0" + milliseconds;
+    //     return time;
+    // }
 
     // Main Functions:
     //
+
+    function audioTimecode_doBrowse() {
+        var browseOutputPath = Folder.selectDialog();
+        if (browseOutputPath != null) {
+            atcPal.grp.outputPath.main.box.text = browseOutputPath.fsName.toString();
+        }
+    }
 
     function audioTimecode_main() {
         atcData.selectedLayers = app.project.activeItem.selectedLayers;
@@ -174,11 +200,26 @@
 
     function audioTimecode_exportAsTXT(layers) {
         var audioLayersDict = [];
-        var audioTimecode_txt = new File(atcData.projectFolder.fsName + "/" + atcData.projectNameNoExt + ".txt");
+
+        var usePath;
+        var editboxOutputPath = atcPal.grp.outputPath.main.box.text;
+        if (editboxOutputPath == "") {
+            usePath = atcData.projectFolder.fsName;
+        } else {
+            var usePathFolder = new Folder(editboxOutputPath);
+            if (usePathFolder.exists == true) {
+                usePath = editboxOutputPath;
+            } else {
+                alert(audioTimecode_localize(atcPal.strPathErr));
+                usePath = atcData.projectFolder.fsName;
+            }
+        }
+        
+        var audioTimecode_txt = new File(usePath + "/" + atcData.projectNameNoExt + ".txt");
         for (var i = 0; i < layers.length; i++) {
             var sourcename = layers[i].source.name;
-            var starttime = secondsToTime(layers[i].startTime.toFixed(2));
-            var endtime = secondsToTime(layers[i].outPoint.toFixed(2));
+            var starttime = layers[i].startTime;
+            var endtime = layers[i].outPoint;
             audioLayersDict.push([sourcename, starttime, endtime]);
         }
         audioTimecode_txt.open("w");
