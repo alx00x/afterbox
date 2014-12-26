@@ -2,6 +2,7 @@
 title Please Wait
 
 set etcpath=%~dp0
+set aepath=%~dp1
 set pm="%etcpath%procmon.exe"
 
 set config_seq="%etcpath%elemconfig_seq.pmc"
@@ -20,7 +21,7 @@ echo   - logging to file
 start "" /b %pm% /accepteula /quiet /minimized /backingfile %backing_seq% /loadconfig %config_seq%
     
 %pm% /waitforidle
-afterfx.exe
+%aepath%\afterfx.exe
     
 :file_check_seq
 if EXIST %terminateProc_seq% (goto file_exists_seq) else (PING 127.0.0.1 -w 1000 -n 10 >NUL)
@@ -33,7 +34,7 @@ goto file_check_seq
 del %backing_seq%
 del %terminateProc_seq%
 
-afterfx.exe
+%aepath%\afterfx.exe
 
 title Done
 echo Done

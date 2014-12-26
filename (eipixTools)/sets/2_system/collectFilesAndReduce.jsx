@@ -1,7 +1,7 @@
 ﻿// collectFilesAndReduce.jsx
 // 
 // Name: collectFilesAndReduce
-// Version: 1.8
+// Version: 1.9
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -20,7 +20,7 @@
 
     cfarData.scriptNameShort = "CFAR";
     cfarData.scriptName = "Collect Files And Reduce";
-    cfarData.scriptVersion = "1.8";
+    cfarData.scriptVersion = "1.9";
     cfarData.scriptTitle = cfarData.scriptName + " v" + cfarData.scriptVersion;
 
     cfarData.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
@@ -36,7 +36,7 @@
     cfarData.strElem = {en: "Element 3D"};
     cfarData.strGatherBtn = {en: "Gather"};
     cfarData.strParseBtn = {en: "Parse"};
-    cfarData.strGetElemInst = {en: "Gathering resources could take a minute. Be patient!"};
+    cfarData.strGetElemInst = {en: "Gathering resources could take a minute. Please be patient!"};
     cfarData.strNoElementInProject = {en: "Could not detect Element3D in this project."};
 
     cfarData.strOpts = {en: "Options"};
@@ -95,16 +95,22 @@
                 }, \
                 elem: Panel { \
                     text: '" + collectFilesAndReduce_localize(cfarData.strElem) + "', alignment:['fill','top'], \
-                    orientation:'row', alignment:['left','fill'], \
+                    orientation:'column', alignment:['left','fill'] \
                     lst: Group { \
-                        orientation:'column', alignment:['left','fill'], \
-                        dispElemList: ListBox { alignment:['fill','fill'], size:[220,120], properties:{numberOfColumns:2, showHeaders:true, columnTitles: ['#', 'Path'], columnWidths:[20,180]} }, \
+                        orientation:'row', alignment:['left','fill'], \
+                        dispElemList: ListBox { alignment:['fill','fill'], size:[335,120], properties:{numberOfColumns:2, showHeaders:true, columnTitles: ['#', 'Path'], columnWidths:[20,310]} }, \
                     }, \
                     btn: Group { \
-                        orientation:'column', alignment:['left','fill'], \
-                        gatherBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strGatherBtn) + "', preferredSize:[100,20] }, \
-                        getElemInst: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strGetElemInst) + "', preferredSize:[100,40], properties:{multiline:true} }, \
-                        parseBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strParseBtn) + "', preferredSize:[100,20] }, \
+                        alignment:['left','fill'] \
+                        text: Group { \
+                            orientation:'row', alignment:['left','top'] \
+                            getElemInst: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strGetElemInst) + "', preferredSize:[220,40], properties:{multiline:true} }, \
+                        }, \
+                        button: Group { \
+                            orientation:'column', alignment:['left','fill'] \
+                            gatherBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strGatherBtn) + "', preferredSize:[100,20] }, \
+                            parseBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strParseBtn) + "', preferredSize:[100,20] }, \
+                        }, \
                     }, \
                 }, \
                 addl: Panel { \
@@ -126,51 +132,25 @@
                     cancelBtn: Button { text:'" + collectFilesAndReduce_localize(cfarData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                 }, \
             }";
-                //addl: Panel { \
-                //    alignment:['fill','top'], \
-                //    text: '" + collectFilesAndReduce_localize(cfarData.strAddlPath) + "', alignment:['fill','top'], \
-                //    temp: Group { \
-                //        alignment:['fill','top'], \
-                //        sst1: StaticText { text:'"+ collectFilesAndReduce_localize(cfarData.strAddlPathBtn) + ":', preferredSize:[80,20] }, \
-                //        sst2: StaticText { text:'List', preferredSize:[-1,20] }, \
-                //    }, \
-                //}, \
-
-                //inst: Group { \
-                //    orientation:'row', alignment:['left','fill'], \
-                //    instgrp: Group { \
-                //        orientation: 'column', \
-                //        instructions: StaticText { text:'" + collectFilesAndReduce_localize(cfarData.strInstructions) + "', alignment:['left','fill'], properties:{multiline:true} }, \
-                //        text: StaticText { text:'', alignment:['left','fill'], properties:{multiline:true} }, \
-                //        loader: Progressbar { text:'Progressbar', minvalue:0, maxvalue:100, size:[200,12]},\
-                //    }, \
-                //    opts: Panel { \
-                //        text: '" + collectFilesAndReduce_localize(cfarData.strOpts) + "', alignment:['fill','top'], \
-                //        orientation:'column', alignment:['left','fill'], minimumSize:[155,-1], \
-                //        box1: Checkbox { text:'" + collectFilesAndReduce_localize(cfarData.strGenerateReport) + "', alignment:['fill','top'] }, \
-                //        box2: Checkbox { text:'" + collectFilesAndReduce_localize(cfarData.strZipFileEnable) + "', alignment:['fill','top'] }, \
-                //        box3: Checkbox { text:'" + collectFilesAndReduce_localize(cfarData.strObjSequence) + "', alignment:['fill','top'] }, \
-                //    }, \
-                //}, \
 
             pal.grp = pal.add(res);
             pal.grp.header.help.onClick = function() {
                 alert(cfarData.scriptTitle + "\n" + collectFilesAndReduce_localize(cfarData.strHelpText), collectFilesAndReduce_localize(cfarData.strHelpTitle));
             }
 
-            pal.grp.elem.btn.parseBtn.enabled = false;
+            pal.grp.elem.btn.button.parseBtn.enabled = false;
             pal.grp.inst.opts.box1.value = false;
             pal.grp.inst.opts.box1.enabled = false;
             pal.grp.inst.opts.box2.value = true;
             pal.grp.inst.opts.box3.value = false;
 
-            pal.grp.elem.btn.gatherBtn.onClick = function() {
-                pal.grp.elem.btn.gatherBtn.enabled = false;
+            pal.grp.elem.btn.button.gatherBtn.onClick = function() {
+                pal.grp.elem.btn.button.gatherBtn.enabled = false;
                 collectFilesAndReduce_doGather();
             }
 
-            pal.grp.elem.btn.parseBtn.onClick = function() {
-                pal.grp.elem.btn.gatherBtn.enabled = false;
+            pal.grp.elem.btn.button.parseBtn.onClick = function() {
+                pal.grp.elem.btn.button.gatherBtn.enabled = false;
                 collectFilesAndReduce_doParse();
             }
 
@@ -606,10 +586,11 @@
             var terminateProc_seq = new File(desktopPath.fsName + "/terminateProcess_seq.txt");
 
             var collectSequenceArgument = "false";
+            var afterfxEXE = new File(Folder.appPackage.fullName + "/afterfx.exe");
             var runprocess = new File(etcFolder.fsName + "/runprocess.vbs");
 
             if (runprocess.exists == true) {
-                var cmdLineToExecute = "\"" + runprocess.fsName + "\"" + " " + collectSequenceArgument;
+                var cmdLineToExecute = "\"" + runprocess.fsName + "\"" + " " + collectSequenceArgument + " " + "\"" + afterfxEXE.fsName + "\"";
                 system.callSystem("cmd.exe /c \"" + cmdLineToExecute + "\"");
             } else {
                 alert(collectFilesAndReduce_localize(cfarData.runprocessMissing));
@@ -650,7 +631,7 @@
                 }
             }
 
-            cfarPal.grp.elem.btn.parseBtn.enabled = true;
+            cfarPal.grp.elem.btn.button.parseBtn.enabled = true;
         } else {
             alert(collectFilesAndReduce_localize(cfarData.strNoElementInProject));
         }
@@ -698,7 +679,7 @@
         }
 
         cfarData.doCollectElementFiles = true;
-        cfarPal.grp.elem.btn.parseBtn.enabled = false;
+        cfarPal.grp.elem.btn.button.parseBtn.enabled = false;
     }
 
     // Additional
