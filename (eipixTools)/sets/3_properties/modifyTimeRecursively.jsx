@@ -1,7 +1,7 @@
 ﻿// modifyTimeRecursively.jsx
 // 
 // Name: modifyTimeRecursively
-// Version: 0.8
+// Version: 1.0
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -16,7 +16,7 @@
     var mtrData = new Object(); // Store globals in an object
     mtrData.scriptNameShort = "MTR";
     mtrData.scriptName = "Modify Time Recursively";
-    mtrData.scriptVersion = "0.8";
+    mtrData.scriptVersion = "1.0";
     mtrData.scriptTitle = mtrData.scriptName + " v" + mtrData.scriptVersion;
 
     mtrData.timeUnit;
@@ -51,7 +51,7 @@
     // Build UI
     function mtr_buildUI(thisObj)
     {
-        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", mtrData.scriptTitle, undefined, {resizeable:true});
+        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", mtrData.scriptName, undefined, {resizeable:true});
         
         if (pal !== null)
         {
@@ -60,7 +60,7 @@
                 orientation:'column', alignment:['fill','fill'], \
                 header: Group { \
                     alignment:['fill','top'], \
-                    title: StaticText { text:'" + mtrData.scriptNameShort + "', alignment:['fill','center'] }, \
+                    title: StaticText { text:'" + mtrData.scriptNameShort + " v" + mtrData.scriptVersion + "', alignment:['fill','center'] }, \
                     help: Button { text:'" + mtr_localize(mtrData.strHelp) +"', maximumSize:[30,20], alignment:['right','center'] }, \
                 }, \
                 opts: Panel { \

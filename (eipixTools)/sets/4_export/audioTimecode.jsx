@@ -1,7 +1,7 @@
 ﻿// audioTimecode.jsx
 // 
 // Name: audioTimecode
-// Version: 0.6
+// Version: 2.2
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -21,18 +21,12 @@
         return;
     }
 
-    if (app.project.activeItem.selectedLayers.length == 0) {
-        alert("Select at least one audio layer.");
-        return;
-    }
-
     // Define main variables
     var atcData = new Object();
 
     atcData.scriptNameShort = "ATC";
     atcData.scriptName = "Audio Timecode";
-    atcData.scriptVersion = "0.6";
-    atcData.scriptTitle = atcData.scriptName + " v" + atcData.scriptVersion;
+    atcData.scriptVersion = "2.2";
 
     atcData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
     atcData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -45,21 +39,27 @@
     atcData.strHelp = {en: "?"};
     atcData.strHelpTitle = {en: "Help"};
     atcData.strErr = {en: "Something went wrong."};
-    atcData.strNoAudioLayers = {en: "No audio layers weere found."};
-    atcData.strHelpText = {en: "This script exports timecode data related to audio files to the external XML or TXT file."};
+    atcData.strNoAudioLayers = {en: "No audio layers were found."};
+    atcData.strHelpText = {en: "This script exports timecode data related to audio files to the external .script or .text file."};
 
     atcData.strRenderSettings = {en: "Settings"};
     atcData.strOutputPath = {en: "Output Path"};
-    atcData.strXML = {en: "Export as XML"};
-    atcData.strTXT = {en: "Export as TXT"};
+    atcData.strScript = {en: "Export as .script"};
+    atcData.strText = {en: "Export as .txt"};
 
     // Define project variables
     atcData.projectName = app.project.file.name;
     atcData.projectNameNoExt = atcData.projectName.replace(".aepx", "").replace(".aep", "");
-    atcData.projectFolder = app.project.file.parent;
 
-    atcData.selectedLayers = []
-    atcData.selectedAudioLayers = []
+    atcData.projectFolder = app.project.file.parent;
+    atcData.activeItem = app.project.activeItem;
+    atcData.activeItemName = atcData.activeItem.name;
+
+    atcData.selectedLayers = [];
+    atcData.selectedAudioLayers = [];
+    atcData.audioLayersDataDirty = [];
+    atcData.audioLayersData = [];
+    atcData.usePath;
 
     // Localize
     function audioTimecode_localize(strVar) {
@@ -75,7 +75,7 @@
                     orientation:'column', alignment:['fill','fill'], \
                     header: Group { \
                         alignment:['fill','top'], \
-                        title: StaticText { text:'" + atcData.scriptNameShort + "', alignment:['fill','center'] }, \
+                        title: StaticText { text:'" + atcData.scriptNameShort + " v" + atcData.scriptVersion + "', alignment:['fill','center'] }, \
                         help: Button { text:'" + audioTimecode_localize(atcData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
                     outputPath: Panel { \
@@ -92,8 +92,8 @@
                         text: '" + audioTimecode_localize(atcData.strRenderSettings) + "', alignment:['fill','top'] \
                         rdio: Group { \
                             alignment:['fill','top'], \
-                            xml: RadioButton { text:'" + audioTimecode_localize(atcData.strXML) + "' }, \
-                            txt: RadioButton { text:'" + audioTimecode_localize(atcData.strTXT) + "', value:true }, \
+                            script: RadioButton { text:'" + audioTimecode_localize(atcData.strScript) + "' }, \
+                            text: RadioButton { text:'" + audioTimecode_localize(atcData.strText) + "', value:true }, \
                         }, \
                     }, \
                     sepr: Group { \
@@ -116,7 +116,7 @@
                 this.layout.resize();
             }
 
-            pal.grp.opts.rdio.xml.enabled = false;
+            pal.grp.opts.rdio.script.enabled = false;
 
             pal.grp.header.help.onClick = function() {
                 alert(atcData.scriptTitle + "\n" + audioTimecode_localize(atcData.strHelpText), audioTimecode_localize(atcData.strHelpTitle));
@@ -133,35 +133,6 @@
         return pal;
     }
 
-    // function secondsToTime(timeInSeconds) {
-    //     var sec_num = parseInt(timeInSeconds, 10);
-    //     if (timeInSeconds.toString().indexOf('.') === -1)  {
-    //         var mil_num = 00;
-    //     } else {
-    //         var mil_num_dec = timeInSeconds.toString().split(".")[1];
-    //         var mil_num = parseInt(mil_num_dec, 10);
-    //     }
-    //     var hours = Math.floor(sec_num / 3600);
-    //     var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-    //     var seconds = sec_num - (hours * 3600) - (minutes * 60);
-    //     var milliseconds = parseInt(mil_num, 10);
-
-    //     if (hours < 10) {
-    //         hours = "0" + hours;
-    //     }
-    //     if (minutes < 10) {
-    //         minutes = "0" + minutes;
-    //     }
-    //     if (seconds < 10) {
-    //         seconds = "0" + seconds;
-    //     }
-    //     if (milliseconds < 10) {
-    //         milliseconds = "0" + milliseconds;
-    //     }
-    //     var time = hours + ':' + minutes + ':' + seconds + ":0" + milliseconds;
-    //     return time;
-    // }
-
     // Main Functions:
     //
 
@@ -172,62 +143,82 @@
         }
     }
 
-    function audioTimecode_main() {
-        atcData.selectedLayers = app.project.activeItem.selectedLayers;
-
-        for (var i = 0; i < atcData.selectedLayers.length; i++) {
-            if (atcData.selectedLayers[i].hasAudio == true) {
-                atcData.selectedAudioLayers.push(atcData.selectedLayers[i]); 
-            }
-        }
-
-        if (atcData.selectedAudioLayers.length == 0) {
-            alert(audioTimecode_localize(atcData.strNoAudioLayers));
-        } else {
-            if (atcPal.grp.opts.rdio.xml.value == true){
-                audioTimecode_exportAsXML(atcData.selectedAudioLayers);
-            } else if (atcPal.grp.opts.rdio.txt.value == true) {
-                audioTimecode_exportAsTXT(atcData.selectedAudioLayers);
-            } else {
-                alert(audioTimecode_localize(atcData.strErr))
-            } 
-        }
-    }
-
-    function audioTimecode_exportAsXML(layers) {
+    function audioTimecode_exportAsScript() {
         //code
     }
 
-    function audioTimecode_exportAsTXT(layers) {
-        var audioLayersDict = [];
+    function audioTimecode_exportAsText() { 
+        var audioTimecode_text = new File(atcData.usePath + "/" + atcData.activeItemName + ".txt");
+        audioTimecode_text.open("w");
+        for (var i = 0; i < atcData.audioLayersData.length; i++) {
+            audioTimecode_text.writeln("Filename: " + atcData.audioLayersData[i][0]);
+            audioTimecode_text.writeln("Timecode: " + atcData.audioLayersData[i][1] + " --> " + atcData.audioLayersData[i][2] + "\n");
+        }
+        audioTimecode_text.close();
+    }
 
-        var usePath;
+    function audioTimecode_getTimeRecursively(currentComp, timeOffset) {
+        var offsetFloat = parseFloat(timeOffset);
+        var currentLayer;
+        for (var i = 1; i <= currentComp.layers.length; i++) {
+            currentLayer = currentComp.layers[i];
+            if (!(currentLayer.source instanceof CompItem) && (currentLayer.source instanceof FootageItem) && (currentLayer instanceof AVLayer) && (currentLayer.source.hasAudio == true) && (currentLayer.audioEnabled == true) && (currentLayer.source.hasVideo == false)) {
+                var sourceName = currentLayer.source.name;
+                var startTime = parseFloat(currentLayer.startTime) + offsetFloat;
+                var endTime = parseFloat(currentLayer.outPoint) + offsetFloat;
+                atcData.audioLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
+            } else if ((currentLayer.source instanceof CompItem) && (currentLayer.audioEnabled == true)) {
+                var offset = currentLayer.startTime + timeOffset;
+                audioTimecode_getTimeRecursively(currentLayer.source, offset);
+            }
+        }
+    }
+
+    function audioTimecode_main() {
+        audioTimecode_getTimeRecursively(atcData.activeItem, 0);
+        var layersDataDirty = atcData.audioLayersDataDirty;
+        var layersDataUnique = [];
+
+        layersDataUnique[0] = layersDataDirty[0];
+        for (var i = 0; i < layersDataDirty.length; i++) {
+            var flag = true;
+            for (var j = 0; j < layersDataUnique.length; j++) {
+                if (layersDataUnique[j][0] == layersDataDirty[i][0]) {
+                    flag = false;
+                }
+            }
+            if (flag == true)
+                layersDataUnique.push(layersDataDirty[i]);
+        }
+
+        function compare(a, b) {
+            if (a[2] < b[2]) return -1;
+            if (a[2] > b[2]) return 1;
+            return 0;
+        }
+
+        atcData.audioLayersData = layersDataUnique.sort(compare);
+
         var editboxOutputPath = atcPal.grp.outputPath.main.box.text;
         if (editboxOutputPath == "") {
-            usePath = atcData.projectFolder.fsName;
+            atcData.usePath = atcData.projectFolder.fsName;
         } else {
             var usePathFolder = new Folder(editboxOutputPath);
             if (usePathFolder.exists == true) {
-                usePath = editboxOutputPath;
+                atcData.usePath = editboxOutputPath;
             } else {
                 alert(audioTimecode_localize(atcPal.strPathErr));
-                usePath = atcData.projectFolder.fsName;
+                atcData.usePath = atcData.projectFolder.fsName;
             }
         }
-        
-        var audioTimecode_txt = new File(usePath + "/" + atcData.projectNameNoExt + ".txt");
-        for (var i = 0; i < layers.length; i++) {
-            var sourcename = layers[i].source.name;
-            var starttime = layers[i].startTime;
-            var endtime = layers[i].outPoint;
-            audioLayersDict.push([sourcename, starttime, endtime]);
+
+        if (atcPal.grp.opts.rdio.script.value == true) {
+            audioTimecode_exportAsScript();
+        } else if (atcPal.grp.opts.rdio.text.value == true) {
+            audioTimecode_exportAsText();
+        } else {
+            alert(audioTimecode_localize(atcData.strErr))
         }
-        audioTimecode_txt.open("w");
-        for (var i = 0; i < audioLayersDict.length; i++) {
-            audioTimecode_txt.writeln("Filename: " + audioLayersDict[i][0]);
-            audioTimecode_txt.writeln("Timecode: " + audioLayersDict[i][1] + " --> " + audioLayersDict[i][2] + "\n");
-        }
-        audioTimecode_txt.close();
     }
 
     // Button Functions:

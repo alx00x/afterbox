@@ -40,13 +40,13 @@
 
     //BuildUI
     function setElementQuality_buildUI(thisObj) {
-        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", setElementQualityData.scriptTitle);
+        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", setElementQualityData.scriptName);
         var res =
             "group { \
                 orientation:'column', alignment:['fill','fill'], \
                 header: Group { \
                     alignment:['fill','top'], \
-                    title: StaticText { text:'" + setElementQualityData.scriptNameShort + "', alignment:['fill','center'] }, \
+                    title: StaticText { text:'" + setElementQualityData.scriptNameShort + " v" + setElementQualityData.scriptVersion + "', alignment:['fill','center'] }, \
                     help: Button { text:'" + setElementQuality_localize(setElementQualityData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                 }, \
                 options: Panel { orientation:'column', text:'Options', alignment:['fill','fill'], alignChildren: ['fill','center'], \

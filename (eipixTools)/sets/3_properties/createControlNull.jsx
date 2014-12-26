@@ -1,7 +1,7 @@
 // createControlNull.jsx
 // 
 // Name: createControlNull
-// Version: 1.1
+// Version: 1.2
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -20,7 +20,7 @@
 
     createControlNullData.scriptNameShort = "CCN";
     createControlNullData.scriptName = "Create Control Null";
-    createControlNullData.scriptVersion = "1.1";
+    createControlNullData.scriptVersion = "1.2";
     createControlNullData.scriptTitle = createControlNullData.scriptName + " v" + createControlNullData.scriptVersion;
 
     createControlNullData.strSelect = {en: "Select"};
@@ -51,13 +51,13 @@
 
     //BuildUI
     function createControlNull_buildUI(thisObj) {
-        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", createControlNullData.scriptTitle);
+        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", createControlNullData.scriptName);
         var res =
             "group { \
                 orientation:'column', alignment:['fill','fill'], \
                 header: Group { \
                     alignment:['fill','top'], \
-                    title: StaticText { text:'" + createControlNullData.scriptNameShort + "', alignment:['fill','center'] }, \
+                    title: StaticText { text:'" + createControlNullData.scriptNameShort + " v" + createControlNullData.scriptVersion + "', alignment:['fill','center'] }, \
                     help: Button { text:'" + createControlNull_localize(createControlNullData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                 }, \
                 instr: Panel { orientation:'column', text:'" + createControlNull_localize(createControlNullData.strInstructions) + "', alignment:['fill','fill'], alignChildren: ['fill','center'], \

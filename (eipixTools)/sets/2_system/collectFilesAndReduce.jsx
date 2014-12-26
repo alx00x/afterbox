@@ -1,7 +1,7 @@
 ﻿// collectFilesAndReduce.jsx
 // 
 // Name: collectFilesAndReduce
-// Version: 1.7
+// Version: 1.8
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -20,7 +20,7 @@
 
     cfarData.scriptNameShort = "CFAR";
     cfarData.scriptName = "Collect Files And Reduce";
-    cfarData.scriptVersion = "1.7";
+    cfarData.scriptVersion = "1.8";
     cfarData.scriptTitle = cfarData.scriptName + " v" + cfarData.scriptVersion;
 
     cfarData.strMinAE = {en: "This script requires Adobe After Effects CS5 or later."};
@@ -70,7 +70,7 @@
                 orientation:'column', alignment:['fill','fill'], \
                 header: Group { \
                     alignment:['fill','top'], \
-                    title: StaticText { text:'" + cfarData.scriptNameShort + "', alignment:['fill','center'] }, \
+                    title: StaticText { text:'" + cfarData.scriptNameShort + " v" + cfarData.scriptVersion + "', alignment:['fill','center'] }, \
                     help: Button { text:'" + collectFilesAndReduce_localize(cfarData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                 }, \
                 sepr: Group { \

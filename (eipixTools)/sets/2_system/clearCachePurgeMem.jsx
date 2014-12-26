@@ -1,7 +1,7 @@
 ﻿// clearCachePurgeMem.jsx
 // 
 // Name: clearCachePurgeMem
-// Version: 1.3
+// Version: 1.4
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -32,7 +32,7 @@
     var PurgeMemData = new Object(); // Store globals in an object
     PurgeMem.scriptNameShort = "CCPM";
     PurgeMem.scriptName = "Clear Cache Purge Memory";
-    PurgeMem.scriptVersion = "1.1";
+    PurgeMem.scriptVersion = "1.4";
     PurgeMem.scriptTitle = PurgeMem.scriptName + " v" + PurgeMem.scriptVersion;
     PurgeMem.strExecute = {en: "Clear Cache"};
 
@@ -64,7 +64,7 @@
                 orientation:'column', alignment:['fill','fill'], \
                 header: Group { \
                     alignment:['fill','top'], \
-                    title: StaticText { text:'" + PurgeMem.scriptNameShort + "', alignment:['fill','center'] }, \
+                    title: StaticText { text:'" + PurgeMem.scriptNameShort + " v" + PurgeMem.scriptVersion + "', alignment:['fill','center'] }, \
                     help: Button { text:'" + PurgeMem_localize(PurgeMem.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                 }, \
                 cmds: Group { \

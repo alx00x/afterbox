@@ -1,7 +1,7 @@
 ﻿// copyCamAndConnect.jsx
 // 
 // Name: copyCamAndConnect
-// Version: 1.3
+// Version: 1.4
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -20,7 +20,7 @@
     var copyCamAndConnectData = new Object(); // Store globals in an object
     copyCamAndConnectData.scriptNameShort = "CCAC";
     copyCamAndConnectData.scriptName = "Copy Cam And Connect";
-    copyCamAndConnectData.scriptVersion = "1.3";
+    copyCamAndConnectData.scriptVersion = "1.4";
     copyCamAndConnectData.scriptTitle = copyCamAndConnectData.scriptName + " v" + copyCamAndConnectData.scriptVersion;
 
     copyCamAndConnectData.strSelect = {en: "Select"};
@@ -58,7 +58,7 @@
 
     // Build UI
     function copyCamAndConnect_buildUI(thisObj) {
-        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", copyCamAndConnectData.scriptTitle, undefined, {
+        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", copyCamAndConnectData.scriptName, undefined, {
             resizeable: true
         });
 
@@ -68,7 +68,7 @@
                 orientation:'column', alignment:['fill','fill'], \
                 header: Group { \
                     alignment:['fill','top'], \
-                    title: StaticText { text:'" + copyCamAndConnectData.scriptNameShort + "', alignment:['fill','center'] }, \
+                    title: StaticText { text:'" + copyCamAndConnectData.scriptNameShort + " v" + copyCamAndConnectData.scriptVersion + "', alignment:['fill','center'] }, \
                     help: Button { text:'" + copyCamAndConnect_localize(copyCamAndConnectData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                 }, \
                 opts: Panel { \

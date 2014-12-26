@@ -1,7 +1,7 @@
 ﻿// networkRender.jsx
 // 
 // Name: networkRender
-// Version: 1.1
+// Version: 1.2
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -20,7 +20,7 @@
 
     netrData.scriptNameShort = "NET";
     netrData.scriptName = "Network Render";
-    netrData.scriptVersion = "1.1";
+    netrData.scriptVersion = "1.2";
     netrData.scriptTitle = netrData.scriptName + " v" + netrData.scriptVersion;
 
     netrData.strPathErr = {en: "Specified path could not be found."};
@@ -59,7 +59,7 @@
 
     netrData.strHelp = {en: "?"};
     netrData.strHelpTitle = {en: "Help"};
-    netrData.strHelpText = {en: "This script sends the active project  command-line renderer."};
+    netrData.strHelpText = {en: "This script sends the active composition to network renderer."};
 
     netrData.errNoRenderFolder = {en: "Could not find render folder. Please specify render output location."};
     netrData.errNoPNG = {en: "You don't have \"PNG Sequence\" template installed. Run [IMP REND] script to enable it. Switching to PSD sequence for now."};
@@ -135,7 +135,7 @@
         };
     }
 
-    // Prototipe includs a string inside another scrting
+    // Prototipe includs a string inside another string
     if (!String.prototype.includes) {
         String.prototype.includes = function() {
             return String.prototype.indexOf.apply(this, arguments) !== -1;
@@ -196,7 +196,7 @@
                     orientation:'column', alignment:['fill','fill'], \
                     header: Group { \
                         alignment:['fill','top'], \
-                        title: StaticText { text:'" + netrData.scriptNameShort + "', alignment:['fill','center'] }, \
+                        title: StaticText { text:'" + netrData.scriptNameShort + " v" + netrData.scriptVersion + "', alignment:['fill','center'] }, \
                         help: Button { text:'" + networkRender_localize(netrData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
                     sepr: Group { \

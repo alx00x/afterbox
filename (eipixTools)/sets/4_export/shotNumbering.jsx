@@ -73,7 +73,7 @@
                     orientation:'column', alignment:['fill','fill'], \
                     header: Group { \
                         alignment:['fill','top'], \
-                        title: StaticText { text:'" + shnData.scriptNameShort + "', alignment:['fill','center'] }, \
+                        title: StaticText { text:'" + shnData.scriptNameShort + " v" + shnData.scriptVersion + "', alignment:['fill','center'] }, \
                         help: Button { text:'" + shotNumbering_localize(shnData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
                     sepr: Group { \

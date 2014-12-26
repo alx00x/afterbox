@@ -78,13 +78,13 @@
 
     //BuildUI
     function setMaterialOptions_createUI(thisObj) {
-        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", setMaterialOptionsData.scriptTitle);
+        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", setMaterialOptionsData.scriptName);
         var res =
             "group { \
                 orientation:'column', alignment:['fill','fill'], \
                 header: Group { \
                     alignment:['fill','top'], \
-                    title: StaticText { text:'" + setMaterialOptionsData.scriptNameShort + "', alignment:['fill','center'] }, \
+                    title: StaticText { text:'" + setMaterialOptionsData.scriptNameShort + " v" + setMaterialOptionsData.scriptVersion + "', alignment:['fill','center'] }, \
                     help: Button { text:'" + setMaterialOptions_localize(setMaterialOptionsData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                 }, \
                 accL: Panel { orientation:'row', text:'Accepts Lights', alignment:['fill','fill'], alignChildren: ['fill','center'], \

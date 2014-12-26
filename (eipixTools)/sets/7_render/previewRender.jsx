@@ -82,7 +82,7 @@
                     orientation:'column', alignment:['fill','fill'], \
                     header: Group { \
                         alignment:['fill','top'], \
-                        title: StaticText { text:'" + prrData.scriptNameShort + "', alignment:['fill','center'] }, \
+                        title: StaticText { text:'" + prrData.scriptNameShort + " v" + prrData.scriptVersion + "', alignment:['fill','center'] }, \
                         help: Button { text:'" + previewRender_localize(prrData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
                     sepr: Group { \

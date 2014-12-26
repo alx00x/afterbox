@@ -1,7 +1,7 @@
 ﻿// backgroundRender.jsx
 // 
 // Name: backgroundRender
-// Version: 1.2
+// Version: 1.3
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -22,7 +22,7 @@
 
     bgrData.scriptNameShort = "BGR";
     bgrData.scriptName = "Background Render";
-    bgrData.scriptVersion = "1.2";
+    bgrData.scriptVersion = "1.3";
     bgrData.scriptTitle = bgrData.scriptName + " v" + bgrData.scriptVersion;
 
     bgrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
@@ -144,7 +144,7 @@
                     orientation:'column', alignment:['fill','fill'], \
                     header: Group { \
                         alignment:['fill','top'], \
-                        title: StaticText { text:'" + bgrData.scriptNameShort + "', alignment:['fill','center'] }, \
+                        title: StaticText { text:'" + bgrData.scriptNameShort + " v" + bgrData.scriptVersion + "', alignment:['fill','center'] }, \
                         help: Button { text:'" + backgroundRender_localize(bgrData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
                     sepr: Group { \
