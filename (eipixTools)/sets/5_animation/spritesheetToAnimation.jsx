@@ -1,14 +1,14 @@
-﻿// spritesToAnimation.jsx
+﻿// spritesheetToAnimation.jsx
 // 
-// Name: spritesToAnimation
-// Version: 0.1
+// Name: spritesheetToAnimation
+// Version: 1.0
 // Author: Aleksandar Kocic
 // 
 // Description: Turns sprite tiled sheets into sequences.
 // 
 // 
 
-(function spritesToAnimation(thisObj) {
+(function spritesheetToAnimation(thisObj) {
     if (app.project.file == null) {
         alert("Save the project first.");
         return;
@@ -22,9 +22,9 @@
     // Define main variables
     var s2aData = new Object();
 
-    s2aData.scriptNameShort = "S2A";
+    s2aData.scriptNameShort = "STA";
     s2aData.scriptName = "Spritesheet To Animation";
-    s2aData.scriptVersion = "0.1";
+    s2aData.scriptVersion = "1.0";
     s2aData.scriptTitle = s2aData.scriptName + " v" + s2aData.scriptVersion;
 
     s2aData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -55,12 +55,12 @@
 
 
     // Localize
-    function spritesToAnimation_localize(strVar) {
+    function spritesheetToAnimation_localize(strVar) {
         return strVar["en"];
     }
 
     // Build UI
-    function spritesToAnimation_buildUI(thisObj) {
+    function spritesheetToAnimation_buildUI(thisObj) {
         var pal = new Window("dialog", s2aData.scriptName, undefined, {resizeable:true});
         if (pal !== null) {
             var res =
@@ -69,35 +69,35 @@
                     header: Group { \
                         alignment:['fill','top'], \
                         title: StaticText { text:'" + s2aData.scriptNameShort + " v" + s2aData.scriptVersion + "', alignment:['fill','center'] }, \
-                        help: Button { text:'" + spritesToAnimation_localize(s2aData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
+                        help: Button { text:'" + spritesheetToAnimation_localize(s2aData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
                     spritesheet: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + spritesToAnimation_localize(s2aData.strSpriteSheet) + "', alignment:['fill','top'], \
+                        text: '" + spritesheetToAnimation_localize(s2aData.strSpriteSheet) + "', alignment:['fill','top'], \
                         select: Group { \
                             alignment:['fill','top'], \
                             fld: EditText { alignment:['fill','center'], preferredSize:[250,20] },  \
-                            btn: Button { text:'" + spritesToAnimation_localize(s2aData.strBrowse) + "', preferredSize:[-1,20] }, \
+                            btn: Button { text:'" + spritesheetToAnimation_localize(s2aData.strBrowse) + "', preferredSize:[-1,20] }, \
                         }, \
                     }, \
                     sliders: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + spritesToAnimation_localize(s2aData.strOptions) + "', alignment:['fill','top'], \
+                        text: '" + spritesheetToAnimation_localize(s2aData.strOptions) + "', alignment:['fill','top'], \
                         ver: Group { \
                             alignment:['fill','top'], \
-                            text: StaticText { text:'" + spritesToAnimation_localize(s2aData.strColumns) + ":', preferredSize:[120,20] }, \
+                            text: StaticText { text:'" + spritesheetToAnimation_localize(s2aData.strColumns) + ":', preferredSize:[120,20] }, \
                             fld: EditText { text:'1', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
                             sld: Slider { value:1, minvalue:1, maxvalue:16, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                         hor: Group { \
                             alignment:['fill','top'], \
-                            text: StaticText { text:'" + spritesToAnimation_localize(s2aData.strRows) + ":', preferredSize:[120,20] }, \
+                            text: StaticText { text:'" + spritesheetToAnimation_localize(s2aData.strRows) + ":', preferredSize:[120,20] }, \
                             fld: EditText { text:'1', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
                             sld: Slider { value:1, minvalue:1, maxvalue:16, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                         fps: Group { \
                             alignment:['fill','top'], \
-                            text: StaticText { text:'" + spritesToAnimation_localize(s2aData.strFramesPerSecond) + ":', preferredSize:[120,20] }, \
+                            text: StaticText { text:'" + spritesheetToAnimation_localize(s2aData.strFramesPerSecond) + ":', preferredSize:[120,20] }, \
                             fld: EditText { text:'25', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
                             sld: Slider { value:25, minvalue:1, maxvalue:50, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
@@ -108,8 +108,8 @@
                     }, \
                     cmds: Group { \
                         alignment:['fill','top'], \
-                        executeBtn: Button { text:'" + spritesToAnimation_localize(s2aData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
-                        cancelBtn: Button { text:'" + spritesToAnimation_localize(s2aData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        executeBtn: Button { text:'" + spritesheetToAnimation_localize(s2aData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        cancelBtn: Button { text:'" + spritesheetToAnimation_localize(s2aData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                     }, \
                 }, \
             }";
@@ -123,75 +123,81 @@
             }
 
             pal.grp.spritesheet.select.btn.onClick = function() {
-                audioTimecode_doBrowse();
+                spritesheetToAnimation_doBrowse();
             }
 
             //Rows slider change
-            pal.grp.sliders.hor.fld.onChange = function () {
+            pal.grp.sliders.hor.fld.onChange = function() {
                 var value = parseInt(this.text);
-                if (isNaN(value))
+                if (isNaN(value)) {
                     value = this.parent.sld.value;
-                else if (value < this.parent.sld.minvalue)
+                } else if (value < this.parent.sld.minvalue) {
                     value = this.parent.sld.minvalue;
-                else if (value > this.parent.sld.maxvalue)
+                } else if (value > this.parent.sld.maxvalue) {
                     value = this.parent.sld.maxvalue;
+                }
                 this.text = value.toString();
                 this.parent.sld.value = value;
             }
-            pal.grp.sliders.hor.sld.onChange = pal.grp.sliders.hor.sld.onChanging = function () {
+            pal.grp.sliders.hor.sld.onChange = pal.grp.sliders.hor.sld.onChanging = function() {
                 var value = parseInt(this.value);
-                if (isNaN(value))
+                if (isNaN(value)) {
                     value = parseInt(this.parent.fld.text);
+                }
                 this.value = value;
                 this.parent.fld.text = value.toString();
             }
 
             //Columns slider change
-            pal.grp.sliders.ver.fld.onChange = function () {
+            pal.grp.sliders.ver.fld.onChange = function() {
                 var value = parseInt(this.text);
-                if (isNaN(value))
+                if (isNaN(value)) {
                     value = this.parent.sld.value;
-                else if (value < this.parent.sld.minvalue)
+                } else if (value < this.parent.sld.minvalue) {
                     value = this.parent.sld.minvalue;
-                else if (value > this.parent.sld.maxvalue)
+                } else if (value > this.parent.sld.maxvalue) {
                     value = this.parent.sld.maxvalue;
+                }
                 this.text = value.toString();
                 this.parent.sld.value = value;
             }
-            pal.grp.sliders.ver.sld.onChange = pal.grp.sliders.ver.sld.onChanging = function () {
+            pal.grp.sliders.ver.sld.onChange = pal.grp.sliders.ver.sld.onChanging = function() {
                 var value = parseInt(this.value);
-                if (isNaN(value))
+                if (isNaN(value)) {
                     value = parseInt(this.parent.fld.text);
+                }
                 this.value = value;
                 this.parent.fld.text = value.toString();
             }
 
             //framerate slider change
-            pal.grp.sliders.fps.fld.onChange = function () {
+            pal.grp.sliders.fps.fld.onChange = function() {
                 var value = parseInt(this.text);
-                if (isNaN(value))
+                if (isNaN(value)) {
                     value = this.parent.sld.value;
-                else if (value < this.parent.sld.minvalue)
+                } else if (value < this.parent.sld.minvalue) {
                     value = this.parent.sld.minvalue;
-                else if (value > this.parent.sld.maxvalue)
+                } else if (value > this.parent.sld.maxvalue) {
                     value = this.parent.sld.maxvalue;
+                }
                 this.text = value.toString();
                 this.parent.sld.value = value;
             }
-            pal.grp.sliders.fps.sld.onChange = pal.grp.sliders.fps.sld.onChanging = function () {
+            pal.grp.sliders.fps.sld.onChange = pal.grp.sliders.fps.sld.onChanging = function() {
                 var value = parseInt(this.value);
-                if (isNaN(value))
+                if (isNaN(value)) {
                     value = parseInt(this.parent.fld.text);
+                }
                 this.value = value;
                 this.parent.fld.text = value.toString();
             }
 
             pal.grp.header.help.onClick = function() {
-                alert(s2aData.scriptTitle + "\n" + spritesToAnimation_localize(s2aData.strHelpText), spritesToAnimation_localize(s2aData.strHelpTitle));
+                alert(s2aData.scriptTitle + "\n" + spritesheetToAnimation_localize(s2aData.strHelpText), spritesheetToAnimation_localize(s2aData.strHelpTitle));
             }
 
-            pal.grp.cmds.executeBtn.onClick = spritesToAnimation_doExecute;
-            pal.grp.cmds.cancelBtn.onClick = spritesToAnimation_doCancel;
+            pal.grp.cmds.executeBtn.onClick = spritesheetToAnimation_doExecute;
+            pal.grp.cmds.cancelBtn.onClick = spritesheetToAnimation_doCancel;
         }
 
         return pal;
@@ -200,25 +206,25 @@
     // Main Functions:
     //
 
-    function audioTimecode_doBrowse() {
-        var spreadSheetFile = s2aData.projectFolder.openDlg(spritesToAnimation_localize(s2aData.strBrowseText),"PNG:*.png");
+    function spritesheetToAnimation_doBrowse() {
+        var spreadSheetFile = s2aData.projectFolder.openDlg(spritesheetToAnimation_localize(s2aData.strBrowseText),"PNG:*.png");
         if (spreadSheetFile != null) {
-            atcPal.grp.spritesheet.select.fld.text = spreadSheetFile.fsName.toString();
+            s2aPal.grp.spritesheet.select.fld.text = spreadSheetFile.fsName.toString();
         }
     }
 
-    function spritesToAnimation_main() {
-        var spritesheetPath = atcPal.grp.spritesheet.select.fld.text;
+    function spritesheetToAnimation_main() {
+        var spritesheetPath = s2aPal.grp.spritesheet.select.fld.text;
         var spritesheetFile = new File(spritesheetPath);
         var spritesheetFileName = spritesheetFile.name.replace(/\..+$/, '');
 
         if (spritesheetFile.exists == false) {
-            alert(spritesToAnimation_localize(s2aData.strSpriteSheetErr));
+            alert(spritesheetToAnimation_localize(s2aData.strSpriteSheetErr));
         } else {
 
-            var rows = parseInt(atcPal.grp.sliders.hor.fld.text);
-            var columns = parseInt(atcPal.grp.sliders.ver.fld.text);
-            var framerate = parseInt(atcPal.grp.sliders.fps.fld.text);
+            var rows = parseInt(s2aPal.grp.sliders.hor.fld.text);
+            var columns = parseInt(s2aPal.grp.sliders.ver.fld.text);
+            var framerate = parseInt(s2aPal.grp.sliders.fps.fld.text);
             var frames = rows * columns;
     
             //make folderitem
@@ -268,7 +274,7 @@
                 var compsFolderChildItem = spritesFolderItem.items.addFolder("comps");
                 framesComp.parentFolder = compsFolderChildItem;
                 mainComp.parentFolder = compsFolderChildItem;
-    
+
                 var positionX = 0;
                 var positionY = 0;
                 var counter = 0;
@@ -294,10 +300,10 @@
                     }
                 }
                 sequenceComp.openInViewer();
-                atcPal.close();
+                s2aPal.close();
             } else {
                 spritesFolderItem.remove();
-                alert(spritesToAnimation_localize(s2aData.strIntErr));
+                alert(spritesheetToAnimation_localize(s2aData.strIntErr));
                 return;
             }
         }
@@ -307,15 +313,15 @@
     //
 
     // Execute
-    function spritesToAnimation_doExecute() {
+    function spritesheetToAnimation_doExecute() {
         app.beginUndoGroup(s2aData.scriptName);
-        spritesToAnimation_main()
+        spritesheetToAnimation_main()
         app.endUndoGroup();
     }
 
     // Cancel
-    function spritesToAnimation_doCancel() {
-        atcPal.close();
+    function spritesheetToAnimation_doCancel() {
+        s2aPal.close();
     }
 
     // Main code:
@@ -323,17 +329,17 @@
 
     // Warning
     if (parseFloat(app.version) < 9.0) {
-        alert(spritesToAnimation_localize(s2aData.strMinAE));
+        alert(spritesheetToAnimation_localize(s2aData.strMinAE));
     } else {
         // Build and show the floating palette
-        var atcPal = spritesToAnimation_buildUI(thisObj);
-        if (atcPal !== null) {
-            if (atcPal instanceof Window) {
+        var s2aPal = spritesheetToAnimation_buildUI(thisObj);
+        if (s2aPal !== null) {
+            if (s2aPal instanceof Window) {
                 // Show the palette
-                atcPal.center();
-                atcPal.show();
+                s2aPal.center();
+                s2aPal.show();
             } else {
-                atcPal.layout.layout(true);
+                s2aPal.layout.layout(true);
             }
         }
     }
