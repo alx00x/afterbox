@@ -1,7 +1,8 @@
+#include "(eipixTools)/update/json.js"
 // eipixTools.jsx
 // 
 // Name: eipixTools
-// Version: 2.1
+// Version: 3.0
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
 // 
@@ -21,10 +22,19 @@
 	// Global variables
 	var eipixToolsData = new Object();
 	eipixToolsData.scriptName = "Eipix Tools";
-	eipixToolsData.version = "2.1";
+	eipixToolsData.version = "3.0";
 	eipixToolsData.thisScriptsFolder = new Folder((new File($.fileName)).path);
 	eipixToolsData.scriptsPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\sets\\";
+	eipixToolsData.etcPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\etc\\";
+	eipixToolsData.updatePath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\update\\";
+	eipixToolsData.tempPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\temp\\";
+
 	eipixToolsData.scriptsFolderAlert = "Scripts folder was not found at the expected location.";
+
+	eipixToolsData.errConnection = "Could not establish connection to repository. Please, check your internet connection.";
+	eipixToolsData.errUpdate = "Update failed.";
+	eipixToolsData.strConfirmUpdate = "Theres and update available. Do you wish to download it?";
+	eipixToolsData.strUpdate = "Update successful. You are now on version:\n";
 
 	eipixToolsData.strSettings = "...";
 	eipixToolsData.strSettingsTip = "Settings";
@@ -43,6 +53,8 @@
 		"\n";
 	eipixToolsData.btnSize = 36;
 
+	eipixToolsData.commitHash;
+
 
 	// isNetworkAccessAllowed()
 	// Function for checking if network access is enabled
@@ -53,6 +65,100 @@
 		} else if (securitySetting == 1) {
 			return true;
 		}
+	}
+
+
+	// netCheck()
+	// Function for checking if scripts are up to date
+	function netCheck() {
+		//check repository connection
+		var cmdLineToExecute = "PING -n 1 www.github.com";
+		var netCheck = system.callSystem(cmdLineToExecute);
+		if (netCheck.indexOf("Reply from ") == -1) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+
+	// currentVersionHash()
+	// Function to get current update hash
+	function currentVersionHash() {
+		//get local sha
+		var shaFile = new File(eipixToolsData.updatePath + "sha");
+		shaFile.open("r");
+		eipixToolsData.commitHash = shaFile.read();
+		shaFile.close();
+	}
+
+
+	// isUpdateNeeded()
+	// Function for checking if scripts are up to date
+	function isUpdateNeeded() {
+		//get latest commit sha
+		var latestCommitCommand = "\"" + eipixToolsData.updatePath + "curl.exe" + "\"" + " -s -X GET https://api.github.com/repos/koaleksa/testing-repo/git/refs/heads/master";
+		var latestCommitResponse = system.callSystem(latestCommitCommand);
+		var latestCommitJSON = JSON.parse(latestCommitResponse);
+		var localSha = eipixToolsData.commitHash;
+		var repoSha = latestCommitJSON.object.sha;
+
+		//compare
+		if (localSha == repoSha) {
+			return false;
+		} else {
+			eipixToolsData.commitHash = repoSha;
+			return true;
+		}
+	}
+
+
+	// updateFromGithub()
+	// Clean the eipixTools folder and update
+	function updateFromGithub() {
+		var tempFolder = new Folder(eipixToolsData.tempPath);
+		if (tempFolder.exists == true) {
+			system.callSystem("cmd.exe /c rmdir /s /q \"" + tempFolder.fsName + "\"");
+			system.callSystem("cmd.exe /c mkdir \"" + tempFolder.fsName + "\"");
+		} else {
+			system.callSystem("cmd.exe /c mkdir \"" + tempFolder.fsName + "\"");
+		}
+
+		var downloadUpdateCommand = "(eipixTools)/update/curl.exe -L -k -s https://api.github.com/repos/koaleksa/testing-repo/zipball -o (eipixTools)/update/master.zip";
+		var downloadUpdateResponse = system.callSystem(downloadUpdateCommand);
+
+		var unzipUpdateCommand = "\"" + eipixToolsData.updatePath + "unzip.vbs\" " + "\"" + eipixToolsData.updatePath + "master.zip" + "\"" + " " + "\"" + tempFolder.fsName + "\"";
+		var unzipUpdateResponse = system.callSystem("cmd.exe /c \"" + unzipUpdateCommand + "\"");
+
+		var deleteZipCommand = "del " + "\"" + eipixToolsData.updatePath + "master.zip" + "\"";
+		var deleteZipResponse = system.callSystem("cmd.exe /c \"" + deleteZipCommand + "\"");
+
+		//get extracted folder
+		var extractedArray = tempFolder.getFiles();
+		var extractedFolderPath = extractedArray[0].fsName;
+
+		//delete etc and sets from (eipixTools)
+		system.callSystem("cmd.exe /c rmdir /s /q \"" + eipixToolsData.etcPath + "\"");
+		system.callSystem("cmd.exe /c rmdir /s /q \"" + eipixToolsData.scriptsPath + "\"");
+
+		//replace etc and sets in (eipixTools)
+		var tempEtcPath = extractedFolderPath + "\\(eipixTools)\\etc"
+		var tempSetsPath = extractedFolderPath + "\\(eipixTools)\\sets"
+
+		system.callSystem("robocopy -e \"" + tempEtcPath + "\" \"" + eipixToolsData.etcPath.substring(0, eipixToolsData.etcPath.length - 1) + "\"");
+		system.callSystem("robocopy -e \"" + tempSetsPath + "\" \"" + eipixToolsData.scriptsPath.substring(0, eipixToolsData.scriptsPath.length - 1) + "\"");
+
+		//delete temp folder
+		system.callSystem("cmd.exe /c rmdir /s /q \"" + tempFolder.fsName + "\"");
+
+		//update hash (eipixToolsData.commitHash)
+		var hashFile = new File(eipixToolsData.updatePath + "sha");
+		hashFile.open("w");
+		hashFile.write(eipixToolsData.commitHash);
+		hashFile.close();
+
+		//alert message
+		alert(eipixToolsData.strUpdate + eipixToolsData.commitHash);
 	}
 
 
@@ -169,7 +275,7 @@
 		palObj.settingsBtn.helpTip = eipixToolsData.strSettingsTip;
 		palObj.settingsBtn.onClick = function() {
 			// Get the scripts in the selected scripts folder
-			alert("No settings at the moment :)", "Settings");
+			prompt("Your current version hash is:", eipixToolsData.commitHash);
 		}
 
 		var helpBtnIconFile = new File(eipixToolsData.thisScriptsFolder.fsName + "/(eipixTools)/eipixTools_help.png");
@@ -227,6 +333,21 @@
 		alert(eipixToolsData.strErrAccessDenied);
 		return;
 	} else {
+		// Get local update hash
+		currentVersionHash();
+
+		// Update check
+		if (netCheck() == true) {
+			if (isUpdateNeeded() == true) {
+				var confirmPrompt = confirm(eipixToolsData.strConfirmUpdate);
+				if (confirmPrompt == true) {
+				    updateFromGithub();
+				}
+			}
+		} else {
+			alert(eipixToolsData.errConnection);
+		}
+
 		// Gather scripts
 		eipixToolsData.scripts = [];
 		eipixToolsData.setsFolder = new Folder(eipixToolsData.scriptsPath);

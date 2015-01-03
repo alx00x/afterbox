@@ -17,7 +17,7 @@
     }
 
     if (app.project.activeItem == null) {
-        alert("Select at least one audio layer.");
+        alert("Please, select your composition.");
         return;
     }
 
