@@ -2,7 +2,7 @@
 // eipixTools.jsx
 // 
 // Name: eipixTools
-// Version: 3.0
+// Version: 3.1
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
 // 
@@ -22,7 +22,7 @@
 	// Global variables
 	var eipixToolsData = new Object();
 	eipixToolsData.scriptName = "Eipix Tools";
-	eipixToolsData.version = "3.0";
+	eipixToolsData.version = "3.1";
 	eipixToolsData.thisScriptsFolder = new Folder((new File($.fileName)).path);
 	eipixToolsData.scriptsPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\sets\\";
 	eipixToolsData.etcPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\etc\\";
@@ -97,7 +97,7 @@
 	// Function for checking if scripts are up to date
 	function isUpdateNeeded() {
 		//get latest commit sha
-		var latestCommitCommand = "\"" + eipixToolsData.updatePath + "curl.exe" + "\"" + " -s -X GET https://api.github.com/repos/koaleksa/testing-repo/git/refs/heads/master";
+		var latestCommitCommand = "\"" + eipixToolsData.updatePath + "curl.exe" + "\"" + " -s -X GET https://api.github.com/repos/koaleksa/eipixtools/git/refs/heads/deploy";
 		var latestCommitResponse = system.callSystem(latestCommitCommand);
 		var latestCommitJSON = JSON.parse(latestCommitResponse);
 		var localSha = eipixToolsData.commitHash;
@@ -124,13 +124,13 @@
 			system.callSystem("cmd.exe /c mkdir \"" + tempFolder.fsName + "\"");
 		}
 
-		var downloadUpdateCommand = "(eipixTools)/update/curl.exe -L -k -s https://api.github.com/repos/koaleksa/testing-repo/zipball -o (eipixTools)/update/master.zip";
+		var downloadUpdateCommand = "(eipixTools)/update/curl.exe -L -k -s https://api.github.com/repos/koaleksa/eipixtools/zipball/deploy -o (eipixTools)/update/deploy.zip";
 		var downloadUpdateResponse = system.callSystem(downloadUpdateCommand);
 
-		var unzipUpdateCommand = "\"" + eipixToolsData.updatePath + "unzip.vbs\" " + "\"" + eipixToolsData.updatePath + "master.zip" + "\"" + " " + "\"" + tempFolder.fsName + "\"";
+		var unzipUpdateCommand = "\"" + eipixToolsData.updatePath + "unzip.vbs\" " + "\"" + eipixToolsData.updatePath + "deploy.zip" + "\"" + " " + "\"" + tempFolder.fsName + "\"";
 		var unzipUpdateResponse = system.callSystem("cmd.exe /c \"" + unzipUpdateCommand + "\"");
 
-		var deleteZipCommand = "del " + "\"" + eipixToolsData.updatePath + "master.zip" + "\"";
+		var deleteZipCommand = "del " + "\"" + eipixToolsData.updatePath + "deploy.zip" + "\"";
 		var deleteZipResponse = system.callSystem("cmd.exe /c \"" + deleteZipCommand + "\"");
 
 		//get extracted folder
