@@ -33,7 +33,7 @@
 
 	eipixToolsData.errConnection = "Could not establish connection to repository. Please, check your internet connection.";
 	eipixToolsData.errUpdate = "Update failed.";
-	eipixToolsData.strConfirmUpdate = "Theres and update available. Do you wish to download it?";
+	eipixToolsData.strConfirmUpdate = "There is an update available. Do you wish to download it?";
 	eipixToolsData.strUpdate = "Update successful. You are now on version:\n";
 
 	eipixToolsData.strSettings = "...";
