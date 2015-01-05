@@ -6,10 +6,7 @@
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
-import os
-import sys
-import shutil
-import _winreg
+import os, sys, shutil, _winreg, subprocess
 from PySide import QtCore, QtGui
 
 ae_paths = []
@@ -92,10 +89,12 @@ class Ui_dialog(object):
         files_path = os.getcwd() + "\\files"
         tools_path = os.getcwd() + "\\files\\(eipixTools)"
         script_path = os.getcwd() + "\\files\\eipixTools.jsx"
+        perm_script_path = os.getcwd() + "\\misc\\permissions.vbs"
         try:
             if os.path.exists(install_tools_path):
                 shutil.rmtree(install_tools_path)
             shutil.copytree(tools_path, install_tools_path)
+            subprocess.call("cscript \"" + perm_script_path + "\"" + " " + "\"" + install_tools_path + "\"")
             if os.path.isfile(install_script_path):
                 os.remove(install_script_path)
             shutil.copy(script_path, install_path)
