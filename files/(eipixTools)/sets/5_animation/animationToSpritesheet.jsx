@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 0.2
+// Version: 0.4
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,7 +24,7 @@
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "0.2";
+    a2sData.scriptVersion = "0.4";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
     a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -66,7 +66,6 @@
 
     // Calculate sugested number of columns and rows
     function animationToSpritesheet_factorisation(numOfFrames) {
-        var numOfFrames = a2sData.activeItemFrames;
         var value0 = Math.floor(Math.sqrt(numOfFrames));
         while (numOfFrames % value0 != 0) {
             value0 = value0 - 1;
@@ -80,9 +79,9 @@
     function animationToSpritesheet_factorisation16(inputValue) {
         var valueDiv = 16;
         while (inputValue % valueDiv != 0) {
-            valueDiv = valueDiv + 1;
+            inputValue = inputValue + 1;
         }
-        var value = valueDiv;
+        var value = inputValue;
         return value;
     }
 
@@ -273,14 +272,17 @@
 
     function animationToSpritesheet_main() {
         //get columns and rows
+        var spritesheetFileName = a2sData.spritesheetFile.name.replace(/\..+$/, '');
         var getColumns = parseInt(a2sPal.grp.options.ver.fld.text);
         var getRows = parseInt(a2sPal.grp.options.hor.fld.text);
-        var frames = getRows * getColumns;
+        var frames = a2sData.activeItemFrames;
 
         //calculate dimensions divisible by 16
         var activeWidth = animationToSpritesheet_factorisation16(a2sData.activeItem.width);
         var activeHeight = animationToSpritesheet_factorisation16(a2sData.activeItem.height);
+        var activeDuration = a2sData.activeItem.duration;
         var activeFramerate = a2sData.activeItem.frameRate;
+        var activeFrameDuration = a2sData.activeItem.frameDuration;
 
         //create main folder
         var mainFolderItem = app.project.items.addFolder(a2sData.spritesheetFile.name);
@@ -290,7 +292,7 @@
         var spriteCompWidth = activeWidth;
         var spriteCompHeight = activeHeight;
         var spriteCompFramerate = activeFramerate;
-        var spriteCompDuration = 1 / spriteCompFramerate;
+        var spriteCompDuration = activeDuration;
         var spriteComp = mainFolderItem.items.addComp(spriteCompName, spriteCompWidth, spriteCompHeight, 1, spriteCompDuration, spriteCompFramerate);
         spriteComp.layers.add(a2sData.activeItem);
 
@@ -307,17 +309,33 @@
         var mainCompDuration = 1 / mainCompFramerate;
         var mainComp = mainFolderItem.items.addComp(mainCompName, mainCompWidth, mainCompHeight, 1, mainCompDuration, mainCompFramerate);
         mainComp.layers.add(spriteComp);
+        mainComp.layers[1].transform.anchorPoint.setValue([0,0]);
+        mainComp.layers[1].transform.position.setValue([0,0]);
 
-        //duplicate sprite comp to a number of frames
-        for (i = 0; i < frames; i++) {
+        //duplicate sprite comp to a number of frames and offset in time and space
+        var positionX = spriteComp.width;
+        var positionY = 0;
+        var counter = 1;
+        for (i = 1; i < frames; i++) {
             mainComp.layers[1].duplicate();
+            mainComp.layers[1].transform.position.setValue([positionX,positionY]);
+            mainComp.layers[1].startTime = 0 - (activeFrameDuration * i)
+
+            counter = counter + 1;
+
+            if (counter < getColumns) {
+                positionX = positionX + spriteComp.width;
+                positionY = positionY;
+            } else {
+                counter = 0;
+                positionX = 0;
+                positionY = positionY + spriteComp.height;
+            }
         }
 
-        //position sprite comps into rows and columns
-
-
-        //offset sprite comps in time
         //render
+        mainComp.openInViewer();
+
     }
 
     // Button Functions:
@@ -334,10 +352,10 @@
                 app.endUndoGroup();
                 a2sPal.close();
             } else {
-                alert(animationToSpritesheet_localize(a2sData.a2sData.strOutputErr));
+                alert(animationToSpritesheet_localize(a2sData.strOutputErr));
             }
         } else {
-            alert(animationToSpritesheet_localize(a2sData.a2sData.strSpreadsheetErr));
+            alert(animationToSpritesheet_localize(a2sData.strSpreadsheetErr));
         }
     }
 
