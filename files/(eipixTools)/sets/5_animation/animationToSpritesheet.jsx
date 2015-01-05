@@ -19,6 +19,8 @@
         return;
     }
 
+
+
     // Define main variables
     var a2sData = new Object();
 
@@ -333,9 +335,27 @@
             }
         }
 
-        //render
-        mainComp.openInViewer();
+        //add to render queue
+        var renderQueueItem = app.project.renderQueue.items.add(mainComp);
+        var renderQueueItemIndex = app.project.renderQueue.numItems;
 
+        //set output path
+        renderQueueItem.outputModules[1].file = a2sData.spritesheetFile;
+
+        //get Output Module templates and set png if exists
+        var outputModuleTemplate = "Photoshop";
+        // var omTemplatesAll = app.project.renderQueue.item(renderQueueItemIndex).outputModule(1).templates;
+        // for (var i = 0; i < omTemplatesAll.length; i++) {
+        //     if (omTemplatesAll[i] == "PNG Sequence") {
+        //         outputModuleTemplate = "PNG Sequence";
+        //     }
+        // }
+
+        //set Output Module template
+        renderQueueItem.outputModules[1].applyTemplate(outputModuleTemplate);
+
+        //render
+        app.project.renderQueue.render();
     }
 
     // Button Functions:
