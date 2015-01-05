@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 0.1
+// Version: 0.2
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,7 +24,7 @@
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "0.1";
+    a2sData.scriptVersion = "0.2";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
     a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -34,17 +34,19 @@
 
     a2sData.strExportTo = {en: "Export To"};
     a2sData.strBrowse = {en: "Browse"};
-    a2sData.strBrowseText = {en: "Save Sprite Sheet to:"};
+    a2sData.strBrowseText = {en: "Save Spritesheet to:"};
 
     a2sData.strOptions = {en: "Options"};
     a2sData.strColumns = {en: "Columns"};
     a2sData.strRows = {en: "Rows"};
     a2sData.strRowsInfo = {en: "(this value is calculated automaticaly)"};
 
+    a2sData.strSpreadsheetErr = {en: "You need to specify output first."};
+    a2sData.strOutputErr = {en: "Output is not valid."};
     a2sData.strColumnsErr = {en: "Cannot pack sprites at requested number of rows and columns. Try again."};
 
-    a2sData.strMargin = {en: "Margin"};
     a2sData.strCrop = {en: "Crop to Edges"};
+    a2sData.strSamples = {en: "Samples"};
 
     a2sData.strHelp = {en: "?"};
     a2sData.strHelpTitle = {en: "Help"};
@@ -55,6 +57,7 @@
     a2sData.activeItem = app.project.activeItem;
     a2sData.activeItemFrames = app.project.activeItem.duration * app.project.activeItem.frameRate;
     a2sData.projectFolder = app.project.file.parent;
+    a2sData.spritesheetFile;
 
     // Localize
     function animationToSpritesheet_localize(strVar) {
@@ -66,11 +69,21 @@
         var numOfFrames = a2sData.activeItemFrames;
         var value0 = Math.floor(Math.sqrt(numOfFrames));
         while (numOfFrames % value0 != 0) {
-             value0 = value0 - 1;
-         }
+            value0 = value0 - 1;
+        }
         var value1 = numOfFrames / value0;
         var arr = [value0, value1];
         return arr;
+    }
+
+    // Calculate first divisible by 16
+    function animationToSpritesheet_factorisation16(inputValue) {
+        var valueDiv = 16;
+        while (inputValue % valueDiv != 0) {
+            valueDiv = valueDiv + 1;
+        }
+        var value = valueDiv;
+        return value;
     }
 
     var suggestedAtStart = animationToSpritesheet_factorisation(a2sData.activeItemFrames);
@@ -94,11 +107,11 @@
                             alignment:['right','top'], \
                             box1: Checkbox { text:'" + animationToSpritesheet_localize(a2sData.strCrop) + "' }, \
                         }, \
-                        mar: Group { \
+                        sam: Group { \
                             alignment:['fill','top'], \
-                            text: StaticText { text:'" + animationToSpritesheet_localize(a2sData.strMargin) + ":', preferredSize:[120,20] }, \
+                            text: StaticText { text:'" + animationToSpritesheet_localize(a2sData.strSamples) + ":', preferredSize:[120,20] }, \
                             fld: EditText { text:'1', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:1, minvalue:1, maxvalue:100, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            sld: Slider { value:1, minvalue:1, maxvalue:16, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                         ver: Group { \
                             alignment:['fill','top'], \
@@ -146,8 +159,8 @@
                 animationToSpritesheet_doBrowse();
             }
 
-            //margin slider change
-            pal.grp.options.mar.fld.onChange = function() {
+            //Samples slider change
+            pal.grp.options.sam.fld.onChange = function() {
                 var value = parseInt(this.text);
                 if (isNaN(value)) {
                     value = this.parent.sld.value;
@@ -159,7 +172,7 @@
                 this.text = value.toString();
                 this.parent.sld.value = value;
             }
-            pal.grp.options.mar.sld.onChange = pal.grp.options.mar.sld.onChanging = function() {
+            pal.grp.options.sam.sld.onChange = pal.grp.options.sam.sld.onChanging = function() {
                 var value = parseInt(this.value);
                 if (isNaN(value)) {
                     value = parseInt(this.parent.fld.text);
@@ -169,19 +182,19 @@
             }
 
             pal.grp.options.crp.box1.value = false;
-            pal.grp.options.mar.text.enabled = false;
-            pal.grp.options.mar.fld.enabled = false;
-            pal.grp.options.mar.sld.enabled = false;
+            pal.grp.options.sam.text.enabled = false;
+            pal.grp.options.sam.fld.enabled = false;
+            pal.grp.options.sam.sld.enabled = false;
 
             pal.grp.options.crp.box1.onClick = function() {
                 if (pal.grp.options.crp.box1.value == true) {
-                    pal.grp.options.mar.text.enabled = true;
-                    pal.grp.options.mar.fld.enabled = true;
-                    pal.grp.options.mar.sld.enabled = true;
+                    pal.grp.options.sam.text.enabled = true;
+                    pal.grp.options.sam.fld.enabled = true;
+                    pal.grp.options.sam.sld.enabled = true;
                 } else {
-                    pal.grp.options.mar.text.enabled = false;
-                    pal.grp.options.mar.fld.enabled = false;
-                    pal.grp.options.mar.sld.enabled = false;
+                    pal.grp.options.sam.text.enabled = false;
+                    pal.grp.options.sam.fld.enabled = false;
+                    pal.grp.options.sam.sld.enabled = false;
                 }
             }
 
@@ -259,12 +272,50 @@
     }
 
     function animationToSpritesheet_main() {
+        //get columns and rows
+        var getColumns = parseInt(a2sPal.grp.options.ver.fld.text);
+        var getRows = parseInt(a2sPal.grp.options.hor.fld.text);
+        var frames = getRows * getColumns;
+
+        //calculate dimensions divisible by 16
+        var activeWidth = animationToSpritesheet_factorisation16(a2sData.activeItem.width);
+        var activeHeight = animationToSpritesheet_factorisation16(a2sData.activeItem.height);
+        var activeFramerate = a2sData.activeItem.frameRate;
+
+        //create main folder
+        var mainFolderItem = app.project.items.addFolder(a2sData.spritesheetFile.name);
+
         //create sprite comp and insert active item as layer
-        //crop to edges if requested
-        //create render comp
-        //insert sprite comp
+        var spriteCompName = "sprite_" + spritesheetFileName;
+        var spriteCompWidth = activeWidth;
+        var spriteCompHeight = activeHeight;
+        var spriteCompFramerate = activeFramerate;
+        var spriteCompDuration = 1 / spriteCompFramerate;
+        var spriteComp = mainFolderItem.items.addComp(spriteCompName, spriteCompWidth, spriteCompHeight, 1, spriteCompDuration, spriteCompFramerate);
+        spriteComp.layers.add(a2sData.activeItem);
+
+        //crop sprite comp to edges if requested
+        if (a2sPal.grp.options.crp.box1.value == true) {
+            //code
+        }
+
+        //create main comp and insert active item as layer
+        var mainCompName = "main_" + spritesheetFileName;
+        var mainCompWidth = activeWidth * getColumns;
+        var mainCompHeight = activeHeight * getRows;
+        var mainCompFramerate = activeFramerate;
+        var mainCompDuration = 1 / mainCompFramerate;
+        var mainComp = mainFolderItem.items.addComp(mainCompName, mainCompWidth, mainCompHeight, 1, mainCompDuration, mainCompFramerate);
+        mainComp.layers.add(spriteComp);
+
         //duplicate sprite comp to a number of frames
+        for (i = 0; i < frames; i++) {
+            mainComp.layers[1].duplicate();
+        }
+
         //position sprite comps into rows and columns
+
+
         //offset sprite comps in time
         //render
     }
@@ -274,9 +325,20 @@
 
     // Execute
     function animationToSpritesheet_doExecute() {
-        app.beginUndoGroup(a2sData.scriptName);
-        animationToSpritesheet_main()
-        app.endUndoGroup();
+        var spritesheetPath = a2sPal.grp.spritesheet.select.fld.text;
+        if (spritesheetPath != "") {
+            a2sData.spritesheetFile = new File(spritesheetPath);
+            if (a2sData.spritesheetFile.parent.exists == true) {
+                app.beginUndoGroup(a2sData.scriptName);
+                animationToSpritesheet_main();
+                app.endUndoGroup();
+                a2sPal.close();
+            } else {
+                alert(animationToSpritesheet_localize(a2sData.a2sData.strOutputErr));
+            }
+        } else {
+            alert(animationToSpritesheet_localize(a2sData.a2sData.strSpreadsheetErr));
+        }
     }
 
     // Cancel
