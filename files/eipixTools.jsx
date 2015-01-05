@@ -2,7 +2,7 @@
 // eipixTools.jsx
 // 
 // Name: eipixTools
-// Version: 3.1
+// Version: 3.2
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
 // 
@@ -22,7 +22,7 @@
 	// Global variables
 	var eipixToolsData = new Object();
 	eipixToolsData.scriptName = "Eipix Tools";
-	eipixToolsData.version = "3.1";
+	eipixToolsData.version = "3.2";
 	eipixToolsData.thisScriptsFolder = new Folder((new File($.fileName)).path);
 	eipixToolsData.scriptsPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\sets\\";
 	eipixToolsData.etcPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\etc\\";
@@ -142,8 +142,8 @@
 		system.callSystem("cmd.exe /c rmdir /s /q \"" + eipixToolsData.scriptsPath + "\"");
 
 		//replace etc and sets in (eipixTools)
-		var tempEtcPath = extractedFolderPath + "\\(eipixTools)\\etc"
-		var tempSetsPath = extractedFolderPath + "\\(eipixTools)\\sets"
+		var tempEtcPath = extractedFolderPath + "\\files\\(eipixTools)\\etc"
+		var tempSetsPath = extractedFolderPath + "\\files\\(eipixTools)\\sets"
 
 		system.callSystem("robocopy -e \"" + tempEtcPath + "\" \"" + eipixToolsData.etcPath.substring(0, eipixToolsData.etcPath.length - 1) + "\"");
 		system.callSystem("robocopy -e \"" + tempSetsPath + "\" \"" + eipixToolsData.scriptsPath.substring(0, eipixToolsData.scriptsPath.length - 1) + "\"");
