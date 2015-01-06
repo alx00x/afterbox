@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,7 +24,7 @@
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "1.0";
+    a2sData.scriptVersion = "1.1";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
     a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -472,10 +472,14 @@
         if (spritesheetPath != "") {
             a2sData.spritesheetFile = new File(spritesheetPath);
             if (a2sData.spritesheetFile.parent.exists == true) {
-                app.beginUndoGroup(a2sData.scriptName);
-                animationToSpritesheet_main();
-                app.endUndoGroup();
-                a2sPal.close();
+                if (a2sPal.grp.options.hor.fld.text == "X") {
+                    alert(animationToSpritesheet_localize(a2sData.strColumnsErr));
+                } else {
+                    app.beginUndoGroup(a2sData.scriptName);
+                    animationToSpritesheet_main();
+                    app.endUndoGroup();
+                    a2sPal.close();                    
+                }
             } else {
                 alert(animationToSpritesheet_localize(a2sData.strOutputErr));
             }
