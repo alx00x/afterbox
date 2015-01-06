@@ -34,7 +34,7 @@
 	eipixToolsData.errConnection = "Could not establish connection to repository. Please, check your internet connection.";
 	eipixToolsData.errUpdate = "Update failed.";
 	eipixToolsData.strConfirmUpdate = "There is an update available. Do you wish to download it?";
-	eipixToolsData.strUpdate = "Update successful. You are now on version:\n";
+	eipixToolsData.strUpdate = "Update successful! You are now on version:\n";
 
 	eipixToolsData.strSettings = "...";
 	eipixToolsData.strSettingsTip = "Settings";
@@ -339,7 +339,7 @@
 		// Update check
 		if (netCheck() == true) {
 			if (isUpdateNeeded() == true) {
-				var confirmPrompt = confirm(eipixToolsData.strConfirmUpdate);
+				var confirmPrompt = confirm(eipixToolsData.scriptName + " :\n" + eipixToolsData.strConfirmUpdate);
 				if (confirmPrompt == true) {
 				    updateFromGithub();
 				}
