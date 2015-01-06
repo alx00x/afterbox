@@ -34,7 +34,8 @@
 	eipixToolsData.errConnection = "Could not establish connection to repository. Please, check your internet connection.";
 	eipixToolsData.errUpdate = "Update failed.";
 	eipixToolsData.strConfirmUpdate = "There is an update available. Do you wish to download it?";
-	eipixToolsData.strUpdate = "Update successful! You are now on version:\n";
+	eipixToolsData.strUpdate = "Update successful! You are now on commit:\n";
+	eipixToolsData.strCurrentHash = "Your current version hash is:\n";
 
 	eipixToolsData.strSettings = "...";
 	eipixToolsData.strSettingsTip = "Settings";
@@ -275,7 +276,7 @@
 		palObj.settingsBtn.helpTip = eipixToolsData.strSettingsTip;
 		palObj.settingsBtn.onClick = function() {
 			// Get the scripts in the selected scripts folder
-			prompt("Your current version hash is:", eipixToolsData.commitHash);
+			prompt(eipixToolsData.strCurrentHash, eipixToolsData.commitHash);
 		}
 
 		var helpBtnIconFile = new File(eipixToolsData.thisScriptsFolder.fsName + "/(eipixTools)/eipixTools_help.png");
