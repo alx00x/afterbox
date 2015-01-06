@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 0.4
+// Version: 1.0
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -19,14 +19,12 @@
         return;
     }
 
-
-
     // Define main variables
     var a2sData = new Object();
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "0.4";
+    a2sData.scriptVersion = "1.0";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
     a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -43,6 +41,8 @@
     a2sData.strRows = {en: "Rows"};
     a2sData.strRowsInfo = {en: "(this value is calculated automaticaly)"};
 
+    a2sData.strWarning = {en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Using less than 10 samples is not recommended"};
+    a2sData.strPNGWarning = {en: "Warning: Could not find \"PNG Sequence\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now."};
     a2sData.strSpreadsheetErr = {en: "You need to specify output first."};
     a2sData.strOutputErr = {en: "Output is not valid."};
     a2sData.strColumnsErr = {en: "Cannot pack sprites at requested number of rows and columns. Try again."};
@@ -70,7 +70,7 @@
     function animationToSpritesheet_factorisation(numOfFrames) {
         var value0 = Math.floor(Math.sqrt(numOfFrames));
         while (numOfFrames % value0 != 0) {
-            value0 = value0 - 1;
+            value0 -= 1;
         }
         var value1 = numOfFrames / value0;
         var arr = [value0, value1];
@@ -81,7 +81,7 @@
     function animationToSpritesheet_factorisation16(inputValue) {
         var valueDiv = 16;
         while (inputValue % valueDiv != 0) {
-            inputValue = inputValue + 1;
+            inputValue += 1;
         }
         var value = inputValue;
         return value;
@@ -105,14 +105,16 @@
                         alignment:['fill','top'], \
                         text: '" + animationToSpritesheet_localize(a2sData.strOptions) + "', alignment:['fill','top'], \
                         crp: Group { \
-                            alignment:['right','top'], \
+                            alignment:['left','center'], \
+                            text: StaticText { text:'0 / 0', characters: 7, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
+                            loader: Progressbar { text:'Progressbar', minvalue:0, maxvalue:100, preferredSize:[260,5]},\
                             box1: Checkbox { text:'" + animationToSpritesheet_localize(a2sData.strCrop) + "' }, \
                         }, \
                         sam: Group { \
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + animationToSpritesheet_localize(a2sData.strSamples) + ":', preferredSize:[120,20] }, \
-                            fld: EditText { text:'1', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:1, minvalue:1, maxvalue:16, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            fld: EditText { text:'10', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
+                            sld: Slider { value:10, minvalue:1, maxvalue:20, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                         ver: Group { \
                             alignment:['fill','top'], \
@@ -183,19 +185,31 @@
             }
 
             pal.grp.options.crp.box1.value = false;
+            pal.grp.options.crp.text.visible = false;
+            pal.grp.options.crp.text.enabled = false;
+            pal.grp.options.crp.loader.visible = false;
             pal.grp.options.sam.text.enabled = false;
             pal.grp.options.sam.fld.enabled = false;
             pal.grp.options.sam.sld.enabled = false;
+            var warningShow = true;
 
             pal.grp.options.crp.box1.onClick = function() {
                 if (pal.grp.options.crp.box1.value == true) {
                     pal.grp.options.sam.text.enabled = true;
                     pal.grp.options.sam.fld.enabled = true;
                     pal.grp.options.sam.sld.enabled = true;
+                    pal.grp.options.crp.text.visible = true;
+                    pal.grp.options.crp.loader.visible = true;
+                    if (warningShow == true) {
+                        alert(animationToSpritesheet_localize(a2sData.strWarning));
+                        warningShow = false;
+                    }
                 } else {
                     pal.grp.options.sam.text.enabled = false;
                     pal.grp.options.sam.fld.enabled = false;
                     pal.grp.options.sam.sld.enabled = false;
+                    pal.grp.options.crp.text.visible = false;
+                    pal.grp.options.crp.loader.visible = false;
                 }
             }
 
@@ -258,6 +272,22 @@
         return pal;
     }
 
+    // Progressbar function:
+    //
+    function updateProgressbar(pal, minValue, currentValue, maxValue) {
+        pal.grp.options.crp.loader.minvalue = minValue;
+        pal.grp.options.crp.loader.maxvalue = maxValue;
+        pal.grp.options.crp.loader.value = currentValue;
+        pal.update();
+    }
+
+    // Progresstext function:
+    //
+    function updateProgresstext(pal, text) {
+        pal.grp.options.crp.text.text = text;
+        pal.update();
+    }
+
     // Main Functions:
     //
 
@@ -268,8 +298,66 @@
         }
     }
 
-    function animationToSpritesheet_crop() {
-        //code
+    function animationToSpritesheet_edgeDetect(comp, target, samples) {
+        //add null
+        var addNull = comp.layers.addNull();
+    
+        //add slider property to null
+        var addSlider = addNull.Effects.addProperty("ADBE Slider Control");
+    
+        //analize frame by frame for x1, x2, y1 and y2
+        var compFrames = Math.round(comp.duration * comp.frameRate);
+        var compHeight = comp.height;
+        var compWidth = comp.width;
+    
+        var xSwitch = false;
+        var ySwitch = false;
+    
+        var fx1 = compWidth; //left
+        var fx2 = -1; //right
+        var fy1 = -1; //top
+        var fy2 = -1; //bottom
+    
+        var x1 = compWidth; //left
+        var x2 = -1; //right
+        var y1 = -1; //top
+        var y2 = -1; //bottom
+    
+        for (i = 0; i < compFrames; i++) {
+            updateProgresstext(a2sPal, i + " / " + compFrames);
+
+            for (b = 0; b < compWidth; b += samples) {
+                for (a = 0; a < compHeight; a += samples) {
+                    var expr = "thisComp.layer('" + target + "').sampleImage([" + a + "," + b + "], [" + samples + "," + samples + "]/2, true, " + (i * comp.frameDuration) + ")[3]";
+                    addSlider.property(1).expressionEnabled = true;
+                    addSlider.property(1).expression = expr;
+                    var value = addSlider(1).value;
+                    //find left edge
+                    if ((value != 0) && (a < x1)) {x1 = a;}
+                    //find right edge
+                    if ((value != 0) && (x2 < a)) {x2 = a;}
+                    //find top edge
+                    if ((value > 0) && (ySwitch == false)) {
+                        y1 = b;
+                        ySwitch = true;
+                    }
+                    //find bottom edge
+                    if ((value != 0) && (y2 < b)) {y2 = b;}
+                }
+                updateProgressbar(a2sPal, 0, b+1, compHeight);
+            }
+
+            if (x1 < fx1) {fx1 = x1;}
+            if (x2 > fx2) {fx2 = x2;}
+            if (y1 > fy1) {fy1 = y1;}
+            if (y2 > fy2) {fy2 = y2;}
+        }
+        updateProgresstext(a2sPal, compFrames + " / " + compFrames);
+
+        addNull.remove();
+
+        var arr = [Math.round(fx1 - (samples / 2)), Math.round(fx2 + (samples / 2)), Math.round(fy1 - (samples / 2)), Math.round(fy2 + (samples / 2))];
+        return arr;
     }
 
     function animationToSpritesheet_main() {
@@ -300,13 +388,26 @@
 
         //crop sprite comp to edges if requested
         if (a2sPal.grp.options.crp.box1.value == true) {
-            //code
+            //detect edges
+            var numOfSamples = parseInt(a2sPal.grp.options.sam.fld.text);
+            var targetEdges = animationToSpritesheet_edgeDetect(spriteComp, spriteComp.layers[1].name, numOfSamples);
+
+            //offset active comp layer to accommodate new dimensions
+            var layerPos = spriteComp.layers[1].property("Transform").property("Position").value;
+            spriteComp.layers[1].property("Transform").property("Position").setValue([layerPos[0] - targetEdges[0], layerPos[1] - targetEdges[2]]);
+
+            //crop comp to edges
+            var newWidth = spriteCompWidth - (targetEdges[0] + (spriteCompWidth - targetEdges[1]));
+            var newHeight = spriteCompHeight - (targetEdges[2] + (spriteCompHeight - targetEdges[3]));
+
+            spriteComp.width = animationToSpritesheet_factorisation16(newWidth);
+            spriteComp.height = animationToSpritesheet_factorisation16(newHeight);
         }
 
         //create main comp and insert active item as layer
         var mainCompName = "main_" + spritesheetFileName;
-        var mainCompWidth = activeWidth * getColumns;
-        var mainCompHeight = activeHeight * getRows;
+        var mainCompWidth = spriteComp.width * getColumns;
+        var mainCompHeight = spriteComp.height * getRows;
         var mainCompFramerate = activeFramerate;
         var mainCompDuration = 1 / mainCompFramerate;
         var mainComp = mainFolderItem.items.addComp(mainCompName, mainCompWidth, mainCompHeight, 1, mainCompDuration, mainCompFramerate);
@@ -344,12 +445,16 @@
 
         //get Output Module templates and set png if exists
         var outputModuleTemplate = "Photoshop";
-        // var omTemplatesAll = app.project.renderQueue.item(renderQueueItemIndex).outputModule(1).templates;
-        // for (var i = 0; i < omTemplatesAll.length; i++) {
-        //     if (omTemplatesAll[i] == "PNG Sequence") {
-        //         outputModuleTemplate = "PNG Sequence";
-        //     }
-        // }
+        var omTemplatesAll = app.project.renderQueue.item(renderQueueItemIndex).outputModule(1).templates;
+        for (var i = 0; i < omTemplatesAll.length; i++) {
+            if (omTemplatesAll[i] == "PNG Sequence") {
+                outputModuleTemplate = "PNG Sequence";
+            }
+        }
+
+        if (outputModuleTemplate != "PNG Sequence") {
+            alert(animationToSpritesheet_localize(a2sData.strPNGWarning));
+        }
 
         //set Output Module template
         renderQueueItem.outputModules[1].applyTemplate(outputModuleTemplate);
