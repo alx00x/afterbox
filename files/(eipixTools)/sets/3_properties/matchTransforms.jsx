@@ -1,7 +1,7 @@
 // matchTransforms.jsx
 // 
 // Name: matchTransforms
-// Version: 1.3
+// Version: 2.0
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -10,14 +10,12 @@
 //  
 
 
-(function matchTransforms(thisObj)
-{
-
+(function matchTransforms(thisObj) {
     // Globals
     var matchTransformsData = new Object(); // Store globals in an object
     matchTransformsData.scriptNameShort = "CCAC";
     matchTransformsData.scriptName = "Match Transforms";
-    matchTransformsData.scriptVersion = "1.3";
+    matchTransformsData.scriptVersion = "2.0";
     matchTransformsData.scriptTitle = matchTransformsData.scriptName + " v" + matchTransformsData.scriptVersion;
 
     matchTransformsData.strExecute = {en: "Execute"};
@@ -80,71 +78,42 @@
     // takes layer index
     // returns x, y and y
     function matchTransforms_getWorldPos(idx) {
-        var x;
-        var y;
-        var z;
+        //create null
+        var addNull = activeItem.layers.addNull();
 
-        // check if dimensions are separated
-        var itemSeperation = activeItem.layer(idx).transform.position.dimensionsSeparated;
+        //move to bottom
+        addNull.moveToEnd();
 
-        // check layer is child
-        var parentLayerIndicies = [];
-        var activeLayer = activeItem.layer(idx);
-        while (activeLayer != null) {
-            parentLayerIndicies.push(activeLayer.index);
-            activeLayer = activeLayer.parent;
-        }
+        //add slider and expression
+        var addSlider = addNull.Effects.addProperty("ADBE Point3D Control");
+        var expr = "x = thisComp.layer(" + idx + ").transform.anchorPoint;\nthisComp.layer(" + idx + ").toWorld(x)";
+        addSlider.property(1).expressionEnabled = true;
+        addSlider.property(1).expression = expr;
 
-        // get positions
-        if (itemSeperation == true) {
-            x = 0;
-            y = 0;
-            z = 0;
-            for (var i = 0; i < parentLayerIndicies.length; i++) {
-                x = activeItem.layer(parentLayerIndicies[i]).transform("ADBE Position_0").value + x;
-                y = activeItem.layer(parentLayerIndicies[i]).transform("ADBE Position_1").value + y;
-                z = activeItem.layer(parentLayerIndicies[i]).transform("ADBE Position_2").value + z;
-            }
-        } else {
-            x = 0;
-            y = 0;
-            z = 0;
-            for (var i = 0; i < parentLayerIndicies.length; i++) {
-                x = activeItem.layer(parentLayerIndicies[i]).transform.position.value[0] + x;
-                y = activeItem.layer(parentLayerIndicies[i]).transform.position.value[1] + y;
-                z = activeItem.layer(parentLayerIndicies[i]).transform.position.value[2] + z;
-            }
-        }
+        //read value
+        var value = addSlider(1).value;
 
-        // return world values
-        var positionArr = [x, y, z];
+        //remove null
+        addNull.remove();
+
+        //return world values
+        var positionArr = value;
         return positionArr;
     }
 
     // Get world scale values
     function matchTransforms_getWorldSca(idx) {
-        var x;
-        var y;
-        var z;
-
-        // unlink dimensions
-        var itemSeperation = activeItem.layer(idx).transform.position.dimensionsSeparated;
-
-
-
-
-
-
+        //to be implemented
     }
 
     // Get world orientation values
     function matchTransforms_getWorldRot(idx) {
-        
+        //to be implemented
     }
 
     // Execute
     function matchTransforms_doExecute() {
-        app.beginUndoGroup("Match Transforms");
+        app.beginUndoGroup(matchTransformsData.scriptName);
 
         var primaryItemSeperation = primaryItem.transform.position.dimensionsSeparated;
         var secondaryItemSeperation = secondaryItem.transform.position.dimensionsSeparated;
@@ -153,40 +122,13 @@
         var positionArray = matchTransforms_getWorldPos(primaryItem.index);
 
         // set position
-        if ((primaryItemSeperation == true) && (secondaryItemSeperation == true)) {
+        if (secondaryItemSeperation == true) {
             secondaryItem.property("Transform").property("ADBE Position_0").setValue(positionArray[0]);
             secondaryItem.property("Transform").property("ADBE Position_1").setValue(positionArray[1]);
             secondaryItem.property("Transform").property("ADBE Position_2").setValue(positionArray[2]);
-        } else if ((primaryItemSeperation == true) && (secondaryItemSeperation == false)) {
-            secondaryItem.property("Transform").property("Position").setValue(positionArray);
-        } else if ((primaryItemSeperation == false) && (secondaryItemSeperation == true)) {
-            secondaryItem.property("Transform").property("ADBE Position_0").setValue(positionArray[0]);
-            secondaryItem.property("Transform").property("ADBE Position_1").setValue(positionArray[1]);
-            secondaryItem.property("Transform").property("ADBE Position_2").setValue(positionArray[2]);
-        } else if ((primaryItemSeperation == false) && (secondaryItemSeperation == false)) {
+        } else {
             secondaryItem.property("Transform").property("Position").setValue(positionArray);
         }
-
-        // get world scale
-        var positionArray = matchTransforms_getWorldSca(primaryItem.index);
-
-        // set scale
-        if (secondaryItem instanceof AVLayer) {
-            secondaryItem.property("Transform").property("Scale").setValue(primaryItem.property("Transform").property("Scale").value);
-        }
-
-        // // get world rotation
-        // var positionArray = matchTransforms_getWorldRot(primaryItem.index);
-
-        // // set rotation
-        // if (primaryItem.threeDLayer == true) {
-        //     secondaryItem.property("Transform").property("Orientation").setValue(primaryItem.property("Transform").property("Orientation").value);
-        //     secondaryItem.property("Transform").property("X Rotation").setValue(primaryItem.property("Transform").property("X Rotation").value);
-        //     secondaryItem.property("Transform").property("Y Rotation").setValue(primaryItem.property("Transform").property("Y Rotation").value);
-        //     secondaryItem.property("Transform").property("Z Rotation").setValue(primaryItem.property("Transform").property("Z Rotation").value);
-        // } else {
-        //     secondaryItem.property("Transform").property("Rotation").setValue(primaryItem.property("Transform").property("Rotation").value);
-        // }
 
         app.endUndoGroup();
     }
