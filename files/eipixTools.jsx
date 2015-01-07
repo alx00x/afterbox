@@ -2,7 +2,7 @@
 // eipixTools.jsx
 // 
 // Name: eipixTools
-// Version: 3.2
+// Version: 3.3
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
 // 
@@ -22,7 +22,7 @@
 	// Global variables
 	var eipixToolsData = new Object();
 	eipixToolsData.scriptName = "Eipix Tools";
-	eipixToolsData.version = "3.2";
+	eipixToolsData.version = "3.3";
 	eipixToolsData.thisScriptsFolder = new Folder((new File($.fileName)).path);
 	eipixToolsData.scriptsPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\sets\\";
 	eipixToolsData.etcPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\etc\\";
@@ -98,7 +98,7 @@
 	// Function for checking if scripts are up to date
 	function isUpdateNeeded() {
 		//get latest commit sha
-		var latestCommitCommand = "\"" + eipixToolsData.updatePath + "curl.exe" + "\"" + " -s -X GET https://api.github.com/repos/koaleksa/eipixtools/git/refs/heads/deploy";
+		var latestCommitCommand = "\"" + eipixToolsData.updatePath + "curl.exe" + "\"" + " -s -X GET https://api.github.com/repos/koaleksa/eipix-tools/git/refs/heads/deploy";
 		var latestCommitResponse = system.callSystem(latestCommitCommand);
 		var latestCommitJSON = JSON.parse(latestCommitResponse);
 		var localSha = eipixToolsData.commitHash;
@@ -125,7 +125,7 @@
 			system.callSystem("cmd.exe /c mkdir \"" + tempFolder.fsName + "\"");
 		}
 
-		var downloadUpdateCommand = "(eipixTools)/update/curl.exe -L -k -s https://api.github.com/repos/koaleksa/eipixtools/zipball/deploy -o (eipixTools)/update/deploy.zip";
+		var downloadUpdateCommand = "(eipixTools)/update/curl.exe -L -k -s https://api.github.com/repos/koaleksa/eipix-tools/zipball/deploy -o (eipixTools)/update/deploy.zip";
 		var downloadUpdateResponse = system.callSystem(downloadUpdateCommand);
 
 		var unzipUpdateCommand = "\"" + eipixToolsData.updatePath + "unzip.vbs\" " + "\"" + eipixToolsData.updatePath + "deploy.zip" + "\"" + " " + "\"" + tempFolder.fsName + "\"";
