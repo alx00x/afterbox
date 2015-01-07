@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 1.1
+// Version: 1.2
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,7 +24,7 @@
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "1.1";
+    a2sData.scriptVersion = "1.2";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
     a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -310,9 +310,6 @@
         var compHeight = comp.height;
         var compWidth = comp.width;
     
-        var xSwitch = false;
-        var ySwitch = false;
-    
         var fx1 = compWidth; //left
         var fx2 = -1; //right
         var fy1 = -1; //top
@@ -325,24 +322,25 @@
     
         for (i = 0; i < compFrames; i++) {
             updateProgresstext(a2sPal, i + " / " + compFrames);
+            var ySwitch = false;
 
-            for (b = 0; b < compWidth; b += samples) {
-                for (a = 0; a < compHeight; a += samples) {
+            for (b = 0; b < compHeight; b += samples) {
+                for (a = 0; a < compWidth; a += samples) {
                     var expr = "thisComp.layer('" + target + "').sampleImage([" + a + "," + b + "], [" + samples + "," + samples + "]/2, true, " + (i * comp.frameDuration) + ")[3]";
                     addSlider.property(1).expressionEnabled = true;
                     addSlider.property(1).expression = expr;
                     var value = addSlider(1).value;
                     //find left edge
-                    if ((value != 0) && (a < x1)) {x1 = a;}
+                    if ((value > 0) && (a < x1)) {x1 = a;}
                     //find right edge
-                    if ((value != 0) && (x2 < a)) {x2 = a;}
+                    if ((value > 0) && (x2 < a)) {x2 = a;}
                     //find top edge
                     if ((value > 0) && (ySwitch == false)) {
                         y1 = b;
                         ySwitch = true;
                     }
                     //find bottom edge
-                    if ((value != 0) && (y2 < b)) {y2 = b;}
+                    if ((value > 0) && (y2 < b)) {y2 = b;}
                 }
                 updateProgressbar(a2sPal, 0, b+1, compHeight);
             }
@@ -368,8 +366,8 @@
         var frames = a2sData.activeItemFrames;
 
         //calculate dimensions divisible by 16
-        var activeWidth = animationToSpritesheet_factorisation16(a2sData.activeItem.width);
-        var activeHeight = animationToSpritesheet_factorisation16(a2sData.activeItem.height);
+        var activeWidth = a2sData.activeItem.width;
+        var activeHeight = a2sData.activeItem.height;
         var activeDuration = a2sData.activeItem.duration;
         var activeFramerate = a2sData.activeItem.frameRate;
         var activeFrameDuration = a2sData.activeItem.frameDuration;
@@ -402,6 +400,9 @@
 
             spriteComp.width = animationToSpritesheet_factorisation16(newWidth);
             spriteComp.height = animationToSpritesheet_factorisation16(newHeight);
+        } else {
+            spriteComp.width = animationToSpritesheet_factorisation16(spriteComp.width);
+            spriteComp.height = animationToSpritesheet_factorisation16(spriteComp.height);
         }
 
         //create main comp and insert active item as layer
