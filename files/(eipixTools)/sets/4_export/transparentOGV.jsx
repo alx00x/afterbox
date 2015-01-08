@@ -42,7 +42,7 @@
     togvData.strOptions = {en: "Options"};
 
     togvData.strWarning = {en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Using less than 10 samples is not recommended"};
-    togvData.strPNGWarning = {en: "Warning: Could not find \"PNG Sequence\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now."};
+    togvData.strPNGWarning = {en: "Warning: Could not find \"" + togvData.outputTemplateName + "\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now."};
     togvData.strSpreadsheetErr = {en: "You need to specify output first."};
     togvData.strOutputErr = {en: "Output is not valid."};
 
@@ -60,21 +60,11 @@
     togvData.activeItem = app.project.activeItem;
     togvData.activeItemFrames = app.project.activeItem.duration * app.project.activeItem.frameRate;
     togvData.projectFolder = app.project.file.parent;
-    togvData.spritesheetFile;
+    togvData.outputPath;
 
     // Localize
     function transparentOGV_localize(strVar) {
         return strVar["en"];
-    }
-
-    // Calculate first divisible by 16
-    function transparentOGV_factorisation16(inputValue) {
-        var valueDiv = 16;
-        while (inputValue % valueDiv != 0) {
-            inputValue += 1;
-        }
-        var value = inputValue;
-        return value;
     }
 
     // Build UI
@@ -219,6 +209,17 @@
     // Main Functions:
     //
 
+    // Calculate first divisible by 16
+    function transparentOGV_factorisation16(inputValue) {
+        var valueDiv = 16;
+        while (inputValue % valueDiv != 0) {
+            inputValue += 1;
+        }
+        var value = inputValue;
+        return value;
+    }
+
+    // 
     function transparentOGV_doBrowse() {
         var outputFile = togvData.projectFolder.selectDlg(transparentOGV_localize(togvData.strBrowseText));
         if (outputFile != null) {
@@ -226,6 +227,7 @@
         }
     }
 
+    // 
     function transparentOGV_edgeDetect(comp, target, samples) {
         //add null
         var addNull = comp.layers.addNull();
@@ -286,6 +288,7 @@
         return arr;
     }
 
+    // 
     function checkTemplate(templateName) {
         var renderQ = app.project.renderQueue;
         var tempComp = app.project.items.addComp("setProxyTempComp", 100, 100, 1, 1, 25);
@@ -306,28 +309,9 @@
         return templateExists;
     }
 
-    function addToRenderQueue() {
-        var renderQueueComp = app.project.renderQueue.items.add(newComp);
-        var renderQueueCompIndex = app.project.renderQueue.numItems;
-        renderQueueComp.applyTemplate("Best Settings");
-        renderQueueComp.timeSpanStart = 0;
-        renderQueueComp.timeSpanDuration = newComp.duration;
-        renderQueueComp.outputModules[1].applyTemplate("Lossless");
-        renderQueueComp.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + activeComp.name + "_a.avi");
-
-        var renderQueueThumb = app.project.renderQueue.items.add(activeComp);
-        var renderQueueThumbIndex = app.project.renderQueue.numItems;
-        renderQueueThumb.applyTemplate(outputQuality);
-        renderQueueThumb.timeSpanStart = endFrame;
-        renderQueueThumb.timeSpanDuration = oneFrame;
-        renderQueueThumb.outputModules[1].applyTemplate(outputTemplateName);
-        renderQueueThumb.outputModules[1].file = new File(desktopPath.fsName.toString() + "\\" + activeComp.name + "_[#####].png");
-    }
-
+    // main
     function transparentOGV_main() {
-        var projectFile = app.project.file;
-        var desktopPath = new Folder("~/Desktop");
-        var activeComp = app.project.activeItem;
+        var activeComp = togvData.activeItem;
         var timeSliderPos = activeComp.time;
         var endFrame = activeComp.duration - activeComp.frameDuration;
         var oneFrame = activeComp.frameDuration;
@@ -357,7 +341,7 @@
                     }
 
                     //setup the export ready composition
-                    try {       
+                    try {
                         var newCompName = "ogv(" + activeComp.name + ")";
                         var newCompWidth = activeComp.width * 2;
                         var offsetLeft = activeComp.width / 2;
@@ -373,7 +357,24 @@
                         L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
                         var newCompBG = newComp.layers.addSolid([0,0,0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
                         newCompBG.moveToEnd();
-                        addToRenderQueue();
+
+                        //add avi to render queue
+                        var renderQueueComp = app.project.renderQueue.items.add(newComp);
+                        var renderQueueCompIndex = app.project.renderQueue.numItems;
+                        renderQueueComp.applyTemplate("Best Settings");
+                        renderQueueComp.timeSpanStart = 0;
+                        renderQueueComp.timeSpanDuration = newComp.duration;
+                        renderQueueComp.outputModules[1].applyTemplate("Lossless");
+                        renderQueueComp.outputModules[1].file = new File(togvData.outputPath.fsName.toString() + "\\" + activeComp.name + "_a.avi");
+
+                        //add png to render queue
+                        var renderQueueThumb = app.project.renderQueue.items.add(activeComp);
+                        var renderQueueThumbIndex = app.project.renderQueue.numItems;
+                        renderQueueThumb.applyTemplate(outputQuality);
+                        renderQueueThumb.timeSpanStart = endFrame;
+                        renderQueueThumb.timeSpanDuration = oneFrame;
+                        renderQueueThumb.outputModules[1].applyTemplate(outputTemplateName);
+                        renderQueueThumb.outputModules[1].file = new File(togvData.outputPath.fsName.toString() + "\\" + activeComp.name + "_[#####].png");
                     } catch (err) {
                         alert(err.toString());
                     }
@@ -381,10 +382,6 @@
             } else {
                 alert("Composition dimensions are not divisible by 16.");
             }
-            app.endUndoGroup();
-        } else {
-            alert("Select a composition.");
-        }
     }
 
     // Button Functions:
@@ -394,16 +391,16 @@
     function transparentOGV_doExecute() {
         var outputPath = togvPal.grp.output.select.fld.text;
         if (outputPath != "") {
-            togvData.outputFile = new File(outputPath);
-            if (togvData.outputFile.parent.exists == true) {
-                if (togvPal.grp.options.hor.fld.text == "X") {
-                    alert(transparentOGV_localize(togvData.strColumnsErr));
-                } else {
-                    app.beginUndoGroup(togvData.scriptName);
-                    transparentOGV_main();
-                    app.endUndoGroup();
-                    togvPal.close();                    
+            togvData.outputPath = new File(outputPath);
+            if (togvData.outputPath.parent.exists == true) {
+                app.beginUndoGroup(togvData.scriptName);
+                var checkPoint = checkTemplate(outputTemplateName);
+                if (checkPoint == false) {
+                    alert(transparentOGV_localize(togvData.strWarning));
                 }
+                transparentOGV_main();
+                app.endUndoGroup();
+                togvPal.close();                    
             } else {
                 alert(transparentOGV_localize(togvData.strOutputErr));
             }
