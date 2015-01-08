@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 1.2
+// Version: 1.3
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,7 +24,7 @@
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "1.2";
+    a2sData.scriptVersion = "1.3";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
     a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -80,6 +80,16 @@
     // Calculate first divisible by 16
     function animationToSpritesheet_factorisation16(inputValue) {
         var valueDiv = 16;
+        while (inputValue % valueDiv != 0) {
+            inputValue += 1;
+        }
+        var value = inputValue;
+        return value;
+    }
+
+    // Calculate first divisible by 4
+    function animationToSpritesheet_factorisation4(inputValue) {
+        var valueDiv = 4;
         while (inputValue % valueDiv != 0) {
             inputValue += 1;
         }
@@ -365,7 +375,7 @@
         var getRows = parseInt(a2sPal.grp.options.hor.fld.text);
         var frames = a2sData.activeItemFrames;
 
-        //calculate dimensions divisible by 16
+        //get active comp info
         var activeWidth = a2sData.activeItem.width;
         var activeHeight = a2sData.activeItem.height;
         var activeDuration = a2sData.activeItem.duration;
@@ -398,11 +408,11 @@
             var newWidth = spriteCompWidth - (targetEdges[0] + (spriteCompWidth - targetEdges[1]));
             var newHeight = spriteCompHeight - (targetEdges[2] + (spriteCompHeight - targetEdges[3]));
 
-            spriteComp.width = animationToSpritesheet_factorisation16(newWidth);
-            spriteComp.height = animationToSpritesheet_factorisation16(newHeight);
+            spriteComp.width = animationToSpritesheet_factorisation4(newWidth);
+            spriteComp.height = animationToSpritesheet_factorisation4(newHeight);
         } else {
-            spriteComp.width = animationToSpritesheet_factorisation16(spriteComp.width);
-            spriteComp.height = animationToSpritesheet_factorisation16(spriteComp.height);
+            spriteComp.width = animationToSpritesheet_factorisation4(spriteComp.width);
+            spriteComp.height = animationToSpritesheet_factorisation4(spriteComp.height);
         }
 
         //create main comp and insert active item as layer
