@@ -49,7 +49,7 @@
         if (selectedLayer != null) {
             newSolid.moveBefore(selectedLayer);
         }
-        var addParticular = newSolid.property("Effects").addProperty("Element");
+        var addElement = newSolid.property("Effects").addProperty("Element");
     
         app.endUndoGroup();
     } else {

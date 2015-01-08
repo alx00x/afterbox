@@ -37,7 +37,7 @@
 
     togvData.strExportTo = {en: "Export To"};
     togvData.strBrowse = {en: "Browse"};
-    togvData.strBrowseText = {en: "Save OGV to:"};
+    togvData.strBrowseText = {en: "Save OGV and PNG to:"};
 
     togvData.strOptions = {en: "Options"};
 
@@ -220,7 +220,7 @@
     //
 
     function transparentOGV_doBrowse() {
-        var outputFile = togvData.projectFolder.saveDlg(transparentOGV_localize(togvData.strBrowseText),"PNG:*.png");
+        var outputFile = togvData.projectFolder.selectDlg(transparentOGV_localize(togvData.strBrowseText));
         if (outputFile != null) {
             togvPal.grp.output.select.fld.text = outputFile.fsName.toString();
         }
