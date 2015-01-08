@@ -1,4 +1,4 @@
-// matchTransforms.jsx
+﻿// matchTransforms.jsx
 // 
 // Name: matchTransforms
 // Version: 2.0
@@ -78,44 +78,24 @@
     // takes layer index
     // returns x, y and y
     function matchTransforms_getWorldPos(idx) {
-        var x;
-        var y;
-        var z;
+        //create null and move to bottom
+        var addNull = activeItem.layers.addNull();
+        addNull.moveToEnd();
 
-        // check if dimensions are separated
-        var itemSeperation = activeItem.layer(idx).transform.position.dimensionsSeparated;
+        //add expression
+        var addSlider = addNull.Effects.addProperty("ADBE Point3D Control");
+        var expr = "x = thisComp.layer(" + idx + ").transform.anchorPoint;\nthisComp.layer(" + idx + ").toWorld(x)";
+        addSlider.property(1).expressionEnabled = true;
+        addSlider.property(1).expression = expr;
 
-        // check layer is child
-        var parentLayerIndicies = [];
-        var activeLayer = activeItem.layer(idx);
-        while (activeLayer != null) {
-            parentLayerIndicies.push(activeLayer.index);
-            activeLayer = activeLayer.parent;
-        }
+        //read value
+        var value = addSlider(1).value;
 
-        // get positions
-        if (itemSeperation == true) {
-            x = 0;
-            y = 0;
-            z = 0;
-            for (var i = 0; i < parentLayerIndicies.length; i++) {
-                x = activeItem.layer(parentLayerIndicies[i]).transform("ADBE Position_0").value + x;
-                y = activeItem.layer(parentLayerIndicies[i]).transform("ADBE Position_1").value + y;
-                z = activeItem.layer(parentLayerIndicies[i]).transform("ADBE Position_2").value + z;
-            }
-        } else {
-            x = 0;
-            y = 0;
-            z = 0;
-            for (var i = 0; i < parentLayerIndicies.length; i++) {
-                x = activeItem.layer(parentLayerIndicies[i]).transform.position.value[0] + x;
-                y = activeItem.layer(parentLayerIndicies[i]).transform.position.value[1] + y;
-                z = activeItem.layer(parentLayerIndicies[i]).transform.position.value[2] + z;
-            }
-        }
+        //delete null
+        addNull.remove();
 
         // return world values
-        var positionArr = [x, y, z];
+        var positionArr = value;
         return positionArr;
     }
 
@@ -144,13 +124,7 @@
             secondaryItem.property("Transform").property("ADBE Position_0").setValue(positionArray[0]);
             secondaryItem.property("Transform").property("ADBE Position_1").setValue(positionArray[1]);
             secondaryItem.property("Transform").property("ADBE Position_2").setValue(positionArray[2]);
-        } else if ((primaryItemSeperation == true) && (secondaryItemSeperation == false)) {
-            secondaryItem.property("Transform").property("Position").setValue(positionArray);
-        } else if ((primaryItemSeperation == false) && (secondaryItemSeperation == true)) {
-            secondaryItem.property("Transform").property("ADBE Position_0").setValue(positionArray[0]);
-            secondaryItem.property("Transform").property("ADBE Position_1").setValue(positionArray[1]);
-            secondaryItem.property("Transform").property("ADBE Position_2").setValue(positionArray[2]);
-        } else if ((primaryItemSeperation == false) && (secondaryItemSeperation == false)) {
+        } else {
             secondaryItem.property("Transform").property("Position").setValue(positionArray);
         }
 
