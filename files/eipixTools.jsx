@@ -340,7 +340,7 @@
 		// Update check
 		if (netCheck() == true) {
 			if (isUpdateNeeded() == true) {
-				var confirmPrompt = confirm(eipixToolsData.scriptName + " :\n" + eipixToolsData.strConfirmUpdate);
+				var confirmPrompt = confirm(eipixToolsData.scriptName + ":\n" + eipixToolsData.strConfirmUpdate);
 				if (confirmPrompt == true) {
 				    updateFromGithub();
 				}

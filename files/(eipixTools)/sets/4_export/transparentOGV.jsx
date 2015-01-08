@@ -32,6 +32,7 @@
 
     togvData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     togvData.strActiveCompErr = {en: "Please select a composition."};
+    togvData.strNoSelectErr = {en: "Select at least one background layer."};
     togvData.strExecute = {en: "Execute"};
     togvData.strCancel = {en: "Cancel"};
 
@@ -56,7 +57,8 @@
 
     // Define project variables
     togvData.outputQuality = "Best Settings";
-    togvData.outputTemplateName = "PNG Sequence";
+    togvData.outputTemplateVid = "Lossless";
+    togvData.outputTemplateImg = "PNG Sequence";
     togvData.activeItem = app.project.activeItem;
     togvData.activeItemFrames = app.project.activeItem.duration * app.project.activeItem.frameRate;
     togvData.projectFolder = app.project.file.parent;
@@ -69,7 +71,7 @@
 
     // Build UI
     function transparentOGV_buildUI(thisObj) {
-        var pal = new Window("dialog", togvData.scriptName, undefined, {resizeable:true});
+        var pal = new Window("palette", togvData.scriptName, undefined, {resizeable:true});
         if (pal !== null) {
             var res =
                 "group { \
@@ -310,78 +312,133 @@
     }
 
     // main
-    function transparentOGV_main() {
+    function transparentOGV_main() {      
+        //get general info
+        var outPath = togvData.outputPath;
+        var frames = togvData.activeItemFrames;
+
+        //get active comp info
         var activeComp = togvData.activeItem;
-        var timeSliderPos = activeComp.time;
-        var endFrame = activeComp.duration - activeComp.frameDuration;
-        var oneFrame = activeComp.frameDuration;
+        var activeWidth = togvData.activeItem.width;
+        var activeHeight = togvData.activeItem.height;
+        var activeDuration = togvData.activeItem.duration;
+        var activeFramerate = togvData.activeItem.frameRate;
+        var activeFrameDuration = togvData.activeItem.frameDuration;
         var selectedLayers = [];
         var selectedLayersIndices = [];
-        var newComp;
 
-        if ((activeComp != null) && (activeComp instanceof CompItem)) {
-            app.beginUndoGroup("Make OGV ready composition for ingame use");
-            if ((activeComp.width % 16 === 0) && (activeComp.height % 16 === 0)) {
-                selectedLayers = activeComp.selectedLayers;
-                if (selectedLayers.length === 0) {
-                    alert("Select at least one background layer.");
-                } else {
-                    //get each selected layer's index
-                    for (var i = 0; i < selectedLayers.length; i++) {
-                        selectedLayersIndices.push(selectedLayers[i].index);
-                    }
-                    
-                    //copy source of activeComp
-                    var activeCompAlpha = activeComp.duplicate();
-                    activeCompAlpha.name = "alpha(" + activeComp.name + ")";
+        //create main folder
+        var mainFolderItem = app.project.items.addFolder(activeComp.name + "_OGV");
 
-                    //set selected layers as guides in copy of activeComp
-                    for (var i = 0; i < selectedLayersIndices.length; i++) {
-                        activeCompAlpha.layer(selectedLayersIndices[i]).guideLayer = true;
-                    }
+        selectedLayers = activeComp.selectedLayers;
+        //get each selected layer's index
+        for (var i = 0; i < selectedLayers.length; i++) {
+            selectedLayersIndices.push(selectedLayers[i].index);
+        }
 
-                    //setup the export ready composition
-                    try {
-                        var newCompName = "ogv(" + activeComp.name + ")";
-                        var newCompWidth = activeComp.width * 2;
-                        var offsetLeft = activeComp.width / 2;
-                        var offsetRight = (activeComp.width / 2) * 3;
-                        var offsetHight = activeComp.height / 2;
-                        newComp = app.project.items.addComp(newCompName, newCompWidth, activeComp.height, activeComp.pixelAspect, activeComp.duration, activeComp.frameRate);
-                        newComp.layers.add(activeComp);
-                        newComp.layers.add(activeCompAlpha);
-                        var L1 = newComp.layers[2];
-                        var L2 = newComp.layers[1];
-                        L1.property("ADBE Transform Group").property("ADBE Position").setValue([offsetLeft,offsetHight]);
-                        L2.property("ADBE Transform Group").property("ADBE Position").setValue([offsetRight,offsetHight]);
-                        L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
-                        var newCompBG = newComp.layers.addSolid([0,0,0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
-                        newCompBG.moveToEnd();
+        //copy source of activeComp
+        var activeCompAlpha = activeComp.duplicate();
+        activeCompAlpha.name = "alpha(" + activeComp.name + ")";
+        activeCompAlpha.parentFolder = mainFolderItem;
 
-                        //add avi to render queue
-                        var renderQueueComp = app.project.renderQueue.items.add(newComp);
-                        var renderQueueCompIndex = app.project.renderQueue.numItems;
-                        renderQueueComp.applyTemplate("Best Settings");
-                        renderQueueComp.timeSpanStart = 0;
-                        renderQueueComp.timeSpanDuration = newComp.duration;
-                        renderQueueComp.outputModules[1].applyTemplate("Lossless");
-                        renderQueueComp.outputModules[1].file = new File(togvData.outputPath.fsName.toString() + "\\" + activeComp.name + "_a.avi");
+        //set selected layers as guides in copy of mainComp
+        for (var i = 0; i < selectedLayersIndices.length; i++) {
+            activeCompAlpha.layer(selectedLayersIndices[i]).guideLayer = true;
+        }
 
-                        //add png to render queue
-                        var renderQueueThumb = app.project.renderQueue.items.add(activeComp);
-                        var renderQueueThumbIndex = app.project.renderQueue.numItems;
-                        renderQueueThumb.applyTemplate(outputQuality);
-                        renderQueueThumb.timeSpanStart = endFrame;
-                        renderQueueThumb.timeSpanDuration = oneFrame;
-                        renderQueueThumb.outputModules[1].applyTemplate(outputTemplateName);
-                        renderQueueThumb.outputModules[1].file = new File(togvData.outputPath.fsName.toString() + "\\" + activeComp.name + "_[#####].png");
-                    } catch (err) {
-                        alert(err.toString());
-                    }
-                }
-            } else {
-                alert("Composition dimensions are not divisible by 16.");
-            }
+        //create container for activeComp
+        var mainCompName = "main_" + activeComp.name;
+        var mainCompWidth = activeWidth;
+        var mainCompHeight = activeHeight;
+        var mainCompFramerate = activeFramerate;
+        var mainCompDuration = activeDuration;
+        var mainComp = mainFolderItem.items.addComp(mainCompName, mainCompWidth, mainCompHeight, 1, mainCompDuration, mainCompFramerate);
+        mainComp.layers.add(activeComp);
+
+        //create container for activeCompAlpha
+        var mainCompAlphaName = "alpha_" + activeComp.name;
+        var mainCompAlphaWidth = activeWidth;
+        var mainCompAlphaHeight = activeHeight;
+        var mainCompAlphaFramerate = activeFramerate;
+        var mainCompAlphaDuration = activeDuration;
+        var mainCompAlpha = mainFolderItem.items.addComp(mainCompAlphaName, mainCompAlphaWidth, mainCompAlphaHeight, 1, mainCompAlphaDuration, mainCompAlphaFramerate);
+        mainCompAlpha.layers.add(activeCompAlpha);
+
+        //crop mainComp and mainCompAlpha to edges if requested
+        if (togvPal.grp.options.crp.box1.value == true) {
+            //detect edges
+            var numOfSamples = parseInt(togvPal.grp.options.sam.fld.text);
+            var targetEdges = transparentOGV_edgeDetect(mainCompAlpha, mainCompAlpha.layers[1].name, numOfSamples);
+
+            //offset mainComp layer to accommodate new dimensions
+            var layerPos = mainComp.layers[1].property("Transform").property("Position").value;
+            mainComp.layers[1].property("Transform").property("Position").setValue([layerPos[0] - targetEdges[0], layerPos[1] - targetEdges[2]]);
+
+            //offset mainCompAlpha layer to accommodate new dimensions
+            var layerPos = mainCompAlpha.layers[1].property("Transform").property("Position").value;
+            mainCompAlpha.layers[1].property("Transform").property("Position").setValue([layerPos[0] - targetEdges[0], layerPos[1] - targetEdges[2]]);
+
+            //crop comp to edges
+            var newWidth = mainCompWidth - (targetEdges[0] + (mainCompWidth - targetEdges[1]));
+            var newHeight = mainCompHeight - (targetEdges[2] + (mainCompHeight - targetEdges[3]));
+
+            //crop mainComp
+            mainComp.width = transparentOGV_factorisation16(newWidth);
+            mainComp.height = transparentOGV_factorisation16(newHeight);
+
+            //crop mainCompAlpha
+            mainCompAlpha.width = transparentOGV_factorisation16(newWidth);
+            mainCompAlpha.height = transparentOGV_factorisation16(newHeight);
+        } else {
+            //crop mainComp
+            mainComp.width = transparentOGV_factorisation16(mainComp.width);
+            mainComp.height = transparentOGV_factorisation16(mainComp.height);
+
+            //crop mainCompAlpha
+            mainCompAlpha.width = transparentOGV_factorisation16(mainComp.width);
+            mainCompAlpha.height = transparentOGV_factorisation16(mainComp.height);
+        }
+
+        //setup the export
+        try {
+            var endFrame = mainComp.duration - mainComp.frameDuration;
+            var oneFrame = mainComp.frameDuration;
+            var newCompName = "ogv(" + mainComp.name + ")";
+            var newCompWidth = mainComp.width * 2;
+            var offsetLeft = mainComp.width / 2;
+            var offsetRight = (mainComp.width / 2) * 3;
+            var offsetHight = mainComp.height / 2;
+            var newComp = mainFolderItem.items.addComp(newCompName, newCompWidth, mainComp.height, mainComp.pixelAspect, mainComp.duration, mainComp.frameRate);
+            newComp.layers.add(mainComp);
+            newComp.layers.add(mainCompAlpha);
+            var L1 = newComp.layers[2];
+            var L2 = newComp.layers[1];
+            L1.property("ADBE Transform Group").property("ADBE Position").setValue([offsetLeft,offsetHight]);
+            L2.property("ADBE Transform Group").property("ADBE Position").setValue([offsetRight,offsetHight]);
+            L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
+            var newCompBG = newComp.layers.addSolid([0,0,0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
+            newCompBG.moveToEnd();
+            //add avi to render queue
+            var renderQueueComp = app.project.renderQueue.items.add(newComp);
+            var renderQueueCompIndex = app.project.renderQueue.numItems;
+            renderQueueComp.applyTemplate(togvData.outputQuality);
+            renderQueueComp.timeSpanStart = 0;
+            renderQueueComp.timeSpanDuration = newComp.duration;
+            renderQueueComp.outputModules[1].applyTemplate(togvData.outputTemplateVid);
+            renderQueueComp.outputModules[1].file = new File(togvData.outputPath.fsName.toString() + "\\" + activeComp.name + "_a.avi");
+            //add png to render queue
+            var renderQueueThumb = app.project.renderQueue.items.add(mainComp);
+            var renderQueueThumbIndex = app.project.renderQueue.numItems;
+            renderQueueThumb.applyTemplate(togvData.outputQuality);
+            renderQueueThumb.timeSpanStart = endFrame;
+            renderQueueThumb.timeSpanDuration = oneFrame;
+            renderQueueThumb.outputModules[1].applyTemplate(togvData.outputTemplateImg);
+            renderQueueThumb.outputModules[1].file = new File(togvData.outputPath.fsName.toString() + "\\" + activeComp.name + "_[#####].png");
+            //render
+            app.project.renderQueue.render();
+        } catch (err) {
+            alert(err.toString());
+        }
     }
 
     // Button Functions:
@@ -392,15 +449,19 @@
         var outputPath = togvPal.grp.output.select.fld.text;
         if (outputPath != "") {
             togvData.outputPath = new File(outputPath);
-            if (togvData.outputPath.parent.exists == true) {
-                app.beginUndoGroup(togvData.scriptName);
-                var checkPoint = checkTemplate(outputTemplateName);
-                if (checkPoint == false) {
-                    alert(transparentOGV_localize(togvData.strWarning));
+            if (togvData.outputPath.exists == true) {
+                if (togvData.activeItem.selectedLayers.length === 0) {
+                    alert(transparentOGV_localize(togvData.strNoSelectErr));
+                } else {
+                    app.beginUndoGroup(togvData.scriptName);
+                    var checkPoint = checkTemplate(togvData.outputTemplateName);
+                    if (checkPoint == false) {
+                        alert(transparentOGV_localize(togvData.strWarning));
+                    }
+                    transparentOGV_main();
+                    app.endUndoGroup();
+                    togvPal.close();    
                 }
-                transparentOGV_main();
-                app.endUndoGroup();
-                togvPal.close();                    
             } else {
                 alert(transparentOGV_localize(togvData.strOutputErr));
             }

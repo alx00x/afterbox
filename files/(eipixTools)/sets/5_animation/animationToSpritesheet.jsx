@@ -375,7 +375,7 @@
         var getRows = parseInt(a2sPal.grp.options.hor.fld.text);
         var frames = a2sData.activeItemFrames;
 
-        //calculate dimensions divisible by 16
+        //get active comp info
         var activeWidth = a2sData.activeItem.width;
         var activeHeight = a2sData.activeItem.height;
         var activeDuration = a2sData.activeItem.duration;
