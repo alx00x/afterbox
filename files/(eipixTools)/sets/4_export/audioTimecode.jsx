@@ -150,14 +150,22 @@
     function audioTimecode_exportAsText() { 
         var audioTimecode_text = new File(atcData.usePath + "/" + atcData.activeItemName + ".txt");
         audioTimecode_text.open("w");
-        for (var i = 0; i < atcData.audioLayersData.length; i++) {
-            audioTimecode_text.writeln("Filename: " + atcData.audioLayersData[i][0]);
-            audioTimecode_text.writeln("Timecode: " + atcData.audioLayersData[i][1] + " --> " + atcData.audioLayersData[i][2] + "\n");
+        var nothingToWrite = false;
+        if (atcData.audioLayersData != "") {
+            for (var i = 0; i < atcData.audioLayersData.length; i++) {
+                audioTimecode_text.writeln("Filename: " + atcData.audioLayersData[i][0]);
+                audioTimecode_text.writeln("Timecode: " + atcData.audioLayersData[i][1] + " --> " + atcData.audioLayersData[i][2] + "\n");
+            }
+            audioTimecode_text.writeln("----------------------------------------" + "\n");
         }
-        audioTimecode_text.writeln("----------------------------------------");
-        for (var j = 0; j < atcData.textLayersData.length; j++) {
-            audioTimecode_text.writeln("Sound   : " + atcData.textLayersData[j][0]);
-            audioTimecode_text.writeln("Timecode: " + atcData.textLayersData[j][1] + " --> " + atcData.textLayersData[j][2] + "\n");
+        if (atcData.textLayersData != "") {
+            for (var j = 0; j < atcData.textLayersData.length; j++) {
+                audioTimecode_text.writeln("Sound   : " + atcData.textLayersData[j][0]);
+                audioTimecode_text.writeln("Timecode: " + atcData.textLayersData[j][1] + " --> " + atcData.textLayersData[j][2] + "\n");
+            }
+        }
+        if ((atcData.audioLayersData == "") && (atcData.textLayersData == "")) {
+            audioTimecode_text.writeln("Error: Could not find any active audio or text.");
         }
         audioTimecode_text.close();
     }
@@ -184,9 +192,9 @@
         var currentLayer;
         for (var i = 1; i <= currentComp.layers.length; i++) {
             currentLayer = currentComp.layers[i];
-            if (currentLayer.source instanceof TextLayer) {
-                var sourceName = currentLayer.source.name;
-                var startTime = parseFloat(currentLayer.startTime) + offsetFloat;
+            if (currentLayer instanceof TextLayer) {
+                var sourceName = String(currentLayer.text.sourceText.value);
+                var startTime = parseFloat(currentLayer.inPoint) + offsetFloat;
                 var endTime = parseFloat(currentLayer.outPoint) + offsetFloat;
                 atcData.textLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
             } else if (currentLayer.source instanceof CompItem) {
@@ -237,10 +245,6 @@
                 textLayersDataUnique.push(textLayersDataDirty[i]);
         }
         atcData.textLayersData = textLayersDataUnique.sort(compare);
-
-        alert(atcData.textLayersData);
-        return;
-
 
         //get output path
         var editboxOutputPath = atcPal.grp.outputPath.main.box.text;
