@@ -1,7 +1,7 @@
 ﻿// audioTimecode.jsx
 // 
 // Name: audioTimecode
-// Version: 2.2
+// Version: 3.0
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,7 +26,7 @@
 
     atcData.scriptNameShort = "ATC";
     atcData.scriptName = "Audio Timecode";
-    atcData.scriptVersion = "2.2";
+    atcData.scriptVersion = "3.0";
 
     atcData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
     atcData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -54,11 +54,11 @@
     atcData.projectFolder = app.project.file.parent;
     atcData.activeItem = app.project.activeItem;
     atcData.activeItemName = atcData.activeItem.name;
-
-    atcData.selectedLayers = [];
-    atcData.selectedAudioLayers = [];
     atcData.audioLayersDataDirty = [];
     atcData.audioLayersData = [];
+    atcData.textLayersDataDirty = [];
+    atcData.textLayersData = [];
+
     atcData.usePath;
 
     // Localize
@@ -150,14 +150,27 @@
     function audioTimecode_exportAsText() { 
         var audioTimecode_text = new File(atcData.usePath + "/" + atcData.activeItemName + ".txt");
         audioTimecode_text.open("w");
-        for (var i = 0; i < atcData.audioLayersData.length; i++) {
-            audioTimecode_text.writeln("Filename: " + atcData.audioLayersData[i][0]);
-            audioTimecode_text.writeln("Timecode: " + atcData.audioLayersData[i][1] + " --> " + atcData.audioLayersData[i][2] + "\n");
+        var nothingToWrite = false;
+        if (atcData.audioLayersData != "") {
+            for (var i = 0; i < atcData.audioLayersData.length; i++) {
+                audioTimecode_text.writeln("Filename: " + atcData.audioLayersData[i][0]);
+                audioTimecode_text.writeln("Timecode: " + atcData.audioLayersData[i][1] + " --> " + atcData.audioLayersData[i][2] + "\n");
+            }
+            audioTimecode_text.writeln("----------------------------------------" + "\n");
+        }
+        if (atcData.textLayersData != "") {
+            for (var j = 0; j < atcData.textLayersData.length; j++) {
+                audioTimecode_text.writeln("Sound   : " + atcData.textLayersData[j][0]);
+                audioTimecode_text.writeln("Timecode: " + atcData.textLayersData[j][1] + " --> " + atcData.textLayersData[j][2] + "\n");
+            }
+        }
+        if ((atcData.audioLayersData == "") && (atcData.textLayersData == "")) {
+            audioTimecode_text.writeln("Error: Could not find any active audio or text.");
         }
         audioTimecode_text.close();
     }
 
-    function audioTimecode_getTimeRecursively(currentComp, timeOffset) {
+    function audioTimecode_getAudioTimeRecursively(currentComp, timeOffset) {
         var offsetFloat = parseFloat(timeOffset);
         var currentLayer;
         for (var i = 1; i <= currentComp.layers.length; i++) {
@@ -169,16 +182,40 @@
                 atcData.audioLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
             } else if ((currentLayer.source instanceof CompItem) && (currentLayer.audioEnabled == true)) {
                 var offset = currentLayer.startTime + timeOffset;
-                audioTimecode_getTimeRecursively(currentLayer.source, offset);
+                audioTimecode_getAudioTimeRecursively(currentLayer.source, offset);
+            }
+        }
+    }
+
+    function audioTimecode_getTextTimeRecursively(currentComp, timeOffset) {
+        var offsetFloat = parseFloat(timeOffset);
+        var currentLayer;
+        for (var i = 1; i <= currentComp.layers.length; i++) {
+            currentLayer = currentComp.layers[i];
+            if (currentLayer instanceof TextLayer) {
+                var sourceName = String(currentLayer.text.sourceText.value);
+                var startTime = parseFloat(currentLayer.inPoint) + offsetFloat;
+                var endTime = parseFloat(currentLayer.outPoint) + offsetFloat;
+                atcData.textLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
+            } else if (currentLayer.source instanceof CompItem) {
+                var offset = currentLayer.startTime + timeOffset;
+                audioTimecode_getTextTimeRecursively(currentLayer.source, offset);
             }
         }
     }
 
     function audioTimecode_main() {
-        audioTimecode_getTimeRecursively(atcData.activeItem, 0);
+        //sorting function
+        function compare(a, b) {
+            if (a[2] < b[2]) return -1;
+            if (a[2] > b[2]) return 1;
+            return 0;
+        }
+
+        //get audio layers information
+        audioTimecode_getAudioTimeRecursively(atcData.activeItem, 0);
         var layersDataDirty = atcData.audioLayersDataDirty;
         var layersDataUnique = [];
-
         layersDataUnique[0] = layersDataDirty[0];
         for (var i = 0; i < layersDataDirty.length; i++) {
             var flag = true;
@@ -190,15 +227,26 @@
             if (flag == true)
                 layersDataUnique.push(layersDataDirty[i]);
         }
-
-        function compare(a, b) {
-            if (a[2] < b[2]) return -1;
-            if (a[2] > b[2]) return 1;
-            return 0;
-        }
-
         atcData.audioLayersData = layersDataUnique.sort(compare);
 
+        //get text layers information
+        audioTimecode_getTextTimeRecursively(atcData.activeItem, 0);
+        var textLayersDataDirty = atcData.textLayersDataDirty;
+        var textLayersDataUnique = [];
+        textLayersDataUnique[0] = textLayersDataDirty[0];
+        for (var i = 0; i < textLayersDataDirty.length; i++) {
+            var flag = true;
+            for (var j = 0; j < textLayersDataUnique.length; j++) {
+                if (textLayersDataUnique[j][0] == textLayersDataDirty[i][0]) {
+                    flag = false;
+                }
+            }
+            if (flag == true)
+                textLayersDataUnique.push(textLayersDataDirty[i]);
+        }
+        atcData.textLayersData = textLayersDataUnique.sort(compare);
+
+        //get output path
         var editboxOutputPath = atcPal.grp.outputPath.main.box.text;
         if (editboxOutputPath == "") {
             atcData.usePath = atcData.projectFolder.fsName;
@@ -212,6 +260,7 @@
             }
         }
 
+        //call export commands
         if (atcPal.grp.opts.rdio.script.value == true) {
             audioTimecode_exportAsScript();
         } else if (atcPal.grp.opts.rdio.text.value == true) {
