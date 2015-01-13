@@ -133,7 +133,9 @@
 
     // Set margine
     function onionSkinning_setMargine() {
-        //code
+        //get value from slider
+        //set start time to forward layer
+        //set start time to backward layer
     }
 
     // Setup
