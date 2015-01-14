@@ -1,7 +1,7 @@
 ﻿// backgroundRender.jsx
 // 
 // Name: backgroundRender
-// Version: 1.3
+// Version: 1.4
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -22,7 +22,7 @@
 
     bgrData.scriptNameShort = "BGR";
     bgrData.scriptName = "Background Render";
-    bgrData.scriptVersion = "1.3";
+    bgrData.scriptVersion = "1.4";
     bgrData.scriptTitle = bgrData.scriptName + " v" + bgrData.scriptVersion;
 
     bgrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
@@ -252,6 +252,13 @@
         return "\""+ string + "\"";
     }
 
+    // Prototipe includs a string inside another string
+    if (!String.prototype.includes) {
+        String.prototype.includes = function() {
+            return String.prototype.indexOf.apply(this, arguments) !== -1;
+        };
+    }
+
     // Main
     function backgroundRender_main() {
         // Add to render queue
@@ -287,7 +294,16 @@
                 usePath = bgrData.outputPath;
             }
         }
-        renderQueueItem.outputModules[1].file = new File(usePath.toString() + "\\" + bgrData.activeItemName + "_[" + renderQueueItemIndex + "]" + "_[#####]");
+
+        // Padding
+        if (outputModuleTemplate.toString().includes("Sequence") == true) {
+            sequencePadding = "_[#####]";
+        } else {
+            sequencePadding = "";
+        }
+
+        // Output
+        renderQueueItem.outputModules[1].file = new File(usePath.toString() + "\\" + bgrData.activeItemName + "_[" + renderQueueItemIndex + "]" + sequencePadding);
 
         // Save the project
         app.project.save();
