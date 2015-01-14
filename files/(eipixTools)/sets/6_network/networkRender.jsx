@@ -1,7 +1,7 @@
 ﻿// networkRender.jsx
 // 
 // Name: networkRender
-// Version: 1.2
+// Version: 1.3
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -10,7 +10,6 @@
 
 
 (function networkRender(thisObj) {
-
     // Define main variables
     var netrData = new Object();
 
@@ -20,7 +19,7 @@
 
     netrData.scriptNameShort = "NET";
     netrData.scriptName = "Network Render";
-    netrData.scriptVersion = "1.2";
+    netrData.scriptVersion = "1.3";
     netrData.scriptTitle = netrData.scriptName + " v" + netrData.scriptVersion;
 
     netrData.strPathErr = {en: "Specified path could not be found."};
@@ -53,6 +52,7 @@
     netrData.strFlags = {en: "Flags"};
     netrData.strNameTemplate = {en: "Name Template"};
     netrData.strOutputPath = {en: "Output Path"};
+    netrData.strBrowse  = {en: "Browse"};
     netrData.strTimeSpan = {en: "Time Span"};
     netrData.strNumTasks = {en: "Tasks"};
     netrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
@@ -61,8 +61,15 @@
     netrData.strHelpTitle = {en: "Help"};
     netrData.strHelpText = {en: "This script sends the active composition to network renderer."};
 
+    netrData.strInvalidPath = {en: "Invalid path. You have to render inside \"D:\\epx\\\"."};
     netrData.errNoRenderFolder = {en: "Could not find render folder. Please specify render output location."};
-    netrData.errNoPNG = {en: "You don't have \"PNG Sequence\" template installed. Run [IMP REND] script to enable it. Switching to PSD sequence for now."};
+
+    // Console errors
+    netrData.strProjectPathErr = {en: "> Invalid project path. Save under D:\\epx\\"};
+    netrData.errNoPNG = {en: "> You don't have \"PNG Sequence\" template installed. Switching to PSD sequence."};
+
+    // Define globals
+    netrData.projectFolder = app.project.file.parent;
 
     if (app.project.file == null) {
         alert(networkRender_localize(netrData.strSaveProjectErr));
@@ -101,6 +108,12 @@
         String.prototype.startsWith = function(str) {
             return this.slice(0, str.length) == str;
         };
+    }
+
+    // Project path error check
+    var projectPathError = "";
+    if (netrData.projectRoot.startsWith("D:\\epx") == false) {
+        projectPathError = networkRender_localize(netrData.strProjectPathErr) + "\n";
     }
 
     // Prototipe indexOf
@@ -169,13 +182,29 @@
     // Check if theres Multi-Machine PNG Sequence
     var omPNGSequence = omTemplates.indexOf("PNG Sequence");
 
-    var errorConsoleScrolling = "false";
-    var errorConsole = "No Errors...";
+    // No PNG Sequence template error
+    var noPNGError = "";
     if (omPNGSequence == -1) {
-        errorConsoleScrolling = "true";
-        errorConsole = networkRender_localize(netrData.errNoPNG);
+        noPNGError = networkRender_localize(netrData.errNoPNG) + "\n";
     } else {
         omMMIndex = omPNGSequence;
+    }
+
+    //Errors found check
+    if ((projectPathError == "") && (noPNGError == "")) {
+        var errorsFound = true;
+    } else {
+        var errorsFound = false;
+    }
+
+    //Console
+    var errorConsole;
+    var errorConsoleScrolling = "false";
+    if (errorsFound == true) {
+        errorConsole = "No Errors...";
+    } else {
+        errorConsoleScrolling = "true";
+        errorConsole = projectPathError + noPNGError;
     }
 
     // Padding
@@ -280,7 +309,8 @@
                         text: '" + networkRender_localize(netrData.strOutputPath) + "', alignment:['fill','top'], \
                         main: Group { \
                             alignment:['fill','top'], \
-                            fld: EditText { alignment:['fill','center'], preferredSize:[-1,20] },  \
+                            fld: EditText { alignment:['fill','center'], preferredSize:[200,20] },  \
+                            browseBtn: Button { text:'" + networkRender_localize(netrData.strBrowse) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                         }, \
                     }, \
                     flags: Panel { \
@@ -413,6 +443,7 @@
             pal.grp.flags.opts.box2.value = true;
             pal.grp.flags.opts.box3.value = true;
 
+            pal.grp.outputPath.main.browseBtn.onClick = networkRender_doBrowse;
             pal.grp.cmds.executeBtn.onClick = networkRender_doExecute;
             pal.grp.cmds.cancelBtn.onClick = networkRender_doCancel;
         }
@@ -426,6 +457,19 @@
     // Add quotes
     function addQuotes(string) { 
         return "\""+ string + "\"";
+    }
+
+    // Dialog to let users define render location
+    function networkRender_doBrowse() {
+        //var browseOutputPath = Folder.selectDialog();
+        var browseOutputPath = netrData.projectFolder.selectDlg();
+        if (browseOutputPath != null) {
+            if (browseOutputPath.fsName.toString().startsWith("D:\\epx") == true) {
+                netrPal.grp.outputPath.main.fld.text = browseOutputPath.fsName.toString();
+            } else {
+                alert(networkRender_localize(netrData.strInvalidPath));
+            }
+        }
     }
 
     // Create task list
