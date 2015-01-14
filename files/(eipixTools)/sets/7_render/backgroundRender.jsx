@@ -69,7 +69,7 @@
     bgrData.workAreaStart = bgrData.activeItem.workAreaStart;
     bgrData.workAreaDuration = bgrData.activeItem.workAreaDuration;
 
-    // Prototipe startsWith
+    // Prototype startsWith
     if (typeof String.prototype.startsWith != 'function') {
         String.prototype.startsWith = function(str) {
             return this.slice(0, str.length) == str;

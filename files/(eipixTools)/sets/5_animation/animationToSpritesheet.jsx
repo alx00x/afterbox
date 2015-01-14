@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 1.3
+// Version: 1.4
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,7 +24,7 @@
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "1.3";
+    a2sData.scriptVersion = "1.4";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
     a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -46,6 +46,8 @@
     a2sData.strSpreadsheetErr = {en: "You need to specify output first."};
     a2sData.strOutputErr = {en: "Output is not valid."};
     a2sData.strColumnsErr = {en: "Cannot pack sprites at requested number of rows and columns. Try again."};
+    a2sData.strTooLongErr = {en: "Your composition is too long. Cannot run the script."};
+    a2sData.strFramerateErr = {en: "Your composition framerate is not 25fps. Do you wish to continue?"};
 
     a2sData.strCrop = {en: "Crop to Edges"};
     a2sData.strSamples = {en: "Samples"};
@@ -60,6 +62,20 @@
     a2sData.activeItemFrames = app.project.activeItem.duration * app.project.activeItem.frameRate;
     a2sData.projectFolder = app.project.file.parent;
     a2sData.spritesheetFile;
+
+    // Comp lenght check
+    if (a2sData.activeItemFrames > 250) {
+        alert(animationToSpritesheet_localize(a2sData.strTooLongErr));
+        return;
+    }
+
+    // Comp framerate check
+    if (app.project.activeItem.frameRate != 25) {
+        var fpscheck = confirm(animationToSpritesheet_localize(a2sData.strFramerateErr));
+        if (fpscheck == false) {
+            return;
+        }
+    }
 
     // Localize
     function animationToSpritesheet_localize(strVar) {
@@ -97,7 +113,7 @@
         return value;
     }
 
-    var suggestedAtStart = animationToSpritesheet_factorisation(a2sData.activeItemFrames);
+    var suggestedAtStart = animationToSpritesheet_factorisation(Math.round(a2sData.activeItemFrames));
 
     // Build UI
     function animationToSpritesheet_buildUI(thisObj) {
