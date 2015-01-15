@@ -1,7 +1,7 @@
 ﻿// networkRender.jsx
 // 
 // Name: networkRender
-// Version: 1.4
+// Version: 1.5
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -10,6 +10,16 @@
 
 
 (function networkRender(thisObj) {
+    if (app.project.file == null) {
+        alert("Save the project first.");
+        return;
+    }
+
+    if (app.project.activeItem == null) {
+        alert("Please, select your composition.");
+        return;
+    }
+
     // Define main variables
     var netrData = new Object();
 
@@ -19,7 +29,7 @@
 
     netrData.scriptNameShort = "NET";
     netrData.scriptName = "Network Render";
-    netrData.scriptVersion = "1.4";
+    netrData.scriptVersion = "1.5";
     netrData.scriptTitle = netrData.scriptName + " v" + netrData.scriptVersion;
 
     netrData.strPathErr = {en: "Specified path could not be found."};

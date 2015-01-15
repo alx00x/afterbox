@@ -1,7 +1,7 @@
 ﻿// spritesheetToAnimation.jsx
 // 
 // Name: spritesheetToAnimation
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description: Turns sprite tiled sheets into sequences.
@@ -9,22 +9,12 @@
 // 
 
 (function spritesheetToAnimation(thisObj) {
-    if (app.project.file == null) {
-        alert("Save the project first.");
-        return;
-    }
-
-    if (app.project.activeItem == null) {
-        alert("Please, select your composition.");
-        return;
-    }
-
     // Define main variables
     var s2aData = new Object();
 
     s2aData.scriptNameShort = "STA";
     s2aData.scriptName = "Spritesheet To Animation";
-    s2aData.scriptVersion = "1.0";
+    s2aData.scriptVersion = "1.1";
     s2aData.scriptTitle = s2aData.scriptName + " v" + s2aData.scriptVersion;
 
     s2aData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -48,11 +38,6 @@
     s2aData.strHelpTitle = {en: "Help"};
     s2aData.strErr = {en: "Something went wrong."};
     s2aData.strHelpText = {en: "This script turns sprite tiled sheets into sequences."};
-
-    // Define project variables
-    s2aData.activeItem = app.project.activeItem;
-    s2aData.projectFolder = app.project.file.parent;
-
 
     // Localize
     function spritesheetToAnimation_localize(strVar) {
@@ -207,7 +192,12 @@
     //
 
     function spritesheetToAnimation_doBrowse() {
-        var spreadSheetFile = s2aData.projectFolder.openDlg(spritesheetToAnimation_localize(s2aData.strBrowseText),"PNG:*.png");
+        if (app.project.file != null) {
+            var spreadSheetFile = app.project.file.parent.openDlg(spritesheetToAnimation_localize(s2aData.strBrowseText),"PNG:*.png");
+        } else {
+            var spreadSheetFile = File.openDialog(spritesheetToAnimation_localize(s2aData.strBrowseText),"PNG:*.png");
+        }
+
         if (spreadSheetFile != null) {
             s2aPal.grp.spritesheet.select.fld.text = spreadSheetFile.fsName.toString();
         }
