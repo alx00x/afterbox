@@ -1,7 +1,7 @@
 ﻿// networkRender.jsx
 // 
 // Name: networkRender
-// Version: 1.3
+// Version: 1.4
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -19,7 +19,7 @@
 
     netrData.scriptNameShort = "NET";
     netrData.scriptName = "Network Render";
-    netrData.scriptVersion = "1.3";
+    netrData.scriptVersion = "1.4";
     netrData.scriptTitle = netrData.scriptName + " v" + netrData.scriptVersion;
 
     netrData.strPathErr = {en: "Specified path could not be found."};
@@ -30,8 +30,8 @@
 
     netrData.strSaveActionMsg = {en: "Project needs to be saved now. Do you wish to continue?"};
     netrData.strQuestion = {en: "Do you wish to proceed?"};
-    netrData.strExecute = {en: "Yes"};
-    netrData.strCancel = {en: "No"};
+    netrData.strYes = {en: "Yes"};
+    netrData.strNo = {en: "No"};
 
     netrData.strJobName = {en: "Job Name"};
     netrData.strManager = {en: "Manager"};
@@ -56,6 +56,12 @@
     netrData.strTimeSpan = {en: "Time Span"};
     netrData.strNumTasks = {en: "Tasks"};
     netrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
+    netrData.strPostRender = {en: "Post Render"};
+    netrData.strPostRenderOpts = {en: ["Play", "Dont Play"]};
+    netrData.strConfigure = {en: "Configure"};
+    netrData.strConfigInvalidPath = {en: "Invalid path entered for:"};
+    netrData.strSave = {en: "Save"};
+    netrData.strCancel = {en: "Cancel"};
 
     netrData.strHelp = {en: "?"};
     netrData.strHelpTitle = {en: "Help"};
@@ -65,6 +71,7 @@
     netrData.errNoRenderFolder = {en: "Could not find render folder. Please specify render output location."};
 
     // Console errors
+    netrData.errConnectionErr = {en: "> Could not connect to " + netrData.strManagerIP};
     netrData.strProjectPathErr = {en: "> Invalid project path. Save under D:\\epx\\"};
     netrData.errNoPNG = {en: "> You don't have \"PNG Sequence\" template installed. Switching to PSD sequence."};
 
@@ -109,6 +116,13 @@
             return this.slice(0, str.length) == str;
         };
     }
+
+    // Connection to server check
+    // var connectionError = "";
+    // var epxNetwork = new Folder("\\\\" + netrData.strManagerIP + "\\epx");
+    // if (epxNetwork.exists == false) {
+    //     connectionError = networkRender_localize(netrData.errConnectionErr) + "\n";
+    // }
 
     // Project path error check
     var projectPathError = "";
@@ -216,6 +230,8 @@
     // Remove temp render queue item
     app.project.renderQueue.item(tempRenderQueueItemIndex).remove();
 
+
+
     // Build UI
     function networkRender_buildUI(thisObj) {
         var pal = new Window("dialog", netrData.scriptName, undefined, {resizeable:false});
@@ -295,6 +311,12 @@
                             text: StaticText { text:'" + networkRender_localize(netrData.strTimeSpan) + ":', preferredSize:[100,20] }, \
                             list: DropDownList { alignment:['fill','center'], preferredSize:[180,20] }, \
                         }, \
+                        pr: Group { \
+                            alignment:['fill','top'], \
+                            text: StaticText { text:'" + networkRender_localize(netrData.strPostRender) + ":', preferredSize:[100,20] }, \
+                            list: DropDownList { alignment:['fill','center'], preferredSize:[100,20] }, \
+                            btn: Button { text:'" + networkRender_localize(netrData.strConfigure) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        }, \
                     }, \
                     name: Panel { \
                         alignment:['fill','top'], \
@@ -329,8 +351,8 @@
                     }, \
                     cmds: Group { \
                         alignment:['fill','top'], \
-                        executeBtn: Button { text:'" + networkRender_localize(netrData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
-                        cancelBtn: Button { text:'" + networkRender_localize(netrData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        executeBtn: Button { text:'" + networkRender_localize(netrData.strYes) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        cancelBtn: Button { text:'" + networkRender_localize(netrData.strNo) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                     }, \
                 }, \
             }";
@@ -418,6 +440,12 @@
             }
             pal.grp.options.time.list.selection = 1;
 
+            var prItems = networkRender_localize(netrData.strPostRenderOpts);
+            for (var i = 0; i < prItems.length; i++) {
+                pal.grp.options.pr.list.add("item", prItems[i]);
+            }
+            pal.grp.options.pr.list.selection = 0;
+
             pal.grp.name.main.fld.text = "[compName]" + sequencePadding + ".[fileExtension]";
             pal.grp.options.om.list.onChange = function () {
                 var selectedOMTemplate = pal.grp.options.om.list.selection;
@@ -443,12 +471,108 @@
             pal.grp.flags.opts.box2.value = true;
             pal.grp.flags.opts.box3.value = true;
 
+            pal.grp.options.pr.btn.onClick = networkRender_doConfigureUI;
             pal.grp.outputPath.main.browseBtn.onClick = networkRender_doBrowse;
             pal.grp.cmds.executeBtn.onClick = networkRender_doExecute;
             pal.grp.cmds.cancelBtn.onClick = networkRender_doCancel;
         }
 
         return pal;
+    }
+
+    // Build Config UI
+    function networkRender_buildConfigUI(thisObj) {
+        var pal = new Window("dialog", "Configure", undefined, {resizeable:false});
+        if (pal !== null) {
+            var res =
+                "group { \
+                    orientation:'column', alignment:['fill','fill'], \
+                    opts: Panel { \
+                        alignment:['fill','top'], \
+                        text: 'Application Paths', alignment:['fill','top'] \
+                        djv: Group { \
+                            alignment:['fill','top'], \
+                            text: StaticText { text:'djv_view:', preferredSize:[80,20] }, \
+                            fld: EditText { alignment:['fill','center'], preferredSize:[300,20] },  \
+                        }, \
+                        fch: Group { \
+                            alignment:['fill','top'], \
+                            text: StaticText { text:'fcheck:', preferredSize:[80,20] }, \
+                            fld: EditText { alignment:['fill','center'], preferredSize:[300,20] },  \
+                        }, \
+                    }, \
+                    cmds: Group { \
+                        alignment:['fill','top'], \
+                        saveBtn: Button { text:'" + networkRender_localize(netrData.strSave) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        cancelBtn: Button { text:'" + networkRender_localize(netrData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                    }, \
+                }, \
+            }";
+            pal.grp = pal.add(res);
+
+            pal.layout.layout(true);
+            pal.grp.minimumSize = pal.grp.size;
+
+            if (app.settings.haveSetting("EipixTools", "djv_path")) {
+                var djv_app = app.settings.getSetting("EipixTools", "djv_path");
+                pal.grp.opts.djv.fld.text = djv_app;
+            }
+
+            if (app.settings.haveSetting("EipixTools", "fcheck_path")) {
+                var fcheck_app = app.settings.getSetting("EipixTools", "fcheck_path");
+                pal.grp.opts.fch.fld.text = fcheck_app;
+            }
+
+            pal.grp.cmds.saveBtn.onClick = networkRender_doConfigureSave;
+            pal.grp.cmds.cancelBtn.onClick = networkRender_doConfigureCancel;
+        }
+        return pal;
+    }
+
+    // Configure
+    var netrConfigPal;
+    function networkRender_doConfigureUI() {
+        netrConfigPal = networkRender_buildConfigUI(thisObj);
+        if (netrConfigPal !== null) {
+            if (netrConfigPal instanceof Window) {
+                // Show the palette
+                netrConfigPal.center();
+                netrConfigPal.show();
+            } else {
+                netrConfigPal.layout.layout(true);
+            }
+        }
+    }
+
+    // Configure Save
+    function networkRender_doConfigureSave() {
+        //save djv view path
+        if (netrConfigPal.grp.opts.djv.fld.text != "") {
+            var djv_path = new File(netrConfigPal.grp.opts.djv.fld.text);
+            if (djv_path.exists == true) {
+                app.settings.saveSetting("EipixTools", "djv_path", djv_path.fsName);
+            } else {
+                alert(networkRender_localize(netrData.strConfigInvalidPath) + " djv_view");
+            }
+        }
+
+        //save fcheck path
+        if (netrConfigPal.grp.opts.fch.fld.text != "") {
+            var fcheck_path = new File(netrConfigPal.grp.opts.fch.fld.text);
+            if (fcheck_path.exists == true) {
+                app.settings.saveSetting("EipixTools", "fcheck_path", fcheck_path.fsName);
+            } else {
+                alert(networkRender_localize(netrData.strConfigInvalidPath) + " fcheck");
+            }
+        }
+
+        //close config
+        netrConfigPal.close();
+    }
+
+    // Configure Cancel
+    function networkRender_doConfigureCancel() {
+        netrConfigPal.close();
     }
 
     // Main Functions:
@@ -527,9 +651,9 @@
         var tasklistvalue = netrPal.grp.options.task.fld.text;
         var timeoutvalue = netrPal.grp.options.timeout.fld.text;
         var priorityvalue = netrPal.grp.options.priority.fld.text;
-        var rstemplatevalue =  netrPal.grp.options.rs.list.selection;
-        var omtemplatevaleu =  netrPal.grp.options.om.list.selection;
-        var timevalue =  netrPal.grp.options.time.list.selection;
+        var rstemplatevalue = netrPal.grp.options.rs.list.selection;
+        var omtemplatevaleu = netrPal.grp.options.om.list.selection;
+        var timevalue = netrPal.grp.options.time.list.selection;
 
         if (netrPal.grp.flags.opts.box1.value == true) {
             var sound = " -sound ON";
@@ -595,12 +719,12 @@
 
         var startframe;
         var endframe;
-        if (netrPal.grp.options.time.list.selection.index == 1) {
+        if (timevalue.index == 1) {
             startframe = netrData.workAreaStart * netrData.framerate;
-            endframe = netrData.workAreaDuration * netrData.framerate;
+            endframe = netrData.workAreaDuration * netrData.framerate + startframe - 1;
         } else {
             startframe = netrData.timeSpanStart * netrData.framerate;
-            endframe = netrData.timeSpanDuration * netrData.framerate;
+            endframe = netrData.timeSpanDuration * netrData.framerate - 1;
         }
 
         var tasklist = "";
@@ -618,6 +742,65 @@
 
         app.project.save(renderFile);
 
+        //add comp to render queue using renderPathFolder.fsName + useName as path
+        var renderQueueItem = app.project.renderQueue.items.add(app.project.activeItem);
+        var renderQueueItemIndex = app.project.renderQueue.numItems;
+        renderQueueItem.applyTemplate(rstemplatevalue);
+        renderQueueItem.outputModules[1].applyTemplate(omtemplatevaleu);
+        renderQueueItem.outputModules[1].file = new File(renderPathFolder.fsName + "\\" + useName);
+
+        //read out output path
+        var fullOutputPath = renderQueueItem.outputModules[1].file.fsName;
+
+        //delete last render queue item
+        app.project.renderQueue.item(renderQueueItemIndex).remove();
+
+        //is sequence
+        var isSequence = false;
+        var selectedOMTemplate = omtemplatevaleu;
+        if (selectedOMTemplate.toString().includes("Sequence") == true) {
+            isSequence = true;
+        }
+
+        //leading zeros
+        function pad(num, size) {
+            var s = num + "";
+            while (s.length < size) s = "0" + s;
+            return s;
+        }
+
+        //post render play command
+        var postRenderPlay = "";
+        if (netrPal.grp.options.pr.list.selection == 0) {
+            //post render play applications
+            if (app.settings.haveSetting("EipixTools", "djv_path")) {
+                var djv_app = app.settings.getSetting("EipixTools", "djv_path");
+            }
+            if (app.settings.haveSetting("EipixTools", "fcheck_path")) {
+                var fcheck_app = app.settings.getSetting("EipixTools", "fcheck_path");
+            }
+            var djv_view = new File(djv_app);
+            var fcheck = new File(fcheck_app);
+
+            //post render play command
+            var fullUsablePath;
+            if (isSequence == true) {
+                if (djv_view.exists == true) {
+                    fullUsablePath = fullOutputPath.replace("[#####]", "#");
+                    postRenderPlay = "start \"\" " + "\"" + djv_view.fsName + "\"" + " " + "\"" + fullUsablePath + "\"";
+                } else if (fcheck.exists == true) {
+                    fullUsablePath = fullOutputPath.replace("[#####]", "@@@@@");
+                    postRenderPlay = "start \"\" " + "\"" + fcheck.fsName + "\" " + "-r " + netrData.framerate + " " + "-n " + startframe + " " + endframe + " 1 " + "\"" + fullUsablePath + "\"";
+                } else {
+                    fullUsablePath = fullOutputPath.replace("[#####]", pad(startframe, 5));
+                    postRenderPlay = "start \"\" " + "\"" + fullUsablePath + "\"";
+                }
+            } else {
+                postRenderPlay = "start \"\" " + "\"" + fullOutputPath + "\"";
+            }
+        }
+
+        //write bat file
         var batContent = "@echo off\r\n";
         batContent += "title Network Render Prompt\r\n"
         batContent += "\"C:\\Program Files (x86)\\Autodesk\\Backburner\\cmdjob.exe\" -jobname " + addQuotes(jobname) + " -manager " + manager + " "
@@ -626,6 +809,7 @@
         batContent += "-comp " + addQuotes(netrData.activeItemName) + " -RStemplate " + addQuotes(rstemplatevalue.toString()) + " -OMtemplate " + addQuotes(omtemplatevaleu.toString()) + " -output " + addQuotes(usePath.toString()) + " "
         batContent += "-s " + addQuotes(startFlag) + " -e " + addQuotes(endFlag)
         batContent += sound + multiProcessing + "\r\n"
+        batContent += postRenderPlay + "\r\n"
         batContent += "pause";
 
         var batFile = new File(app.project.file.fsName.replace(".aep", ".bat"));
@@ -679,6 +863,15 @@
     } else if (!(app.project.activeItem instanceof CompItem) || (app.project.activeItem == null)) {
         alert(networkRender_localize(netrData.strActiveCompErr));
     } else {
+        if (app.settings.haveSetting("EipixTools", "fcheck_path") == false) {
+            var fcheck2015 = new File("C:\\Program Files\\Autodesk\\Maya2015\\bin\\fcheck.exe");
+            var fcheck2014 = new File("C:\\Program Files\\Autodesk\\Maya2014\\bin\\fcheck.exe");
+            if (fcheck2015.exists == true) {
+                app.settings.saveSetting("EipixTools", "fcheck_path", fcheck2015.fsName);
+            } else if (fcheck2014.exists == true) {
+                app.settings.saveSetting("EipixTools", "fcheck_path", fcheck2014.fsName);
+            }
+        }
         // Build and show the floating palette
         var netrPal = networkRender_buildUI(thisObj);
         if (netrPal !== null) {
