@@ -1,7 +1,7 @@
 ﻿// networkRender.jsx
 // 
 // Name: networkRender
-// Version: 1.5
+// Version: 1.6
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -29,7 +29,7 @@
 
     netrData.scriptNameShort = "NET";
     netrData.scriptName = "Network Render";
-    netrData.scriptVersion = "1.5";
+    netrData.scriptVersion = "1.6";
     netrData.scriptTitle = netrData.scriptName + " v" + netrData.scriptVersion;
 
     netrData.strPathErr = {en: "Specified path could not be found."};
@@ -757,7 +757,7 @@
         var renderQueueItemIndex = app.project.renderQueue.numItems;
         renderQueueItem.applyTemplate(rstemplatevalue);
         renderQueueItem.outputModules[1].applyTemplate(omtemplatevaleu);
-        renderQueueItem.outputModules[1].file = new File(renderPathFolder.fsName + "\\" + useName);
+        renderQueueItem.outputModules[1].file = new File(usePath);
 
         //read out output path
         var fullOutputPath = renderQueueItem.outputModules[1].file.fsName;
