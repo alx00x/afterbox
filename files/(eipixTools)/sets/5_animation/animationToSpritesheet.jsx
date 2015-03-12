@@ -146,7 +146,7 @@
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + animationToSpritesheet_localize(a2sData.strColumns) + ":', preferredSize:[120,20] }, \
                             fld: EditText { text:'1', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:1, minvalue:1, maxvalue:16, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            sld: Slider { value:1, minvalue:1, maxvalue:32, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                         hor: Group { \
                             alignment:['fill','top'], \
