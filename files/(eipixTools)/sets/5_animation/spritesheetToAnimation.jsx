@@ -72,13 +72,13 @@
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + spritesheetToAnimation_localize(s2aData.strColumns) + ":', preferredSize:[120,20] }, \
                             fld: EditText { text:'1', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:1, minvalue:1, maxvalue:16, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            sld: Slider { value:1, minvalue:1, maxvalue:32, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                         hor: Group { \
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + spritesheetToAnimation_localize(s2aData.strRows) + ":', preferredSize:[120,20] }, \
                             fld: EditText { text:'1', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:1, minvalue:1, maxvalue:16, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            sld: Slider { value:1, minvalue:1, maxvalue:32, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                         fps: Group { \
                             alignment:['fill','top'], \
