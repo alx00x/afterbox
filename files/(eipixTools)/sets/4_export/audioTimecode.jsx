@@ -1,7 +1,7 @@
 ﻿// audioTimecode.jsx
 // 
 // Name: audioTimecode
-// Version: 3.0
+// Version: 3.5
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,7 +26,7 @@
 
     atcData.scriptNameShort = "ATC";
     atcData.scriptName = "Audio Timecode";
-    atcData.scriptVersion = "3.0";
+    atcData.scriptVersion = "3.5";
 
     atcData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
     atcData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -56,6 +56,8 @@
     atcData.activeItemName = atcData.activeItem.name;
     atcData.audioLayersDataDirty = [];
     atcData.audioLayersData = [];
+    atcData.engineLayersDataDirty = [];
+    atcData.engineLayersData = [];
     atcData.textLayersDataDirty = [];
     atcData.textLayersData = [];
 
@@ -143,6 +145,20 @@
         }
     }
 
+    // Remove apostrophe
+    function removeApostrophe(str) {
+        var string = str;
+        string = string.replace(/'/g, '');
+        return string;
+    }
+
+    // Remove newline
+    function removeNewline(str) {
+        var string = str;
+        string = string.replace(/(\r\n|\n|\r)/gm,'');
+        return string;
+    }
+
     function audioTimecode_exportAsScript() {
         //code
     }
@@ -155,6 +171,13 @@
             for (var i = 0; i < atcData.audioLayersData.length; i++) {
                 audioTimecode_text.writeln("Filename: " + atcData.audioLayersData[i][0]);
                 audioTimecode_text.writeln("Timecode: " + atcData.audioLayersData[i][1] + " --> " + atcData.audioLayersData[i][2] + "\n");
+            }
+            audioTimecode_text.writeln("----------------------------------------" + "\n");
+        }
+        if (atcData.engineLayersData != "") {
+            for (var j = 0; j < atcData.engineLayersData.length; j++) {
+                audioTimecode_text.writeln("Engine  : " + atcData.engineLayersData[j][0]);
+                audioTimecode_text.writeln("Timecode: " + atcData.engineLayersData[j][1] + " --> " + atcData.engineLayersData[j][2] + "\n");
             }
             audioTimecode_text.writeln("----------------------------------------" + "\n");
         }
@@ -193,10 +216,15 @@
         for (var i = 1; i <= currentComp.layers.length; i++) {
             currentLayer = currentComp.layers[i];
             if (currentLayer instanceof TextLayer) {
-                var sourceName = String(currentLayer.text.sourceText.value);
+                var layerName = currentLayer.name;
+                var sourceText = String(currentLayer.text.sourceText.value);
                 var startTime = parseFloat(currentLayer.inPoint) + offsetFloat;
                 var endTime = parseFloat(currentLayer.outPoint) + offsetFloat;
-                atcData.textLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
+                if (layerName == "engine_text") {
+                    atcData.engineLayersDataDirty.push([removeNewline(sourceText), startTime.toFixed(2), endTime.toFixed(2)]);
+                } else {
+                    atcData.textLayersDataDirty.push([removeNewline(sourceText), startTime.toFixed(2), endTime.toFixed(2)]);
+                }
             } else if (currentLayer.source instanceof CompItem) {
                 var offset = currentLayer.startTime + timeOffset;
                 audioTimecode_getTextTimeRecursively(currentLayer.source, offset);
@@ -207,8 +235,8 @@
     function audioTimecode_main() {
         //sorting function
         function compare(a, b) {
-            if (a[2] < b[2]) return -1;
-            if (a[2] > b[2]) return 1;
+            if (a[1] < b[1]) return -1;
+            if (a[1] > b[1]) return 1;
             return 0;
         }
 
@@ -216,7 +244,6 @@
         audioTimecode_getAudioTimeRecursively(atcData.activeItem, 0);
         var layersDataDirty = atcData.audioLayersDataDirty;
         var layersDataUnique = [];
-        layersDataUnique[0] = layersDataDirty[0];
         for (var i = 0; i < layersDataDirty.length; i++) {
             var flag = true;
             for (var j = 0; j < layersDataUnique.length; j++) {
@@ -224,8 +251,9 @@
                     flag = false;
                 }
             }
-            if (flag == true)
+            if (flag == true) {
                 layersDataUnique.push(layersDataDirty[i]);
+            }
         }
         atcData.audioLayersData = layersDataUnique.sort(compare);
 
@@ -233,7 +261,6 @@
         audioTimecode_getTextTimeRecursively(atcData.activeItem, 0);
         var textLayersDataDirty = atcData.textLayersDataDirty;
         var textLayersDataUnique = [];
-        textLayersDataUnique[0] = textLayersDataDirty[0];
         for (var i = 0; i < textLayersDataDirty.length; i++) {
             var flag = true;
             for (var j = 0; j < textLayersDataUnique.length; j++) {
@@ -241,10 +268,26 @@
                     flag = false;
                 }
             }
-            if (flag == true)
+            if (flag == true) {
                 textLayersDataUnique.push(textLayersDataDirty[i]);
+            }
         }
         atcData.textLayersData = textLayersDataUnique.sort(compare);
+
+        //filter engine layers information
+        var engineLayersDataDirty = atcData.engineLayersDataDirty;
+        var engineLayersDataUnique = [];
+        for (var i = 0; i < engineLayersDataDirty.length; i++) {
+            var flag = true;
+            for (var j = 0; j < engineLayersDataUnique.length; j++) {
+                if (engineLayersDataUnique[j][0] == engineLayersDataDirty[i][0]) {
+                    flag = false;
+                }
+            }
+            if (flag == true)
+                engineLayersDataUnique.push(engineLayersDataDirty[i]);
+        }      
+        atcData.engineLayersData = engineLayersDataUnique.sort(compare);
 
         //get output path
         var editboxOutputPath = atcPal.grp.outputPath.main.box.text;
