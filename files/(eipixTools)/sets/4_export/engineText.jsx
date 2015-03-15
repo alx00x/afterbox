@@ -151,6 +151,10 @@
         addEffect.property(1).setValueAtKey(3, 100);
         addEffect.property(1).setValueAtKey(4, 0);
 
+        //lock
+        presentsText.guideLayer = true;
+        presentsText.locked = true;
+
         //undo group close
         app.endUndoGroup();
     }
@@ -204,6 +208,10 @@
         addEffect.property(1).setValueAtKey(2, 100);
         addEffect.property(1).setValueAtKey(3, 100);
         addEffect.property(1).setValueAtKey(4, 0);
+
+        //set guide and lock
+        collectorsText.guideLayer = true;
+        collectorsText.locked = true;
 
         //undo group close
         app.endUndoGroup();
