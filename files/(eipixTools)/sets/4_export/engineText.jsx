@@ -1,7 +1,11 @@
 ﻿// engineText.jsx
 // 
 // Name: engineText
+<<<<<<< HEAD
 // Version: 1.1
+=======
+// Version: 1.0
+>>>>>>> origin/deploy
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,7 +30,11 @@
 
     etData.scriptNameShort = "ET";
     etData.scriptName = "Engine Text";
+<<<<<<< HEAD
     etData.scriptVersion = "1.1";
+=======
+    etData.scriptVersion = "1.0";
+>>>>>>> origin/deploy
 
     etData.strBtnPesents = {en: "EIPIX ENTERTAINMENT \r\nPRESENTS"};
     etData.strBtnCE = {en: "COLLECTOR'S EDITION"};
@@ -151,8 +159,14 @@
         addEffect.property(1).setValueAtKey(3, 100);
         addEffect.property(1).setValueAtKey(4, 0);
 
+<<<<<<< HEAD
         //guide
         presentsText.guideLayer = true;
+=======
+        //lock
+        presentsText.guideLayer = true;
+        presentsText.locked = true;
+>>>>>>> origin/deploy
 
         //undo group close
         app.endUndoGroup();
