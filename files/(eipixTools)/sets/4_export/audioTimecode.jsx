@@ -1,11 +1,7 @@
 ﻿// audioTimecode.jsx
 // 
 // Name: audioTimecode
-<<<<<<< HEAD
 // Version: 3.6
-=======
-// Version: 3.5
->>>>>>> origin/deploy
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -30,11 +26,7 @@
 
     atcData.scriptNameShort = "ATC";
     atcData.scriptName = "Audio Timecode";
-<<<<<<< HEAD
     atcData.scriptVersion = "3.6";
-=======
-    atcData.scriptVersion = "3.5";
->>>>>>> origin/deploy
 
     atcData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
     atcData.strKeyErr = {en: "Leyar %s has an unexpected number of keys."};
@@ -186,13 +178,6 @@
             audioTimecode_text.writeln("Note: Could not find any active audio." + "\n");
             audioTimecode_text.writeln("----------------------------------------" + "\n");
         }
-        if (atcData.engineLayersData != "") {
-            for (var j = 0; j < atcData.engineLayersData.length; j++) {
-                audioTimecode_text.writeln("Engine  : " + atcData.engineLayersData[j][0]);
-                audioTimecode_text.writeln("Timecode: " + atcData.engineLayersData[j][1] + " --> " + atcData.engineLayersData[j][2] + "\n");
-            }
-            audioTimecode_text.writeln("----------------------------------------" + "\n");
-        }
         if (atcData.textLayersData != "") {
             for (var j = 0; j < atcData.textLayersData.length; j++) {
                 audioTimecode_text.writeln("Sound   : " + atcData.textLayersData[j][0]);
@@ -252,7 +237,6 @@
                 var startTime = parseFloat(currentLayer.inPoint) + offsetFloat;
                 var endTime = parseFloat(currentLayer.outPoint) + offsetFloat;
                 if (layerName == "engine_text") {
-<<<<<<< HEAD
                     //check if layer has "ADBE Solid Composite"
                     var composite = currentLayer.Effects.property("ADBE Solid Composite");
                     if (composite != null) {
@@ -271,9 +255,6 @@
                             alert(error_message);
                         }
                     }    
-=======
-                    atcData.engineLayersDataDirty.push([removeNewline(sourceText), startTime.toFixed(2), endTime.toFixed(2)]);
->>>>>>> origin/deploy
                 } else {
                     atcData.textLayersDataDirty.push([removeNewline(sourceText), startTime.toFixed(2), endTime.toFixed(2)]);
                 }
@@ -287,13 +268,7 @@
     function audioTimecode_main() {
         //sorting function
         function compare(a, b) {
-<<<<<<< HEAD
             return a[1] - b[1];
-=======
-            if (a[1] < b[1]) return -1;
-            if (a[1] > b[1]) return 1;
-            return 0;
->>>>>>> origin/deploy
         }
 
         //get audio layers information
@@ -331,11 +306,7 @@
         atcData.textLayersData = textLayersDataUnique.sort(compare);
 
         //filter engine layers information
-<<<<<<< HEAD
         var engineLayersDataDirty = atcData.engineLayersDataDirty;      
-=======
-        var engineLayersDataDirty = atcData.engineLayersDataDirty;
->>>>>>> origin/deploy
         var engineLayersDataUnique = [];
         for (var i = 0; i < engineLayersDataDirty.length; i++) {
             var flag = true;
@@ -346,11 +317,7 @@
             }
             if (flag == true)
                 engineLayersDataUnique.push(engineLayersDataDirty[i]);
-<<<<<<< HEAD
         }
-=======
-        }      
->>>>>>> origin/deploy
         atcData.engineLayersData = engineLayersDataUnique.sort(compare);
 
         //get output path
