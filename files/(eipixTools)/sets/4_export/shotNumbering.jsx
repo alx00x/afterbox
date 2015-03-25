@@ -190,7 +190,7 @@
             gameNameText.opacity.setValue(40);
             var gameNameTextValue = gameNameText.sourceText.value;
             gameNameTextValue.resetCharStyle();
-            gameNameTextValue.resetParagraphStyle()
+            gameNameTextValue.resetParagraphStyle();
             gameNameTextValue.justification = ParagraphJustification.LEFT_JUSTIFY;
             gameNameTextValue.fontSize = activeItemHeight/16;
             gameNameTextValue.fillColor = [1, 1, 1];
