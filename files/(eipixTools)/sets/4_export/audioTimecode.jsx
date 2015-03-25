@@ -1,7 +1,7 @@
 ﻿// audioTimecode.jsx
 // 
 // Name: audioTimecode
-// Version: 3.0
+// Version: 3.6
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,9 +26,10 @@
 
     atcData.scriptNameShort = "ATC";
     atcData.scriptName = "Audio Timecode";
-    atcData.scriptVersion = "3.0";
+    atcData.scriptVersion = "3.6";
 
     atcData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
+    atcData.strKeyErr = {en: "Leyar %s has an unexpected number of keys."};
     atcData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     atcData.strSaveProject = {en: "Save your project first.."};
     atcData.strActiveCompErr = {en: "Please select a composition."};
@@ -56,6 +57,8 @@
     atcData.activeItemName = atcData.activeItem.name;
     atcData.audioLayersDataDirty = [];
     atcData.audioLayersData = [];
+    atcData.engineLayersDataDirty = [];
+    atcData.engineLayersData = [];
     atcData.textLayersDataDirty = [];
     atcData.textLayersData = [];
 
@@ -143,6 +146,20 @@
         }
     }
 
+    // Remove apostrophe
+    function removeApostrophe(str) {
+        var string = str;
+        string = string.replace(/'/g, '');
+        return string;
+    }
+
+    // Remove newline
+    function removeNewline(str) {
+        var string = str;
+        string = string.replace(/(\r\n|\n|\r)/gm,'');
+        return string;
+    }
+
     function audioTimecode_exportAsScript() {
         //code
     }
@@ -157,15 +174,37 @@
                 audioTimecode_text.writeln("Timecode: " + atcData.audioLayersData[i][1] + " --> " + atcData.audioLayersData[i][2] + "\n");
             }
             audioTimecode_text.writeln("----------------------------------------" + "\n");
+        } else {
+            audioTimecode_text.writeln("Note: Could not find any active audio." + "\n");
+            audioTimecode_text.writeln("----------------------------------------" + "\n");
         }
         if (atcData.textLayersData != "") {
             for (var j = 0; j < atcData.textLayersData.length; j++) {
                 audioTimecode_text.writeln("Sound   : " + atcData.textLayersData[j][0]);
                 audioTimecode_text.writeln("Timecode: " + atcData.textLayersData[j][1] + " --> " + atcData.textLayersData[j][2] + "\n");
             }
+            audioTimecode_text.writeln("----------------------------------------" + "\n");
+        } else {
+            audioTimecode_text.writeln("Note: Could not find any active text." + "\n");
+            audioTimecode_text.writeln("----------------------------------------" + "\n");
         }
-        if ((atcData.audioLayersData == "") && (atcData.textLayersData == "")) {
-            audioTimecode_text.writeln("Error: Could not find any active audio or text.");
+        if (atcData.engineLayersData != "") {
+            for (var j = 0; j < atcData.engineLayersData.length; j++) {
+                var startkey = atcData.engineLayersData[j][3];
+                var fadein = atcData.engineLayersData[j][4] - startkey;
+                var stand = atcData.engineLayersData[j][5] - (startkey + fadein);
+                var fadeout = atcData.engineLayersData[j][6] - (startkey + fadein + stand);
+
+                audioTimecode_text.writeln("Engine: " + atcData.engineLayersData[j][0]);
+                //audioTimecode_text.writeln("Timecode: " + atcData.engineLayersData[j][1] + " --> " + atcData.engineLayersData[j][2]);
+                audioTimecode_text.writeln("Script:");
+                audioTimecode_text.writeln("    after " + startkey + " {");
+                audioTimecode_text.writeln("        fadein $element_name " + fadein);
+                audioTimecode_text.writeln("        after " + stand + " {");
+                audioTimecode_text.writeln("            fadeout $element_name " + fadeout);
+                audioTimecode_text.writeln("        }");
+                audioTimecode_text.writeln("    }" + "\n");
+            }
         }
         audioTimecode_text.close();
     }
@@ -193,10 +232,32 @@
         for (var i = 1; i <= currentComp.layers.length; i++) {
             currentLayer = currentComp.layers[i];
             if (currentLayer instanceof TextLayer) {
-                var sourceName = String(currentLayer.text.sourceText.value);
+                var layerName = currentLayer.name;
+                var sourceText = String(currentLayer.text.sourceText.value);
                 var startTime = parseFloat(currentLayer.inPoint) + offsetFloat;
                 var endTime = parseFloat(currentLayer.outPoint) + offsetFloat;
-                atcData.textLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
+                if (layerName == "engine_text") {
+                    //check if layer has "ADBE Solid Composite"
+                    var composite = currentLayer.Effects.property("ADBE Solid Composite");
+                    if (composite != null) {
+                        //check if it has 4 keyframes
+                        if (composite.property(1).numKeys == 4) {
+                            //get keyTime for all 4 frames
+                            var key1 = composite.property(1).keyTime(1);
+                            var key2 = composite.property(1).keyTime(2);
+                            var key3 = composite.property(1).keyTime(3);
+                            var key4 = composite.property(1).keyTime(4);
+                            //add data to engineLayersDataDirty
+                            atcData.engineLayersDataDirty.push([removeNewline(sourceText), startTime.toFixed(2), endTime.toFixed(2), key1, key2, key3, key4]);
+                        } else {
+                            //dislay error if there are more or less keys than expected
+                            var error_message = audioTimecode_localize(atcData.strKeyErr).replace('%s', '"' + removeNewline(sourceText) + '"');
+                            alert(error_message);
+                        }
+                    }    
+                } else {
+                    atcData.textLayersDataDirty.push([removeNewline(sourceText), startTime.toFixed(2), endTime.toFixed(2)]);
+                }
             } else if (currentLayer.source instanceof CompItem) {
                 var offset = currentLayer.startTime + timeOffset;
                 audioTimecode_getTextTimeRecursively(currentLayer.source, offset);
@@ -207,16 +268,13 @@
     function audioTimecode_main() {
         //sorting function
         function compare(a, b) {
-            if (a[2] < b[2]) return -1;
-            if (a[2] > b[2]) return 1;
-            return 0;
+            return a[1] - b[1];
         }
 
         //get audio layers information
         audioTimecode_getAudioTimeRecursively(atcData.activeItem, 0);
         var layersDataDirty = atcData.audioLayersDataDirty;
         var layersDataUnique = [];
-        layersDataUnique[0] = layersDataDirty[0];
         for (var i = 0; i < layersDataDirty.length; i++) {
             var flag = true;
             for (var j = 0; j < layersDataUnique.length; j++) {
@@ -224,8 +282,9 @@
                     flag = false;
                 }
             }
-            if (flag == true)
+            if (flag == true) {
                 layersDataUnique.push(layersDataDirty[i]);
+            }
         }
         atcData.audioLayersData = layersDataUnique.sort(compare);
 
@@ -233,7 +292,6 @@
         audioTimecode_getTextTimeRecursively(atcData.activeItem, 0);
         var textLayersDataDirty = atcData.textLayersDataDirty;
         var textLayersDataUnique = [];
-        textLayersDataUnique[0] = textLayersDataDirty[0];
         for (var i = 0; i < textLayersDataDirty.length; i++) {
             var flag = true;
             for (var j = 0; j < textLayersDataUnique.length; j++) {
@@ -241,10 +299,26 @@
                     flag = false;
                 }
             }
-            if (flag == true)
+            if (flag == true) {
                 textLayersDataUnique.push(textLayersDataDirty[i]);
+            }
         }
         atcData.textLayersData = textLayersDataUnique.sort(compare);
+
+        //filter engine layers information
+        var engineLayersDataDirty = atcData.engineLayersDataDirty;      
+        var engineLayersDataUnique = [];
+        for (var i = 0; i < engineLayersDataDirty.length; i++) {
+            var flag = true;
+            for (var j = 0; j < engineLayersDataUnique.length; j++) {
+                if (engineLayersDataUnique[j][0] == engineLayersDataDirty[i][0]) {
+                    flag = false;
+                }
+            }
+            if (flag == true)
+                engineLayersDataUnique.push(engineLayersDataDirty[i]);
+        }
+        atcData.engineLayersData = engineLayersDataUnique.sort(compare);
 
         //get output path
         var editboxOutputPath = atcPal.grp.outputPath.main.box.text;

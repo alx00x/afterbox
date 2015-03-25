@@ -1,7 +1,7 @@
 ﻿// engineText.jsx
 // 
 // Name: engineText
-// Version: 0.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -12,7 +12,7 @@
 (function engineText(thisObj) {
 
     if (app.project.file == null) {
-        alert("Save the project first.");
+        alert("Save your project first.");
         return;
     }
 
@@ -24,51 +24,40 @@
     // Define main variables
     var etData = new Object();
 
-    etData.scriptNameShort = "ATC";
-    etData.scriptName = "Audio Timecode";
-    etData.scriptVersion = "3.0";
+    etData.scriptNameShort = "ET";
+    etData.scriptName = "Engine Text";
+    etData.scriptVersion = "1.1";
 
-    etData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
-    etData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
-    etData.strSaveProject = {en: "Save your project first.."};
-    etData.strActiveCompErr = {en: "Please select a composition."};
-    etData.strBrowse = {en: "Browse"};
-    etData.strExecute = {en: "Export"};
-    etData.strCancel = {en: "Cancel"};
+    etData.strBtnPesents = {en: "EIPIX ENTERTAINMENT \r\nPRESENTS"};
+    etData.strBtnCE = {en: "COLLECTOR'S EDITION"};
+    etData.strTextLayerName = {en: "engine_text"};
 
     etData.strHelp = {en: "?"};
     etData.strHelpTitle = {en: "Help"};
     etData.strErr = {en: "Something went wrong."};
-    etData.strNoAudioLayers = {en: "No audio layers were found."};
-    etData.strHelpText = {en: "This script exports timecode data related to audio files to the external .script or .text file."};
-
-    etData.strRenderSettings = {en: "Settings"};
-    etData.strOutputPath = {en: "Output Path"};
-    etData.strScript = {en: "Export as .script"};
-    etData.strText = {en: "Export as .txt"};
+    etData.strHelpText = {en: "This script provides a quick way to add placeholder text elements such as intro branding and collector's edition text."};
+    etData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
 
     // Define project variables
-    etData.projectName = app.project.file.name;
-    etData.projectNameNoExt = etData.projectName.replace(".aepx", "").replace(".aep", "");
-
-    etData.projectFolder = app.project.file.parent;
     etData.activeItem = app.project.activeItem;
     etData.activeItemName = etData.activeItem.name;
-    etData.audioLayersDataDirty = [];
-    etData.audioLayersData = [];
-    etData.textLayersDataDirty = [];
-    etData.textLayersData = [];
-
-    etData.usePath;
 
     // Localize
     function engineText_localize(strVar) {
         return strVar["en"];
     }
 
+    // Remove apostrophe
+    function removeApostropheAndNewline(str) {
+        var string = str;
+        string = string.replace(/'/g, '');
+        string = string.replace(/(\r\n|\n|\r)/gm,'');
+        return string;
+    }
+
     // Build UI
     function engineText_buildUI(thisObj) {
-        var pal = new Window("dialog", etData.scriptName, undefined, {resizeable:false});
+        var pal = new Window("palette", etData.scriptName, undefined, {resizeable:true});
         if (pal !== null) {
             var res =
                 "group { \
@@ -78,32 +67,10 @@
                         title: StaticText { text:'" + etData.scriptNameShort + " v" + etData.scriptVersion + "', alignment:['fill','center'] }, \
                         help: Button { text:'" + engineText_localize(etData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
-                    outputPath: Panel { \
-                        alignment:['fill','top'], \
-                        text: '" + engineText_localize(etData.strOutputPath) + "', alignment:['fill','top'], \
-                        main: Group { \
-                            alignment:['fill','top'], \
-                            btn: Button { text:'" + engineText_localize(etData.strBrowse) + "', preferredSize:[50,20] }, \
-                            box: EditText { alignment:['fill','center'], preferredSize:[-1,20] },  \
-                        }, \
-                    }, \
-                    opts: Panel { \
-                        alignment:['fill','top'], \
-                        text: '" + engineText_localize(etData.strRenderSettings) + "', alignment:['fill','top'] \
-                        rdio: Group { \
-                            alignment:['fill','top'], \
-                            script: RadioButton { text:'" + engineText_localize(etData.strScript) + "' }, \
-                            text: RadioButton { text:'" + engineText_localize(etData.strText) + "', value:true }, \
-                        }, \
-                    }, \
-                    sepr: Group { \
-                        orientation:'row', alignment:['fill','top'], \
-                        rule: Panel { height: 2, alignment:['fill','center'] }, \
-                    }, \
-                    cmds: Group { \
-                        alignment:['fill','top'], \
-                        executeBtn: Button { text:'" + engineText_localize(etData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
-                        cancelBtn: Button { text:'" + engineText_localize(etData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                    btns: Group { \
+                        orientation:'column', alignment:['fill','top'], \
+                        prBtn: Button { text:'" + removeApostropheAndNewline(engineText_localize(etData.strBtnPesents)) + "', alignment:['fill','center'] }, \
+                        ceBtn: Button { text:'" + removeApostropheAndNewline(engineText_localize(etData.strBtnCE)) + "', alignment:['fill','center'] }, \
                     }, \
                 }, \
             }";
@@ -116,174 +83,137 @@
                 this.layout.resize();
             }
 
-            pal.grp.opts.rdio.script.enabled = false;
-
             pal.grp.header.help.onClick = function() {
                 alert(etData.scriptTitle + "\n" + engineText_localize(etData.strHelpText), engineText_localize(etData.strHelpTitle));
             }
 
-            pal.grp.outputPath.main.btn.onClick = function() {
-                engineText_doBrowse();
-            }
-
-            pal.grp.cmds.executeBtn.onClick = engineText_doExecute;
-            pal.grp.cmds.cancelBtn.onClick = engineText_doCancel;
+            pal.grp.btns.prBtn.onClick = engineText_doPresents;
+            pal.grp.btns.ceBtn.onClick = engineText_doCollectors;
         }
 
         return pal;
     }
 
+    // Variables
+    var textFont = "Trebuchet MS";
+    var textSize = 36;
+    var textColor = [1.0, 0.8, 0.0];
+
     // Main Functions:
     //
+    function engineText_doPresents() {
+        //undo group open
+        app.beginUndoGroup(removeApostropheAndNewline(engineText_localize(etData.strBtnPesents)));
 
-    function engineText_doBrowse() {
-        var browseOutputPath = Folder.selectDialog();
-        if (browseOutputPath != null) {
-            etPal.grp.outputPath.main.box.text = browseOutputPath.fsName.toString();
-        }
-    }
+        //get necesery data
+        var activeItem = app.project.activeItem;
+        var activeItemName = activeItem.name;
+        var activeItemWidth = activeItem.width;
+        var activeItemHeight = activeItem.height;
+        var activeItemPixelAspect = activeItem.pixelAspect;
+        var activeItemDuration = activeItem.duration;
+        var curentTime = activeItem.time;
 
-    function engineText_exportAsScript() {
-        //code
-    }
+        //add empty text layer
+        var presentsText = activeItem.layers.addText(engineText_localize(etData.strBtnPesents));
+        var presentsTextValue = presentsText.sourceText.value;
+        presentsText.moveToBeginning();
+        presentsText.label = 2;
 
-    function engineText_exportAsText() { 
-        var engineText_text = new File(etData.usePath + "/" + etData.activeItemName + ".txt");
-        engineText_text.open("w");
-        var nothingToWrite = false;
-        if (etData.audioLayersData != "") {
-            for (var i = 0; i < etData.audioLayersData.length; i++) {
-                engineText_text.writeln("Filename: " + etData.audioLayersData[i][0]);
-                engineText_text.writeln("Timecode: " + etData.audioLayersData[i][1] + " --> " + etData.audioLayersData[i][2] + "\n");
-            }
-            engineText_text.writeln("----------------------------------------" + "\n");
-        }
-        if (etData.textLayersData != "") {
-            for (var j = 0; j < etData.textLayersData.length; j++) {
-                engineText_text.writeln("Sound   : " + etData.textLayersData[j][0]);
-                engineText_text.writeln("Timecode: " + etData.textLayersData[j][1] + " --> " + etData.textLayersData[j][2] + "\n");
-            }
-        }
-        if ((etData.audioLayersData == "") && (etData.textLayersData == "")) {
-            engineText_text.writeln("Error: Could not find any active audio or text.");
-        }
-        engineText_text.close();
-    }
+        //set font
+        presentsTextValue.resetParagraphStyle();
+        presentsTextValue.resetCharStyle();
+        presentsTextValue.justification = ParagraphJustification.CENTER_JUSTIFY;
+        presentsTextValue.fontSize = textSize;
+        presentsTextValue.fillColor = textColor;
+        presentsTextValue.font = textFont;
+        presentsText.sourceText.setValue(presentsTextValue);
 
-    function engineText_getAudioTimeRecursively(currentComp, timeOffset) {
-        var offsetFloat = parseFloat(timeOffset);
-        var currentLayer;
-        for (var i = 1; i <= currentComp.layers.length; i++) {
-            currentLayer = currentComp.layers[i];
-            if (!(currentLayer.source instanceof CompItem) && (currentLayer.source instanceof FootageItem) && (currentLayer instanceof AVLayer) && (currentLayer.source.hasAudio == true) && (currentLayer.audioEnabled == true) && (currentLayer.source.hasVideo == false)) {
-                var sourceName = currentLayer.source.name;
-                var startTime = parseFloat(currentLayer.startTime) + offsetFloat;
-                var endTime = parseFloat(currentLayer.outPoint) + offsetFloat;
-                etData.audioLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
-            } else if ((currentLayer.source instanceof CompItem) && (currentLayer.audioEnabled == true)) {
-                var offset = currentLayer.startTime + timeOffset;
-                engineText_getAudioTimeRecursively(currentLayer.source, offset);
-            }
-        }
-    }
+        //set position
+        presentsText.position.setValue([activeItemWidth/2, activeItemHeight/2]);
+        presentsText.name = engineText_localize(etData.strTextLayerName);
 
-    function engineText_getTextTimeRecursively(currentComp, timeOffset) {
-        var offsetFloat = parseFloat(timeOffset);
-        var currentLayer;
-        for (var i = 1; i <= currentComp.layers.length; i++) {
-            currentLayer = currentComp.layers[i];
-            if (currentLayer instanceof TextLayer) {
-                var sourceName = String(currentLayer.text.sourceText.value);
-                var startTime = parseFloat(currentLayer.inPoint) + offsetFloat;
-                var endTime = parseFloat(currentLayer.outPoint) + offsetFloat;
-                etData.textLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
-            } else if (currentLayer.source instanceof CompItem) {
-                var offset = currentLayer.startTime + timeOffset;
-                engineText_getTextTimeRecursively(currentLayer.source, offset);
-            }
-        }
-    }
+        //set duration to 7 seconds
+        presentsText.startTime = curentTime;
+        presentsText.outPoint = curentTime + 7;
 
-    function engineText_main() {
-        //sorting function
-        function compare(a, b) {
-            if (a[2] < b[2]) return -1;
-            if (a[2] > b[2]) return 1;
-            return 0;
-        }
+        //add solid composite effect
+        var addEffect = presentsText.Effects.addProperty("ADBE Solid Composite");
+        addEffect.property(3).setValue(0);
 
-        //get audio layers information
-        engineText_getAudioTimeRecursively(etData.activeItem, 0);
-        var layersDataDirty = etData.audioLayersDataDirty;
-        var layersDataUnique = [];
-        layersDataUnique[0] = layersDataDirty[0];
-        for (var i = 0; i < layersDataDirty.length; i++) {
-            var flag = true;
-            for (var j = 0; j < layersDataUnique.length; j++) {
-                if (layersDataUnique[j][0] == layersDataDirty[i][0]) {
-                    flag = false;
-                }
-            }
-            if (flag == true)
-                layersDataUnique.push(layersDataDirty[i]);
-        }
-        etData.audioLayersData = layersDataUnique.sort(compare);
+        //set source opacity keyframes
+        addEffect.property(1).addKey(curentTime);
+        addEffect.property(1).addKey(curentTime + 3);
+        addEffect.property(1).addKey(curentTime + 5);
+        addEffect.property(1).addKey(curentTime + 7);
+        addEffect.property(1).setValueAtKey(1, 0);
+        addEffect.property(1).setValueAtKey(2, 100);
+        addEffect.property(1).setValueAtKey(3, 100);
+        addEffect.property(1).setValueAtKey(4, 0);
 
-        //get text layers information
-        engineText_getTextTimeRecursively(etData.activeItem, 0);
-        var textLayersDataDirty = etData.textLayersDataDirty;
-        var textLayersDataUnique = [];
-        textLayersDataUnique[0] = textLayersDataDirty[0];
-        for (var i = 0; i < textLayersDataDirty.length; i++) {
-            var flag = true;
-            for (var j = 0; j < textLayersDataUnique.length; j++) {
-                if (textLayersDataUnique[j][0] == textLayersDataDirty[i][0]) {
-                    flag = false;
-                }
-            }
-            if (flag == true)
-                textLayersDataUnique.push(textLayersDataDirty[i]);
-        }
-        etData.textLayersData = textLayersDataUnique.sort(compare);
+        //guide
+        presentsText.guideLayer = true;
 
-        //get output path
-        var editboxOutputPath = etPal.grp.outputPath.main.box.text;
-        if (editboxOutputPath == "") {
-            etData.usePath = etData.projectFolder.fsName;
-        } else {
-            var usePathFolder = new Folder(editboxOutputPath);
-            if (usePathFolder.exists == true) {
-                etData.usePath = editboxOutputPath;
-            } else {
-                alert(engineText_localize(etPal.strPathErr));
-                etData.usePath = etData.projectFolder.fsName;
-            }
-        }
-
-        //call export commands
-        if (etPal.grp.opts.rdio.script.value == true) {
-            engineText_exportAsScript();
-        } else if (etPal.grp.opts.rdio.text.value == true) {
-            engineText_exportAsText();
-        } else {
-            alert(engineText_localize(etData.strErr))
-        }
-    }
-
-    // Button Functions:
-    //
-
-    // Execute
-    function engineText_doExecute() {
-        app.beginUndoGroup(etData.scriptName);
-        engineText_main()
+        //undo group close
         app.endUndoGroup();
-        etPal.close();
     }
 
-    // Cancel
-    function engineText_doCancel() {
-        etPal.close();
+    function engineText_doCollectors() {
+        //undo group open
+        app.beginUndoGroup(removeApostropheAndNewline(engineText_localize(etData.strBtnCE)));
+
+        //get necesery data
+        var activeItem = app.project.activeItem;
+        var activeItemName = activeItem.name;
+        var activeItemWidth = activeItem.width;
+        var activeItemHeight = activeItem.height;
+        var activeItemPixelAspect = activeItem.pixelAspect;
+        var activeItemDuration = activeItem.duration;
+        var curentTime = activeItem.time;
+
+        //add empty text layer
+        var collectorsText = activeItem.layers.addText(engineText_localize(etData.strBtnCE));
+        var collectorsTextValue = collectorsText.sourceText.value;
+        collectorsText.moveToBeginning();
+        collectorsText.label = 2;
+
+        //set font
+        collectorsTextValue.resetParagraphStyle();
+        collectorsTextValue.resetCharStyle();
+        collectorsTextValue.justification = ParagraphJustification.CENTER_JUSTIFY;
+        collectorsTextValue.fontSize = textSize;
+        collectorsTextValue.fillColor = textColor;
+        collectorsTextValue.font = textFont;
+        collectorsText.sourceText.setValue(collectorsTextValue);
+
+        //set position
+        collectorsText.position.setValue([activeItemWidth/2, activeItemHeight/8*7]);
+        collectorsText.name = engineText_localize(etData.strTextLayerName);
+
+        //set duration to 7 seconds
+        collectorsText.startTime = curentTime;
+        collectorsText.outPoint = curentTime + 6;
+
+        //add solid composite effect
+        var addEffect = collectorsText.Effects.addProperty("ADBE Solid Composite");
+        addEffect.property(3).setValue(0);
+
+        //set source opacity keyframes
+        addEffect.property(1).addKey(curentTime);
+        addEffect.property(1).addKey(curentTime + 3);
+        addEffect.property(1).addKey(curentTime + 5);
+        addEffect.property(1).addKey(curentTime + 6);
+        addEffect.property(1).setValueAtKey(1, 0);
+        addEffect.property(1).setValueAtKey(2, 100);
+        addEffect.property(1).setValueAtKey(3, 100);
+        addEffect.property(1).setValueAtKey(4, 0);
+
+        //set guide and lock
+        collectorsText.guideLayer = true;
+        collectorsText.locked = true;
+
+        //undo group close
+        app.endUndoGroup();
     }
 
     // Main code:
