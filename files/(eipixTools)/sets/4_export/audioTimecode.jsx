@@ -189,22 +189,30 @@
             audioTimecode_text.writeln("----------------------------------------" + "\n");
         }
         if (atcData.engineLayersData != "") {
+            audioTimecode_text.writeln("Script:" + "\n");
+            audioTimecode_text.writeln("init {");
+            for (var j = 0; j < atcData.engineLayersData.length; j++) {
+                audioTimecode_text.writeln("    hide $" + atcData.engineLayersData[j][0].replace(" ", "_").toLowerCase());
+            }
+            audioTimecode_text.writeln("}" + "\n");
+            audioTimecode_text.writeln("on !entered {");
             for (var j = 0; j < atcData.engineLayersData.length; j++) {
                 var startkey = atcData.engineLayersData[j][3];
                 var fadein = atcData.engineLayersData[j][4] - startkey;
-                var stand = atcData.engineLayersData[j][5] - (startkey + fadein);
-                var fadeout = atcData.engineLayersData[j][6] - (startkey + fadein + stand);
+                var stand = atcData.engineLayersData[j][5] - startkey;
+                var fadeout = atcData.engineLayersData[j][6] - atcData.engineLayersData[j][5];
 
-                audioTimecode_text.writeln("Engine: " + atcData.engineLayersData[j][0]);
+                //audioTimecode_text.writeln("Engine: " + atcData.engineLayersData[j][0]);
                 //audioTimecode_text.writeln("Timecode: " + atcData.engineLayersData[j][1] + " --> " + atcData.engineLayersData[j][2]);
-                audioTimecode_text.writeln("Script:");
-                audioTimecode_text.writeln("    after " + startkey + " {");
-                audioTimecode_text.writeln("        fadein $element_name " + fadein);
-                audioTimecode_text.writeln("        after " + stand + " {");
-                audioTimecode_text.writeln("            fadeout $element_name " + fadeout);
+                //audioTimecode_text.writeln("Script:");
+                audioTimecode_text.writeln("    after_fx " + startkey + " {");
+                audioTimecode_text.writeln("        fadein_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").toLowerCase() + " " + fadein);
+                audioTimecode_text.writeln("        after_fx " + stand + " {");
+                audioTimecode_text.writeln("            fadeout_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").toLowerCase() + " " + fadeout);
                 audioTimecode_text.writeln("        }");
-                audioTimecode_text.writeln("    }" + "\n");
+                audioTimecode_text.writeln("    }");
             }
+            audioTimecode_text.writeln("}");
         }
         audioTimecode_text.close();
     }
