@@ -1,7 +1,7 @@
-﻿// engineText.jsx
+// engineText.jsx
 // 
 // Name: engineText
-// Version: 1.1
+// Version: 1.6
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,11 +26,11 @@
 
     etData.scriptNameShort = "ET";
     etData.scriptName = "Engine Text";
-    etData.scriptVersion = "1.1";
+    etData.scriptVersion = "1.6";
 
     etData.strBtnPesents = {en: "EIPIX ENTERTAINMENT \r\nPRESENTS"};
     etData.strBtnCE = {en: "COLLECTOR'S EDITION"};
-    etData.strTextLayerName = {en: "engine_text"};
+    etData.strTextLayerName = "engine_text";
 
     etData.strHelp = {en: "?"};
     etData.strHelpTitle = {en: "Help"};
@@ -120,6 +120,10 @@
         presentsText.moveToBeginning();
         presentsText.label = 2;
 
+        //add marker and comment
+        var mv = new MarkerValue("[0] " + engineText_localize(etData.strBtnPesents));
+        presentsText.property("Marker").setValueAtTime(0, mv);
+
         //set font
         presentsTextValue.resetParagraphStyle();
         presentsTextValue.resetCharStyle();
@@ -131,7 +135,7 @@
 
         //set position
         presentsText.position.setValue([activeItemWidth/2, activeItemHeight/2]);
-        presentsText.name = engineText_localize(etData.strTextLayerName);
+        presentsText.name = etData.strTextLayerName;
 
         //set duration to 7 seconds
         presentsText.startTime = curentTime;
@@ -177,6 +181,10 @@
         collectorsText.moveToBeginning();
         collectorsText.label = 2;
 
+        //add marker and comment
+        var mv = new MarkerValue("[1] " + engineText_localize(etData.strBtnCE));
+        collectorsText.property("Marker").setValueAtTime(0, mv);
+
         //set font
         collectorsTextValue.resetParagraphStyle();
         collectorsTextValue.resetCharStyle();
@@ -188,7 +196,7 @@
 
         //set position
         collectorsText.position.setValue([activeItemWidth/2, activeItemHeight/8*7]);
-        collectorsText.name = engineText_localize(etData.strTextLayerName);
+        collectorsText.name = etData.strTextLayerName;
 
         //set duration to 7 seconds
         collectorsText.startTime = curentTime;
@@ -208,9 +216,8 @@
         addEffect.property(1).setValueAtKey(3, 100);
         addEffect.property(1).setValueAtKey(4, 0);
 
-        //set guide and lock
+        //set guide
         collectorsText.guideLayer = true;
-        collectorsText.locked = true;
 
         //undo group close
         app.endUndoGroup();

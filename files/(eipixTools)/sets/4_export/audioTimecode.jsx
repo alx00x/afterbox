@@ -1,7 +1,7 @@
 ﻿// audioTimecode.jsx
 // 
 // Name: audioTimecode
-// Version: 3.6
+// Version: 3.7
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,10 +26,11 @@
 
     atcData.scriptNameShort = "ATC";
     atcData.scriptName = "Audio Timecode";
-    atcData.scriptVersion = "3.6";
+    atcData.scriptVersion = "3.7";
 
     atcData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
     atcData.strKeyErr = {en: "Leyar %s has an unexpected number of keys."};
+    atcData.strCommentErr = {en: "Leyar %s doesnt have a proper marker comment."};
     atcData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     atcData.strSaveProject = {en: "Save your project first.."};
     atcData.strActiveCompErr = {en: "Please select a composition."};
@@ -146,6 +147,14 @@
         }
     }
 
+    //function to check if string starts with substring
+    if (typeof String.prototype.startsWith != 'function') {
+        // see below for better implementation!
+        String.prototype.startsWith = function (str){
+            return this.indexOf(str) === 0;
+        };
+    }
+
     // Remove apostrophe
     function removeApostrophe(str) {
         var string = str;
@@ -192,7 +201,10 @@
             audioTimecode_text.writeln("Script:" + "\n");
             audioTimecode_text.writeln("init {");
             for (var j = 0; j < atcData.engineLayersData.length; j++) {
-                audioTimecode_text.writeln("    hide $" + atcData.engineLayersData[j][0].replace(" ", "_").toLowerCase());
+                audioTimecode_text.writeln("    hide $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase());
+                if (atcData.engineLayersData[j][7].startsWith("[1]") == true) {
+                    audioTimecode_text.writeln("    animate $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase()) + "1f";
+                }
             }
             audioTimecode_text.writeln("}" + "\n");
             audioTimecode_text.writeln("on !entered {");
@@ -206,9 +218,12 @@
                 //audioTimecode_text.writeln("Timecode: " + atcData.engineLayersData[j][1] + " --> " + atcData.engineLayersData[j][2]);
                 //audioTimecode_text.writeln("Script:");
                 audioTimecode_text.writeln("    after_fx " + startkey + " {");
-                audioTimecode_text.writeln("        fadein_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").toLowerCase() + " " + fadein);
+                audioTimecode_text.writeln("        fadein_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " " + fadein);
+                if (atcData.engineLayersData[j][7].startsWith("[1]") == true) {
+                    audioTimecode_text.writeln("        animate $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " 1f 100f");
+                }
                 audioTimecode_text.writeln("        after_fx " + stand + " {");
-                audioTimecode_text.writeln("            fadeout_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").toLowerCase() + " " + fadeout);
+                audioTimecode_text.writeln("            fadeout_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " " + fadeout);
                 audioTimecode_text.writeln("        }");
                 audioTimecode_text.writeln("    }");
             }
@@ -250,13 +265,19 @@
                     if (composite != null) {
                         //check if it has 4 keyframes
                         if (composite.property(1).numKeys == 4) {
-                            //get keyTime for all 4 frames
-                            var key1 = composite.property(1).keyTime(1);
-                            var key2 = composite.property(1).keyTime(2);
-                            var key3 = composite.property(1).keyTime(3);
-                            var key4 = composite.property(1).keyTime(4);
-                            //add data to engineLayersDataDirty
-                            atcData.engineLayersDataDirty.push([removeNewline(sourceText), startTime.toFixed(2), endTime.toFixed(2), key1, key2, key3, key4]);
+                            if (currentLayer.property("Marker").keyValue(1).comment != null) {
+                                //get keyTime for all 4 frames
+                                var key1 = composite.property(1).keyTime(1);
+                                var key2 = composite.property(1).keyTime(2);
+                                var key3 = composite.property(1).keyTime(3);
+                                var key4 = composite.property(1).keyTime(4);
+                                var comment = currentLayer.property("Marker").keyValue(1).comment;
+                                //add data to engineLayersDataDirty
+                                atcData.engineLayersDataDirty.push([removeNewline(sourceText), startTime.toFixed(2), endTime.toFixed(2), key1, key2, key3, key4, comment]);
+                            } else {
+                                var comment_error_message = audioTimecode_localize(atcData.strCommentErr).replace('%s', '"' + removeNewline(sourceText) + '"');
+                                alert(comment_error_message);
+                            }
                         } else {
                             //dislay error if there are more or less keys than expected
                             var error_message = audioTimecode_localize(atcData.strKeyErr).replace('%s', '"' + removeNewline(sourceText) + '"');
