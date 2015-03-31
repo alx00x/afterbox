@@ -1,7 +1,7 @@
 // engineText.jsx
 // 
 // Name: engineText
-// Version: 1.6
+// Version: 1.7
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,9 +26,10 @@
 
     etData.scriptNameShort = "ET";
     etData.scriptName = "Engine Text";
-    etData.scriptVersion = "1.6";
+    etData.scriptVersion = "1.7";
 
-    etData.strBtnPesents = {en: "EIPIX ENTERTAINMENT \r\nPRESENTS"};
+    etData.strBtnEipix = {en: "EIPIX ENTERTAINMENT"};
+    etData.strBtnPesents = {en: "PRESENTS"};
     etData.strBtnCE = {en: "COLLECTOR'S EDITION"};
     etData.strTextLayerName = "engine_text";
 
@@ -69,6 +70,7 @@
                     }, \
                     btns: Group { \
                         orientation:'column', alignment:['fill','top'], \
+                        eiBtn: Button { text:'" + removeApostropheAndNewline(engineText_localize(etData.strBtnEipix)) + "', alignment:['fill','center'] }, \
                         prBtn: Button { text:'" + removeApostropheAndNewline(engineText_localize(etData.strBtnPesents)) + "', alignment:['fill','center'] }, \
                         ceBtn: Button { text:'" + removeApostropheAndNewline(engineText_localize(etData.strBtnCE)) + "', alignment:['fill','center'] }, \
                     }, \
@@ -87,6 +89,7 @@
                 alert(etData.scriptTitle + "\n" + engineText_localize(etData.strHelpText), engineText_localize(etData.strHelpTitle));
             }
 
+            pal.grp.btns.eiBtn.onClick = engineText_doEipix;
             pal.grp.btns.prBtn.onClick = engineText_doPresents;
             pal.grp.btns.ceBtn.onClick = engineText_doCollectors;
         }
@@ -101,6 +104,67 @@
 
     // Main Functions:
     //
+    function engineText_doEipix() {
+        //undo group open
+        app.beginUndoGroup(removeApostropheAndNewline(engineText_localize(etData.strBtnEipix)));
+
+        //get necesery data
+        var activeItem = app.project.activeItem;
+        var activeItemName = activeItem.name;
+        var activeItemWidth = activeItem.width;
+        var activeItemHeight = activeItem.height;
+        var activeItemPixelAspect = activeItem.pixelAspect;
+        var activeItemDuration = activeItem.duration;
+        var curentTime = activeItem.time;
+
+        //add empty text layer
+        var eipixText = activeItem.layers.addText(engineText_localize(etData.strBtnEipix));
+        var eipixTextValue = eipixText.sourceText.value;
+        eipixText.moveToBeginning();
+        eipixText.label = 2;
+
+        //add marker and comment
+        var mv = new MarkerValue("[0] " + engineText_localize(etData.strBtnEipix));
+        eipixText.property("Marker").setValueAtTime(0, mv);
+
+        //set font
+        eipixTextValue.resetParagraphStyle();
+        eipixTextValue.resetCharStyle();
+        eipixTextValue.justification = ParagraphJustification.CENTER_JUSTIFY;
+        eipixTextValue.fontSize = textSize;
+        eipixTextValue.fillColor = textColor;
+        eipixTextValue.font = textFont;
+        eipixText.sourceText.setValue(eipixTextValue);
+
+        //set position
+        eipixText.position.setValue([activeItemWidth/2, activeItemHeight/2]);
+        eipixText.name = etData.strTextLayerName;
+
+        //set duration to 7 seconds
+        eipixText.startTime = curentTime;
+        eipixText.outPoint = curentTime + 7;
+
+        //add solid composite effect
+        var addEffect = eipixText.Effects.addProperty("ADBE Solid Composite");
+        addEffect.property(3).setValue(0);
+
+        //set source opacity keyframes
+        addEffect.property(1).addKey(curentTime);
+        addEffect.property(1).addKey(curentTime + 3);
+        addEffect.property(1).addKey(curentTime + 5);
+        addEffect.property(1).addKey(curentTime + 7);
+        addEffect.property(1).setValueAtKey(1, 0);
+        addEffect.property(1).setValueAtKey(2, 100);
+        addEffect.property(1).setValueAtKey(3, 100);
+        addEffect.property(1).setValueAtKey(4, 0);
+
+        //guide
+        eipixText.guideLayer = true;
+
+        //undo group close
+        app.endUndoGroup();
+    }
+
     function engineText_doPresents() {
         //undo group open
         app.beginUndoGroup(removeApostropheAndNewline(engineText_localize(etData.strBtnPesents)));
@@ -134,7 +198,7 @@
         presentsText.sourceText.setValue(presentsTextValue);
 
         //set position
-        presentsText.position.setValue([activeItemWidth/2, activeItemHeight/2]);
+        presentsText.position.setValue([activeItemWidth/2, activeItemHeight/1.76]);
         presentsText.name = etData.strTextLayerName;
 
         //set duration to 7 seconds
