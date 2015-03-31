@@ -100,7 +100,7 @@
     // Variables
     var textFont = "Trebuchet MS";
     var textSize = 36;
-    var textColor = [1.0, 0.8, 0.0];
+    var textColor = [1.0, 1.0, 1.0];
 
     // Main Functions:
     //
