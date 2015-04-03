@@ -1,7 +1,7 @@
 ﻿// audioTimecode.jsx
 // 
 // Name: audioTimecode
-// Version: 3.7
+// Version: 3.8
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,7 +26,7 @@
 
     atcData.scriptNameShort = "ATC";
     atcData.scriptName = "Audio Timecode";
-    atcData.scriptVersion = "3.7";
+    atcData.scriptVersion = "3.8";
 
     atcData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
     atcData.strKeyErr = {en: "Leyar %s has an unexpected number of keys."};
@@ -62,6 +62,8 @@
     atcData.engineLayersData = [];
     atcData.textLayersDataDirty = [];
     atcData.textLayersData = [];
+    atcData.sfxLayersDataDirty = [];
+    atcData.sfxtLayersData = [];
 
     atcData.usePath;
 
@@ -189,7 +191,7 @@
         }
         if (atcData.textLayersData != "") {
             for (var j = 0; j < atcData.textLayersData.length; j++) {
-                audioTimecode_text.writeln("Sound   : " + atcData.textLayersData[j][0]);
+                audioTimecode_text.writeln("Text    : " + atcData.textLayersData[j][0]);
                 audioTimecode_text.writeln("Timecode: " + atcData.textLayersData[j][1] + " --> " + atcData.textLayersData[j][2] + "\n");
             }
             audioTimecode_text.writeln("----------------------------------------" + "\n");
@@ -203,7 +205,8 @@
             for (var j = 0; j < atcData.engineLayersData.length; j++) {
                 audioTimecode_text.writeln("    hide $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase());
                 if (atcData.engineLayersData[j][7].startsWith("[1]") == true) {
-                    audioTimecode_text.writeln("    animate $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase()) + "1f";
+                    //audioTimecode_text.writeln("    animate $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase()) + " 100f";
+                    audioTimecode_text.writeln("    animate $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " 100f");
                 }
             }
             audioTimecode_text.writeln("}" + "\n");
@@ -220,7 +223,7 @@
                 audioTimecode_text.writeln("    after_fx " + startkey + " {");
                 audioTimecode_text.writeln("        fadein_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " " + fadein);
                 if (atcData.engineLayersData[j][7].startsWith("[1]") == true) {
-                    audioTimecode_text.writeln("        animate $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " 1f 100f");
+                    audioTimecode_text.writeln("        animate $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " 100f 1f 2.5");
                 }
                 audioTimecode_text.writeln("        after_fx " + stand + " {");
                 audioTimecode_text.writeln("            fadeout_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " " + fadeout);

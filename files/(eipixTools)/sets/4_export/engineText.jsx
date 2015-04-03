@@ -1,7 +1,7 @@
 // engineText.jsx
 // 
 // Name: engineText
-// Version: 1.7
+// Version: 1.8
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,7 +26,7 @@
 
     etData.scriptNameShort = "ET";
     etData.scriptName = "Engine Text";
-    etData.scriptVersion = "1.7";
+    etData.scriptVersion = "1.8";
 
     etData.strBtnEipix = {en: "EIPIX ENTERTAINMENT"};
     etData.strBtnPesents = {en: "PRESENTS"};
@@ -272,7 +272,7 @@
 
         //set source opacity keyframes
         addEffect.property(1).addKey(curentTime);
-        addEffect.property(1).addKey(curentTime + 3);
+        addEffect.property(1).addKey(curentTime + 1);
         addEffect.property(1).addKey(curentTime + 5);
         addEffect.property(1).addKey(curentTime + 6);
         addEffect.property(1).setValueAtKey(1, 0);
