@@ -1,7 +1,7 @@
 ﻿// audioTimecode.jsx
 // 
 // Name: audioTimecode
-// Version: 3.8
+// Version: 3.9
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,7 +26,7 @@
 
     atcData.scriptNameShort = "ATC";
     atcData.scriptName = "Audio Timecode";
-    atcData.scriptVersion = "3.8";
+    atcData.scriptVersion = "3.9";
 
     atcData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
     atcData.strKeyErr = {en: "Leyar %s has an unexpected number of keys."};
@@ -52,10 +52,18 @@
     // Define project variables
     atcData.projectName = app.project.file.name;
     atcData.projectNameNoExt = atcData.projectName.replace(".aepx", "").replace(".aep", "");
+    atcData.projectNameNoVer;
+    atcData.projectVersion = atcData.projectNameNoExt.substring(atcData.projectNameNoExt.length, atcData.projectNameNoExt.length - 3);
+    if (atcData.projectNameNoExt.substring(atcData.projectNameNoExt.length - 3, atcData.projectNameNoExt.length - 5) == "_v") {
+        atcData.projectNameNoVer = atcData.projectNameNoExt.substring(0, atcData.projectNameNoExt.length - 5);
+    } else {
+        atcData.projectNameNoVer = atcData.projectNameNoExt;
+    }
 
-    atcData.projectFolder = app.project.file.parent;
+    atcData.projectFolder = app.project.file.parent
     atcData.activeItem = app.project.activeItem;
     atcData.activeItemName = atcData.activeItem.name;
+    atcData.activeItemDuration = atcData.activeItem.duration;
     atcData.audioLayersDataDirty = [];
     atcData.audioLayersData = [];
     atcData.engineLayersDataDirty = [];
@@ -205,32 +213,74 @@
             for (var j = 0; j < atcData.engineLayersData.length; j++) {
                 audioTimecode_text.writeln("    hide $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase());
                 if (atcData.engineLayersData[j][7].startsWith("[1]") == true) {
-                    //audioTimecode_text.writeln("    animate $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase()) + " 100f";
+                    audioTimecode_text.writeln("    hide $" + atcData.projectNameNoVer);
+                    audioTimecode_text.writeln("    set $" + atcData.projectNameNoVer + ".active 0");
                     audioTimecode_text.writeln("    animate $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " 100f");
                 }
             }
             audioTimecode_text.writeln("}" + "\n");
-            audioTimecode_text.writeln("on !entered {");
+
+            var playFirstCheck = false;
+            for (var j = 0; j < atcData.engineLayersData.length; j++) {
+                if (atcData.engineLayersData[j][7].startsWith("[0]") == true) {
+                    var playFirstCheck = true;
+                }
+            }
+
+            if (playFirstCheck == true) {
+                audioTimecode_text.writeln("on !entered {");
+                audioTimecode_text.writeln("    show $" + atcData.projectNameNoVer);
+                audioTimecode_text.writeln("    set $" + atcData.projectNameNoVer + ".active 1");
+                for (var j = 0; j < atcData.engineLayersData.length; j++) {
+                    var startkey = atcData.engineLayersData[j][3];
+                    var fadein = atcData.engineLayersData[j][4] - startkey;
+                    var stand = atcData.engineLayersData[j][5] - startkey;
+                    var fadeout = atcData.engineLayersData[j][6] - atcData.engineLayersData[j][5];
+                    if (atcData.engineLayersData[j][7].startsWith("[0]") == true) {
+                        audioTimecode_text.writeln("    after_fx " + startkey + " {");
+                        audioTimecode_text.writeln("        fadein_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " " + fadein);
+                        audioTimecode_text.writeln("        after_fx " + stand + " {");
+                        audioTimecode_text.writeln("            fadeout_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " " + fadeout);
+                        audioTimecode_text.writeln("        }");
+                        audioTimecode_text.writeln("    }");
+                    }
+                }
+                audioTimecode_text.writeln("    set #end_time " + atcData.activeItemDuration);
+                audioTimecode_text.writeln("    after_fx #end_time {");
+                audioTimecode_text.writeln("        hide $" + atcData.projectNameNoVer);
+                audioTimecode_text.writeln("        set $" + atcData.projectNameNoVer + ".active 0");
+                audioTimecode_text.writeln("        call play_next_video #end_time");
+                audioTimecode_text.writeln("    }");
+                audioTimecode_text.writeln("}" + "\n");
+            }
+
             for (var j = 0; j < atcData.engineLayersData.length; j++) {
                 var startkey = atcData.engineLayersData[j][3];
                 var fadein = atcData.engineLayersData[j][4] - startkey;
                 var stand = atcData.engineLayersData[j][5] - startkey;
                 var fadeout = atcData.engineLayersData[j][6] - atcData.engineLayersData[j][5];
 
-                //audioTimecode_text.writeln("Engine: " + atcData.engineLayersData[j][0]);
-                //audioTimecode_text.writeln("Timecode: " + atcData.engineLayersData[j][1] + " --> " + atcData.engineLayersData[j][2]);
-                //audioTimecode_text.writeln("Script:");
-                audioTimecode_text.writeln("    after_fx " + startkey + " {");
-                audioTimecode_text.writeln("        fadein_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " " + fadein);
                 if (atcData.engineLayersData[j][7].startsWith("[1]") == true) {
+                    audioTimecode_text.writeln("fun play_next_video %time {");
+                    audioTimecode_text.writeln("    set #end_video " + atcData.activeItemDuration);
+                    audioTimecode_text.writeln("    show $" + atcData.projectNameNoVer);
+                    audioTimecode_text.writeln("    set $" + atcData.projectNameNoVer + ".active 1");
+                    audioTimecode_text.writeln("    after_fx " + startkey + " {");
+                    audioTimecode_text.writeln("        fadein_fx $collectors_edition 1");
                     audioTimecode_text.writeln("        animate $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " 100f 1f 2.5");
+                    audioTimecode_text.writeln("        after_fx " + stand + " {");
+                    audioTimecode_text.writeln("            fadeout_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " " + fadeout);
+                    audioTimecode_text.writeln("        }");
+                    audioTimecode_text.writeln("    }");
+                    audioTimecode_text.writeln("    after_fx #end_video {");
+                    audioTimecode_text.writeln("        hide $" + atcData.projectNameNoVer);
+                    audioTimecode_text.writeln("        set $" + atcData.projectNameNoVer + ".active 0");
+                    audioTimecode_text.writeln("    }");
+                    audioTimecode_text.writeln("    signal !finish #end_video");
+                    audioTimecode_text.writeln("}");
                 }
-                audioTimecode_text.writeln("        after_fx " + stand + " {");
-                audioTimecode_text.writeln("            fadeout_fx $" + atcData.engineLayersData[j][0].replace(" ", "_").replace("'", "").toLowerCase() + " " + fadeout);
-                audioTimecode_text.writeln("        }");
-                audioTimecode_text.writeln("    }");
             }
-            audioTimecode_text.writeln("}");
+
         }
         audioTimecode_text.close();
     }
