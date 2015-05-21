@@ -1,6 +1,0 @@
-<<<<<<< HEAD
-hello
-hekllo
-=======
-hello2
->>>>>>> 0b8b13ad2668aa6ab735aa3a381e6c2b5aea5b88
