@@ -1,6 +1,6 @@
-// sendToPhotoshop.jsx
+// simpleLooper.jsx
 // 
-// Name: sendToPhotoshop
+// Name: simpleLooper
 // Version: 0.0
 // Author: Aleksandar Kocic
 // 
@@ -9,7 +9,7 @@
 // provides a basic interface for live updating.
 // 
 
-(function sendToPhotoshop(thisObj) {
+(function simpleLooper(thisObj) {
     if (app.project.file == null) {
         alert("Save the project first.");
         return;
@@ -21,69 +21,69 @@
     }
 
     // Define main variables
-    var s2psData = new Object();
+    var sloopData = new Object();
 
-    s2psData.scriptNameShort = "STPS";
-    s2psData.scriptName = "Send To Photoshop";
-    s2psData.scriptVersion = "0.0";
-    s2psData.scriptTitle = s2psData.scriptName + " v" + s2psData.scriptVersion;
+    sloopData.scriptNameShort = "STPS";
+    sloopData.scriptName = "Send To Photoshop";
+    sloopData.scriptVersion = "0.0";
+    sloopData.scriptTitle = sloopData.scriptName + " v" + sloopData.scriptVersion;
 
-    s2psData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
-    s2psData.strActiveCompErr = {en: "Please select a composition."};
+    sloopData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
+    sloopData.strActiveCompErr = {en: "Please select a composition."};
 
-    s2psData.strUnlink = {en: "UNLINK"};
-    s2psData.strSend = {en: "SEND"};
-    s2psData.strUpdate = {en: "UPDATE"};
+    sloopData.strUnlink = {en: "UNLINK"};
+    sloopData.strSend = {en: "SEND"};
+    sloopData.strUpdate = {en: "UPDATE"};
 
-    s2psData.strLayered = {en: "Layered"};
-    s2psData.strFlattened = {en: "Flattened"};
+    sloopData.strLayered = {en: "Layered"};
+    sloopData.strFlattened = {en: "Flattened"};
 
-    s2psData.strOptions = {en: "..."};
-    s2psData.strHelp = {en: "?"};
+    sloopData.strOptions = {en: "..."};
+    sloopData.strHelp = {en: "?"};
 
-    s2psData.strHelpTitle = {en: "Help"};
-    s2psData.strErr = {en: "Something went wrong."};
-    s2psData.strHelpText = {en: "This script generates a PSD from composition for external editing and provides a basic interface for live updating."};
+    sloopData.strHelpTitle = {en: "Help"};
+    sloopData.strErr = {en: "Something went wrong."};
+    sloopData.strHelpText = {en: "This script generates a PSD from composition for external editing and provides a basic interface for live updating."};
 
     // Define project variables
-    s2psData.outputQuality = "Best Settings";
-    s2psData.outputTemplateVid = "Lossless";
-    s2psData.outputTemplateImg = "PNG Sequence";
-    s2psData.activeItem = app.project.activeItem;
-    s2psData.activeItemFrames = app.project.activeItem.duration * app.project.activeItem.frameRate;
-    s2psData.projectFolder = app.project.file.parent;
-    s2psData.outputPath;
+    sloopData.outputQuality = "Best Settings";
+    sloopData.outputTemplateVid = "Lossless";
+    sloopData.outputTemplateImg = "PNG Sequence";
+    sloopData.activeItem = app.project.activeItem;
+    sloopData.activeItemFrames = app.project.activeItem.duration * app.project.activeItem.frameRate;
+    sloopData.projectFolder = app.project.file.parent;
+    sloopData.outputPath;
 
     // Localize
-    function sendToPhotoshop_localize(strVar) {
+    function simpleLooper_localize(strVar) {
         return strVar["en"];
     }
 
     // Build UI
-    function sendToPhotoshop_buildUI(thisObj) {
-        var pal = new Window("palette", s2psData.scriptName, undefined, {resizeable:true});
+    function simpleLooper_buildUI(thisObj) {
+        var pal = new Window("palette", sloopData.scriptName, undefined, {resizeable:true});
         if (pal !== null) {
             var res =
                 "group { \
                     orientation:'column', alignment:['fill','fill'], \
                     header: Group { \
                         alignment:['fill','top'], \
-                        title: StaticText { text:'" + s2psData.scriptNameShort + " v" + s2psData.scriptVersion + "', alignment:['fill','center'] }, \
-                        options: Button { text:'" + sendToPhotoshop_localize(s2psData.strOptions) + "', maximumSize:[30,20], alignment:['right','center'] }, \
-                        help: Button { text:'" + sendToPhotoshop_localize(s2psData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
+                        title: StaticText { text:'" + sloopData.scriptNameShort + " v" + sloopData.scriptVersion + "', alignment:['fill','center'] }, \
+                        options: Button { text:'" + simpleLooper_localize(sloopData.strOptions) + "', maximumSize:[30,20], alignment:['right','center'] }, \
+                        help: Button { text:'" + simpleLooper_localize(sloopData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
                     btns: Group { \
                         orientation:'column', alignment:['fill','top'], \
                         seperator: Panel { height: 2, alignment:['fill','center'] }, \
-                        unlinkBtn: Button { text:'" + sendToPhotoshop_localize(s2psData.strUnlink) + "', alignment:['fill','center'] }, \
-                        sendBtn: Button { text:'" + sendToPhotoshop_localize(s2psData.strSend) + "', alignment:['fill','center'] }, \
+                        unlinkBtn: Button { text:'" + simpleLooper_localize(sloopData.strUnlink) + "', alignment:['fill','center'] }, \
+                        sendBtn: Button { text:'" + simpleLooper_localize(sloopData.strSend) + "', alignment:['fill','center'] }, \
                         radio: Group { \
                             orientation:'row', alignment:['fill','top'], \
-                            layeredBtn: RadioButton { text:'" + sendToPhotoshop_localize(s2psData.strLayered) + "', alignment:['fill','top'], value:true }, \
-                            flattenedBtn: RadioButton { text:'" + sendToPhotoshop_localize(s2psData.strFlattened) + "', alignment:['fill','top'], value:false }, \
+                            layeredBtn: RadioButton { text:'" + simpleLooper_localize(sloopData.strLayered) + "', alignment:['fill','top'], value:true }, \
+                            flattenedBtn: RadioButton { text:'" + simpleLooper_localize(sloopData.strFlattened) + "', alignment:['fill','top'], value:false }, \
                         }, \
                         seperator: Panel { height: 2, alignment:['fill','center'] }, \
-                        updateBtn: Button { text:'" + sendToPhotoshop_localize(s2psData.strUpdate) + "', alignment:['fill','center'] }, \
+                        updateBtn: Button { text:'" + simpleLooper_localize(sloopData.strUpdate) + "', alignment:['fill','center'] }, \
                     }, \
                 }, \
             }";
@@ -97,7 +97,7 @@
             }
 
             pal.grp.header.help.onClick = function() {
-                alert(s2psData.scriptTitle + "\n" + sendToPhotoshop_localize(s2psData.strHelpText), sendToPhotoshop_localize(s2psData.strHelpTitle));
+                alert(sloopData.scriptTitle + "\n" + simpleLooper_localize(sloopData.strHelpText), simpleLooper_localize(sloopData.strHelpTitle));
             }
 
             pal.grp.header.options.onClick = function() {
@@ -130,12 +130,12 @@
     // Main Functions:
     //
 
-    function sendToPhotoshop() {
+    function simpleLooper() {
         //code
     }
 
-    function sendToPhotoshop_main() {      
-        sendToPhotoshop();
+    function simpleLooper_main() {      
+        simpleLooper();
     }
 
     // Main Code:
@@ -143,17 +143,17 @@
 
     // Warning
     if (parseFloat(app.version) < 9.0) {
-        alert(engineText_localize(s2psData.strMinAE));
+        alert(engineText_localize(sloopData.strMinAE));
     } else {
         // Build and show the floating palette
-        var s2psPal = sendToPhotoshop_buildUI(thisObj);
-        if (s2psPal !== null) {
-            if (s2psPal instanceof Window) {
+        var sloopPal = simpleLooper_buildUI(thisObj);
+        if (sloopPal !== null) {
+            if (sloopPal instanceof Window) {
                 // Show the palette
-                s2psPal.center();
-                s2psPal.show();
+                sloopPal.center();
+                sloopPal.show();
             } else {
-                s2psPal.layout.layout(true);
+                sloopPal.layout.layout(true);
             }
         }
     }
