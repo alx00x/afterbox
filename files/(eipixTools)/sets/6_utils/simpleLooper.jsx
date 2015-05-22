@@ -125,7 +125,7 @@
 
         //set in and out point
         selectedLayer.inPoint = inPoint;
-        selectedLayer.outPoint = outPoint;
+        selectedLayer.outPoint = outPoint + (1 / sloopData.activeItemFps);
 
         //precompose, move all attributes
         var layerIndexArrey = [layerIndex];
