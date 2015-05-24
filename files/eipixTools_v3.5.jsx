@@ -51,7 +51,7 @@
 	eipixToolsData.strBtnSave = "Save";
 	eipixToolsData.strBtnCancel = "Cancel";
 
-	eipixToolsData.ChooseTitle = "Choose";
+	eipixToolsData.ChooseTitle = "Select to Ignore";
 	eipixToolsData.strBtnOk = "Ok";
 
 	eipixToolsData.strSettings = "...";
@@ -394,7 +394,7 @@
                     orientation:'column', alignment:['fill','fill'], \
                     list: Panel { \
                         alignment:['fill','top'], \
-                        lst: ListBox { alignment:['fill','fill'], size:[250,400], properties:{multiselect: true} }, \
+                        lst: ListBox { alignment:['fill','fill'], size:[250,400], properties:{numberOfColumns:1, showHeaders:false, columnTitles: ['Number', 'Script'], columnWidths:[30,200], multiselect: true} }, \
                     }, \
                     sepr: Group { \
                         orientation:'row', alignment:['fill','top'], \
@@ -413,7 +413,12 @@
 
             for (var i = 0; i < eipixToolsData.scripts.length; i++) {
             	var insertScript = eipixToolsData.scripts[i].toString().split(/(\\|\/)/g).pop();
+            	var insertScriptPath = eipixToolsData.scripts[i].toString();
+            	var scriptIcon = new File((insertScriptPath.substring(0, insertScriptPath.length - 3)) + "png");
             	var selectionItems = pal.grp.list.lst.add("item", insertScript);
+            	if (scriptIcon.exists) {
+            		selectionItems.image = scriptIcon;
+            	}
             }
 
             pal.grp.cmds.okBtn.onClick = eipixTools_doChoose;
