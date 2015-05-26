@@ -35,6 +35,7 @@
     s2psData.strSend = {en: "SEND"};
     s2psData.strUpdate = {en: "UPDATE"};
 
+    s2psData.strSendHelpTip = {en: "Selected comp: "};
     s2psData.strLayered = {en: "Layered"};
     s2psData.strFlattened = {en: "Flattened"};
 
@@ -50,6 +51,7 @@
     s2psData.outputTemplateVid = "Lossless";
     s2psData.outputTemplateImg = "PNG Sequence";
     s2psData.activeItem = app.project.activeItem;
+    s2psData.activeItemName = app.project.activeItem.name;
     s2psData.activeItemFrames = app.project.activeItem.duration * app.project.activeItem.frameRate;
     s2psData.projectFolder = app.project.file.parent;
     s2psData.outputPath;
@@ -75,8 +77,8 @@
                     btns: Group { \
                         orientation:'column', alignment:['fill','top'], \
                         seperator: Panel { height: 2, alignment:['fill','center'] }, \
-                        unlinkBtn: Button { text:'" + sendToPhotoshop_localize(s2psData.strUnlink) + "', alignment:['fill','center'] }, \
                         sendBtn: Button { text:'" + sendToPhotoshop_localize(s2psData.strSend) + "', alignment:['fill','center'] }, \
+                        unlinkBtn: Button { text:'" + sendToPhotoshop_localize(s2psData.strUnlink) + "', alignment:['fill','center'] }, \
                         radio: Group { \
                             orientation:'row', alignment:['fill','top'], \
                             layeredBtn: RadioButton { text:'" + sendToPhotoshop_localize(s2psData.strLayered) + "', alignment:['fill','top'], value:true }, \
@@ -104,8 +106,11 @@
                 alert("...");
             }
 
-            pal.grp.btns.unlinkBtn.onClick = engineText_doUnlink;
+            pal.grp.btns.sendBtn.helpTip = sendToPhotoshop_localize(s2psData.strSendHelpTip) + s2psData.activeItemName;
+            pal.grp.btns.unlinkBtn.enabled = false;
+
             pal.grp.btns.sendBtn.onClick = engineText_doSend;
+            pal.grp.btns.unlinkBtn.onClick = engineText_doUnlink;
             pal.grp.btns.updateBtn.onClick = engineText_doUpdate;
         }
 
@@ -114,6 +119,10 @@
 
     // Button Functions:
     //
+
+    function engineText_doSelect() {
+        //code
+    }
 
     function engineText_doUnlink() {
         //code

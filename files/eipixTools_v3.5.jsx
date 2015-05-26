@@ -301,15 +301,15 @@
                     vers: Panel { \
                         alignment:['fill','top'], \
                         text: '" + eipixToolsData.strVersion + "', alignment:['fill','top'] \
+                        dte: Group { \
+                            alignment:['fill','top'], \
+                            txt1: StaticText { text:'" + eipixToolsData.strDate + ":', preferredSize:[80,20] }, \
+                            txt2: StaticText { text:'', preferredSize:[300,20] }, \
+                        }, \
                         sha: Group { \
                             alignment:['fill','top'], \
                             txt1: StaticText { text:'" + eipixToolsData.strHash + ":', preferredSize:[80,20] }, \
                             txt2: StaticText { text:'" + eipixToolsData.localHash + "', preferredSize:[300,20] }, \
-                        }, \
-                        dte: Group { \
-                            alignment:['fill','top'], \
-                            txt1: StaticText { text:'" + eipixToolsData.strDate + ":', preferredSize:[80,20] }, \
-                            txt2: StaticText { text:'" + eipixToolsData.localDate + "', preferredSize:[300,20] }, \
                         }, \
                     }, \
                     opts: Panel { \
@@ -347,6 +347,8 @@
 
             pal.layout.layout(true);
             pal.grp.minimumSize = pal.grp.size;
+
+            pal.grp.vers.dte.txt2.text = eipixToolsData.localDate.slice(0,10) + " " + eipixToolsData.localDate.slice(11,16);
 
             if (app.settings.haveSetting("EipixTools", "Update")) {
                 var updateSetting = (app.settings.getSetting("EipixTools", "Update") === "false") ? false : true;
