@@ -1,7 +1,7 @@
 // sendToPhotoshop.jsx
 // 
 // Name: sendToPhotoshop
-// Version: 0.0
+// Version: 0.1
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -16,21 +16,27 @@
     }
 
     if (app.project.activeItem == null) {
-        alert("Please, select your composition.");
+        alert("Select your composition.");
+        return;
+    }
+
+    if (app.project.activeItem.selectedLayers[0] == null) {
+        alert("Select at least one layer.");
         return;
     }
 
     // Define main variables
     var s2psData = new Object();
 
-    s2psData.scriptNameShort = "STPS";
+    s2psData.scriptNameShort = "S2PS";
     s2psData.scriptName = "Send To Photoshop";
-    s2psData.scriptVersion = "0.0";
+    s2psData.scriptVersion = "0.1";
     s2psData.scriptTitle = s2psData.scriptName + " v" + s2psData.scriptVersion;
 
     s2psData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     s2psData.strActiveCompErr = {en: "Please select a composition."};
 
+    s2psData.strComp = {en: "COMP"};
     s2psData.strUnlink = {en: "UNLINK"};
     s2psData.strSend = {en: "SEND"};
     s2psData.strUpdate = {en: "UPDATE"};
@@ -47,14 +53,16 @@
     s2psData.strHelpText = {en: "This script generates a PSD from composition for external editing and provides a basic interface for live updating."};
 
     // Define project variables
-    s2psData.outputQuality = "Best Settings";
-    s2psData.outputTemplateVid = "Lossless";
-    s2psData.outputTemplateImg = "PNG Sequence";
     s2psData.activeItem = app.project.activeItem;
+    s2psData.activeItemID = app.project.activeItem.id;
     s2psData.activeItemName = app.project.activeItem.name;
     s2psData.activeItemFrames = app.project.activeItem.duration * app.project.activeItem.frameRate;
+    s2psData.activeItemFPS = app.project.activeItem.frameRate;
+    s2psData.activeItemOneFrame = 1 / app.project.activeItem.frameRate;
     s2psData.projectFolder = app.project.file.parent;
-    s2psData.outputPath;
+
+    // Script variables
+    s2psData.PhotoshopPath = "C:\\Program Files\\Adobe\\Adobe Photoshop CC 2014\\Photoshop.exe";
 
     // Localize
     function sendToPhotoshop_localize(strVar) {
@@ -77,12 +85,13 @@
                     btns: Group { \
                         orientation:'column', alignment:['fill','top'], \
                         seperator: Panel { height: 2, alignment:['fill','center'] }, \
+                        compBtn: Button { text:'" + sendToPhotoshop_localize(s2psData.strComp) + "', alignment:['fill','center'] }, \
                         sendBtn: Button { text:'" + sendToPhotoshop_localize(s2psData.strSend) + "', alignment:['fill','center'] }, \
                         unlinkBtn: Button { text:'" + sendToPhotoshop_localize(s2psData.strUnlink) + "', alignment:['fill','center'] }, \
                         radio: Group { \
                             orientation:'row', alignment:['fill','top'], \
-                            layeredBtn: RadioButton { text:'" + sendToPhotoshop_localize(s2psData.strLayered) + "', alignment:['fill','top'], value:true }, \
-                            flattenedBtn: RadioButton { text:'" + sendToPhotoshop_localize(s2psData.strFlattened) + "', alignment:['fill','top'], value:false }, \
+                            layeredBtn: RadioButton { text:'" + sendToPhotoshop_localize(s2psData.strLayered) + "', alignment:['fill','top'], value:false }, \
+                            flattenedBtn: RadioButton { text:'" + sendToPhotoshop_localize(s2psData.strFlattened) + "', alignment:['fill','top'], value:true }, \
                         }, \
                         seperator: Panel { height: 2, alignment:['fill','center'] }, \
                         updateBtn: Button { text:'" + sendToPhotoshop_localize(s2psData.strUpdate) + "', alignment:['fill','center'] }, \
@@ -103,48 +112,143 @@
             }
 
             pal.grp.header.options.onClick = function() {
-                alert("...");
+                alert("No options yet.");
             }
 
-            pal.grp.btns.sendBtn.helpTip = sendToPhotoshop_localize(s2psData.strSendHelpTip) + s2psData.activeItemName;
+            pal.grp.btns.radio.layeredBtn.enabled = false;
+            pal.grp.btns.radio.flattenedBtn.enabled = true;
+
+            pal.grp.btns.compBtn.helpTip = sendToPhotoshop_localize(s2psData.strSendHelpTip) + s2psData.activeItemName;
             pal.grp.btns.unlinkBtn.enabled = false;
 
-            pal.grp.btns.sendBtn.onClick = engineText_doSend;
-            pal.grp.btns.unlinkBtn.onClick = engineText_doUnlink;
-            pal.grp.btns.updateBtn.onClick = engineText_doUpdate;
+            pal.grp.btns.compBtn.onClick = sendToPhotoshop_doComp;
+            pal.grp.btns.sendBtn.onClick = sendToPhotoshop_doSend;
+            pal.grp.btns.unlinkBtn.onClick = sendToPhotoshop_doUnlink;
+            pal.grp.btns.updateBtn.onClick = sendToPhotoshop_doUpdate;
         }
 
         return pal;
     }
 
+    // Support Fucntions:
+    //
+    function pad(num, size) {
+        var s = num+"";
+        while (s.length < size) s = "0" + s;
+        return s;
+    }
+
     // Button Functions:
     //
 
-    function engineText_doSelect() {
+    function sendToPhotoshop_doComp() {
+        //make linked comp active
+
+    }
+
+    function sendToPhotoshop_doSend() {
+        //start undo group
+        app.beginUndoGroup(s2psData.scriptName);
+
+        //get selected layer info
+        var activeItem = s2psData.activeItem;
+        var activeItemName = s2psData.activeItemName;
+        var selectedLayer = activeItem.selectedLayers[0];
+        var index = selectedLayer.index;
+        var inPoint = selectedLayer.inPoint;
+        var outPoint = selectedLayer.outPoint;
+
+        //precompose
+        var layerIndicies = [];
+        layerIndicies.push(index);
+        var newComp = activeItem.layers.precompose(layerIndicies, selectedLayer.name, true);
+        activeItem.layer(index).inPoint = inPoint;
+        activeItem.layer(index).outPoint = outPoint;
+
+        // //open new composition
+        // var openCompCommand = app.findMenuCommandId("Open Layer Source");
+        // app.executeCommand(openCompCommand);
+
+        // //export composition as photoshop file
+        // var saveAsPSCommand = app.findMenuCommandId("Photoshop Layers...");
+        // app.executeCommand(saveAsPSCommand);
+
+        //define render queue variables
+        var renderSettingsTemplate = "Best Settings";
+        var outputModuleTemplate = "Photoshop";
+        var timeSpanStart = inPoint;
+        var timeSpanDuration = s2psData.activeItemOneFrame;
+        var outputPath = Folder.selectDialog().fsName;
+        var exportedFrame = inPoint * s2psData.activeItemFPS;
+
+        //output variables
+        var outputPathFile = outputPath.toString() + "\\" + activeItemName + "_[#####].psd";
+        var PSDFilePath = outputPath.toString() + "\\" + activeItemName + "_" + pad(exportedFrame, 5) + ".psd";
+        var PSEXEPath = s2psData.PhotoshopPath;
+
+        //export PSD
+        var renderQueueItem = app.project.renderQueue.items.add(newComp);
+        var renderQueueItemIndex = app.project.renderQueue.numItems;
+        renderQueueItem.applyTemplate(renderSettingsTemplate);
+        renderQueueItem.timeSpanStart = timeSpanStart;
+        renderQueueItem.timeSpanDuration = timeSpanDuration;
+        renderQueueItem.outputModules[1].applyTemplate(outputModuleTemplate);
+        renderQueueItem.outputModules[1].file = new File(outputPathFile);
+        app.project.renderQueue.render();
+        renderQueueItem.remove();
+
+        //write bat file
+        var batContent = "start \"\" \"" + PSEXEPath + "\"" + " " + "\"" + PSDFilePath + "\"";
+
+        var batFile = new File(outputPath + "\\" + activeItemName + ".bat");
+        if (batFile.exists == true) {
+            batFile.remove();
+        }
+        if (batFile.open("w")) {
+            try {
+                batFile.write(batContent);
+            } catch (err) {
+                alert(err.toString());
+            } finally {
+                batFile.close();
+            }
+        }
+
+        //run bat file
+        if (batFile.exists == true) {
+            batFile.execute();
+        }
+
+        //make initial composition active
+        activeItem.openInViewer();
+
+        //delete bat file
+        if (batFile.exists == true) {
+            batFile.remove();
+        }
+
+        //import photoshop file as composition
+        var importFile = new File(PSDFilePath);
+        var importOptions = new ImportOptions(importFile);
+        importOptions.importAs = ImportAsType.COMP_CROPPED_LAYERS;
+        var theImport = app.project.importFile(importOptions);
+        var currentSelection = app.project.selection;
+        var newImport = currentSelection[0];
+
+        //replace layer with new composition
+        activeItem.openInViewer();
+        activeItem.layer(index).replaceSource(newImport, true)
+
+        //end undo group
+        app.endUndoGroup();
+    }
+
+    function sendToPhotoshop_doUnlink() {
         //code
     }
 
-    function engineText_doUnlink() {
+    function sendToPhotoshop_doUpdate() {
         //code
-    }
-
-    function engineText_doSend() {
-        //code
-    }
-
-    function engineText_doUpdate() {
-        //code
-    }
-
-    // Main Functions:
-    //
-
-    function sendToPhotoshop() {
-        //code
-    }
-
-    function sendToPhotoshop_main() {      
-        sendToPhotoshop();
     }
 
     // Main Code:
@@ -152,7 +256,7 @@
 
     // Warning
     if (parseFloat(app.version) < 9.0) {
-        alert(engineText_localize(s2psData.strMinAE));
+        alert(sendToPhotoshop_localize(s2psData.strMinAE));
     } else {
         // Build and show the floating palette
         var s2psPal = sendToPhotoshop_buildUI(thisObj);
