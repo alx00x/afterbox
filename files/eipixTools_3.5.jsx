@@ -69,6 +69,7 @@
 		"Go to Edit > Preferences > General and make sure\n" +
 		"\"Allow Scripts to Write Files and Access Network\" is checked.\n" +
 		"\n";
+    eipixToolsData.strErrNoSettings = "Repo URL is not defined. Update Aborted.";
 	eipixToolsData.btnSize = 36;
 
 	eipixToolsData.localHash
@@ -203,12 +204,18 @@
 			system.callSystem("cmd.exe /c mkdir \"" + tempFolder.fsName + "\"");
 		}
 
-		var repoURL = app.settings.haveSetting("EipixTools", "Repo URL");
+        if (app.settings.haveSetting("EipixTools", "Repo URL")) {
+            var repoURL = app.settings.getSetting("EipixTools", "Repo URL");
+        } else {
+            alert(eipixToolsData.strErrNoSettings);
+            return;
+        }
+
 		var downloadUpdateCommand = "(eipixTools)/update/curl.exe -L -k -s " + repoURL + "/zipball/deploy -o (eipixTools)/update/deploy.zip";
-		var downloadUpdateResponse = system.callSystem(downloadUpdateCommand);
+        var downloadUpdateResponse = system.callSystem(downloadUpdateCommand);
 
 		var unzipUpdateCommand = "\"" + eipixToolsData.updatePath + "unzip.vbs\" " + "\"" + eipixToolsData.updatePath + "deploy.zip" + "\"" + " " + "\"" + tempFolder.fsName + "\"";
-		var unzipUpdateResponse = system.callSystem("cmd.exe /c \"" + unzipUpdateCommand + "\"");
+        var unzipUpdateResponse = system.callSystem("cmd.exe /c \"" + unzipUpdateCommand + "\"");
 
 		var deleteZipCommand = "del " + "\"" + eipixToolsData.updatePath + "deploy.zip" + "\"";
 		var deleteZipResponse = system.callSystem("cmd.exe /c \"" + deleteZipCommand + "\"");
