@@ -1,7 +1,7 @@
 ﻿// clearCachePurgeMem.jsx
 // 
 // Name: clearCachePurgeMem
-// Version: 1.4
+// Version: 1.5
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -94,8 +94,9 @@
     //
     function PurgeMem_doExecute(strVar) {
         var machineName = system.machineName;
+        var appVersion = app.version.substring(0, 4);
         var diskCachePath = app.preferences.getPrefAsString("Disk Cache Controls", cacheControlsFolder);
-        var diskCachePathFull = diskCachePath + "\\Adobe After Effects Disk Cache - " + machineName + ".noindex\\*";
+        var diskCachePathFull = diskCachePath + "\\Adobe\\After Effects\\" + appVersion + "\\Disk Cache - " + machineName + ".noindex\\*";
         var delCommand = 'for /D %I in ("' + diskCachePathFull + '") do rmdir /s/q "%I"';
         system.callSystem("cmd.exe /c \"" + delCommand + "\"");
         app.purge(PurgeTarget.ALL_CACHES)
