@@ -1,7 +1,7 @@
 ﻿// audioTimecode.jsx
 // 
 // Name: audioTimecode
-// Version: 3.9
+// Version: 3.10
 // Author: Aleksandar Kocic
 // 
 // Description: Exports audio layers timecode.    
@@ -26,7 +26,7 @@
 
     atcData.scriptNameShort = "ATC";
     atcData.scriptName = "Audio Timecode";
-    atcData.scriptVersion = "3.9";
+    atcData.scriptVersion = "3.10";
 
     atcData.strPathErr = {en: "Specified path could not be found. Reverting to project folder."};
     atcData.strKeyErr = {en: "Leyar %s has an unexpected number of keys."};
@@ -280,38 +280,73 @@
                     audioTimecode_text.writeln("}");
                 }
             }
-
         }
         audioTimecode_text.close();
     }
 
-    function audioTimecode_getAudioTimeRecursively(currentComp, timeOffset) {
+    function audioTimecode_compensateTimeRemap(comp, index, value) {
+        var framerate = comp.frameRate;
+        var layer = comp.layer(index);
+        var timeRemapValue = layer.property("ADBE Time Remapping");
+        var currentTime = 0;
+        var oneFrame = 1 / framerate;
+        while (timeRemapValue.valueAtTime(currentTime, false) < value) {
+            currentTime = currentTime + oneFrame;
+        }
+        return currentTime;
+    }
+
+    function audioTimecode_getAudioTimeRecursively(timeRemap, parentComp, childIndex, childComp, timeOffset, timeStretch) {
         var offsetFloat = parseFloat(timeOffset);
         var currentLayer;
-        for (var i = 1; i <= currentComp.layers.length; i++) {
-            currentLayer = currentComp.layers[i];
+        for (var i = 1; i <= childComp.layers.length; i++) {
+            currentLayer = childComp.layers[i];
             if (!(currentLayer.source instanceof CompItem) && (currentLayer.source instanceof FootageItem) && (currentLayer instanceof AVLayer) && (currentLayer.source.hasAudio == true) && (currentLayer.audioEnabled == true) && (currentLayer.source.hasVideo == false)) {
                 var sourceName = currentLayer.source.name;
-                var startTime = parseFloat(currentLayer.startTime) + offsetFloat;
-                var endTime = parseFloat(currentLayer.outPoint) + offsetFloat;
+                var layerStartTime = parseFloat(currentLayer.inPoint);
+                var layerEndTime = parseFloat(currentLayer.outPoint);
+                if (timeRemap == true) {
+                    var startTime = audioTimecode_compensateTimeRemap(parentComp, childIndex, parseFloat(currentLayer.inPoint)) * timeStretch + offsetFloat;
+                    var endTime = audioTimecode_compensateTimeRemap(parentComp, childIndex, parseFloat(currentLayer.outPoint)) * timeStretch + offsetFloat;
+                } else {
+                    var startTime = layerStartTime * timeStretch + offsetFloat;
+                    var endTime = layerEndTime * timeStretch + offsetFloat;
+                }
                 atcData.audioLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
             } else if ((currentLayer.source instanceof CompItem) && (currentLayer.audioEnabled == true)) {
-                var offset = currentLayer.startTime + timeOffset;
-                audioTimecode_getAudioTimeRecursively(currentLayer.source, offset);
+                var timeRemapCheck = false;
+                var getParentComp = childComp;
+                var getChildIndex = currentLayer.index;
+                var stretch = (currentLayer.stretch / 100) * timeStretch;
+                var offset;
+                if (currentLayer.timeRemapEnabled == true) {
+                    timeRemapCheck = true;
+                    offset = timeOffset;
+                } else {
+                    offset = currentLayer.startTime + timeOffset;
+                }
+                audioTimecode_getAudioTimeRecursively(timeRemapCheck, getParentComp, getChildIndex, currentLayer.source, offset, stretch);
             }
         }
     }
 
-    function audioTimecode_getTextTimeRecursively(currentComp, timeOffset) {
+    function audioTimecode_getTextTimeRecursively(timeRemap, parentComp, childIndex, childComp, timeOffset, timeStretch) {
         var offsetFloat = parseFloat(timeOffset);
         var currentLayer;
-        for (var i = 1; i <= currentComp.layers.length; i++) {
-            currentLayer = currentComp.layers[i];
+        for (var i = 1; i <= childComp.layers.length; i++) {
+            currentLayer = childComp.layers[i];
             if (currentLayer instanceof TextLayer) {
                 var layerName = currentLayer.name;
                 var sourceText = String(currentLayer.text.sourceText.value);
-                var startTime = parseFloat(currentLayer.inPoint) + offsetFloat;
-                var endTime = parseFloat(currentLayer.outPoint) + offsetFloat;
+                var layerStartTime = parseFloat(currentLayer.inPoint);
+                var layerEndTime = parseFloat(currentLayer.outPoint);
+                if (timeRemap == true) {
+                    var startTime = audioTimecode_compensateTimeRemap(parentComp, childIndex, parseFloat(currentLayer.inPoint)) * timeStretch + offsetFloat;
+                    var endTime = audioTimecode_compensateTimeRemap(parentComp, childIndex, parseFloat(currentLayer.outPoint)) * timeStretch + offsetFloat;
+                } else {                
+                    var startTime = layerStartTime * timeStretch + offsetFloat;
+                    var endTime = layerEndTime * timeStretch + offsetFloat;
+                }
                 if (layerName == "engine_text") {
                     //check if layer has "ADBE Solid Composite"
                     var composite = currentLayer.Effects.property("ADBE Solid Composite");
@@ -341,8 +376,18 @@
                     atcData.textLayersDataDirty.push([removeNewline(sourceText), startTime.toFixed(2), endTime.toFixed(2)]);
                 }
             } else if (currentLayer.source instanceof CompItem) {
-                var offset = currentLayer.startTime + timeOffset;
-                audioTimecode_getTextTimeRecursively(currentLayer.source, offset);
+                var timeRemapCheck = false;
+                var getParentComp = childComp;
+                var getChildIndex = currentLayer.index;
+                var stretch = (currentLayer.stretch / 100) * timeStretch;
+                var offset;
+                if (currentLayer.timeRemapEnabled == true) {
+                    timeRemapCheck = true;
+                    offset = timeOffset;
+                } else {
+                    offset = currentLayer.startTime + timeOffset;
+                }
+                audioTimecode_getTextTimeRecursively(timeRemapCheck, getParentComp, getChildIndex, currentLayer.source, offset, stretch);
             }
         }
     }
@@ -354,7 +399,7 @@
         }
 
         //get audio layers information
-        audioTimecode_getAudioTimeRecursively(atcData.activeItem, 0);
+        audioTimecode_getAudioTimeRecursively(false, atcData.activeItem, 0, atcData.activeItem, 0, 1);
         var layersDataDirty = atcData.audioLayersDataDirty;
         var layersDataUnique = [];
         for (var i = 0; i < layersDataDirty.length; i++) {
@@ -371,7 +416,7 @@
         atcData.audioLayersData = layersDataUnique.sort(compare);
 
         //get text layers information
-        audioTimecode_getTextTimeRecursively(atcData.activeItem, 0);
+        audioTimecode_getTextTimeRecursively(false, atcData.activeItem, 0, atcData.activeItem, 0, 1);
         var textLayersDataDirty = atcData.textLayersDataDirty;
         var textLayersDataUnique = [];
         for (var i = 0; i < textLayersDataDirty.length; i++) {

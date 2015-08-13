@@ -1,13 +1,13 @@
-#include "(eipixTools)/update/json.js"
+﻿#include "(eipixTools)/update/json.js"
 // eipixTools.jsx
 // 
 // Name: eipixTools
-// Version: 3.4
+// Version: 3.5
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
 // 
 // Description:
-// This is a modified script originally created by Jeff Almasol.
+// This is a heavely modified script originally created by Jeff Almasol.
 // It provides a button launcher for scripts located in:
 // \Support Files\Scripts\ScriptUI Panels\(eipixTools)\sets\
 // 
@@ -22,7 +22,7 @@
 	// Global variables
 	var eipixToolsData = new Object();
 	eipixToolsData.scriptName = "Eipix Tools";
-	eipixToolsData.version = "3.4";
+	eipixToolsData.version = "3.5";
 	eipixToolsData.thisScriptsFolder = new Folder((new File($.fileName)).path);
 	eipixToolsData.scriptsPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\sets\\";
 	eipixToolsData.etcPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\etc\\";
@@ -32,10 +32,27 @@
 	eipixToolsData.scriptsFolderAlert = "Scripts folder was not found at the expected location.";
 
 	eipixToolsData.errConnection = "Could not establish connection to repository. Please, check your internet connection.";
+	eipixToolsData.errCouldNotUpdate = "Failed to perform update. Reverting to previous version.";
 	eipixToolsData.errUpdate = "Update failed.";
 	eipixToolsData.strConfirmUpdate = "There is an update available. Do you wish to download it?";
 	eipixToolsData.strUpdate = "Update successful! You are now on commit:\n";
 	eipixToolsData.strCurrentHash = "Your current version hash is:\n";
+
+	eipixToolsData.strOptions = "Options";
+	eipixToolsData.strCheckForUpdates = "Check For Updates";
+	eipixToolsData.strRepoURL = "Repo URL";
+	eipixToolsData.strIgnoreList = "Ignore list";
+	eipixToolsData.strChoose = "Choose";
+
+	eipixToolsData.strVersion = "Version";
+	eipixToolsData.strHash = "Hash";
+	eipixToolsData.strDate = "Date";
+
+	eipixToolsData.strBtnSave = "Save";
+	eipixToolsData.strBtnCancel = "Cancel";
+
+	eipixToolsData.ChooseTitle = "Select to Ignore";
+	eipixToolsData.strBtnOk = "Ok";
 
 	eipixToolsData.strSettings = "...";
 	eipixToolsData.strSettingsTip = "Settings";
@@ -54,8 +71,46 @@
 		"\n";
 	eipixToolsData.btnSize = 36;
 
+	eipixToolsData.localHash
+	eipixToolsData.localDate
 	eipixToolsData.commitHash;
+	eipixToolsData.commitDate;
 
+	eipixToolsData.update;
+	eipixToolsData.repoURL;
+	eipixToolsData.ignoreList;
+
+	// Production steps of ECMA-262, Edition 5, 15.4.4.14
+	// Reference: http://es5.github.io/#x15.4.4.14
+	if (!Array.prototype.indexOf) {
+	    Array.prototype.indexOf = function(searchElement, fromIndex) {
+	        var k;
+	        if (this == null) {
+	            throw new TypeError('"this" is null or not defined');
+	        }
+	        var O = Object(this);
+	        var len = O.length >>> 0;
+	        if (len === 0) {
+	            return -1;
+	        }
+	        var n = +fromIndex || 0;
+	
+	        if (Math.abs(n) === Infinity) {
+	            n = 0;
+	        }
+	        if (n >= len) {
+	            return -1;
+	        }
+	        k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+	        while (k < len) {
+	            if (k in O && O[k] === searchElement) {
+	                return k;
+	            }
+	            k++;
+	        }
+	        return -1;
+	    };
+	}
 
 	// isNetworkAccessAllowed()
 	// Function for checking if network access is enabled
@@ -83,14 +138,20 @@
 	}
 
 
-	// currentVersionHash()
+	// getLocalVersion()
 	// Function to get current update hash
-	function currentVersionHash() {
+	function getLocalVersion() {
 		//get local sha
-		var shaFile = new File(eipixToolsData.updatePath + "sha");
-		shaFile.open("r");
-		eipixToolsData.commitHash = shaFile.read();
-		shaFile.close();
+        if (app.settings.haveSetting("EipixTools", "Commit Hash")) {
+            eipixToolsData.localHash = app.settings.getSetting("EipixTools", "Commit Hash");
+        }
+        if (app.settings.haveSetting("EipixTools", "Commit Date")) {
+            eipixToolsData.localDate = app.settings.getSetting("EipixTools", "Commit Date");
+        }
+		//var shaFile = new File(eipixToolsData.updatePath + "sha");
+		//shaFile.open("r");
+		//eipixToolsData.commitHash = shaFile.read();
+		//shaFile.close();
 	}
 
 
@@ -98,18 +159,35 @@
 	// Function for checking if scripts are up to date
 	function isUpdateNeeded() {
 		//get latest commit sha
-		var latestCommitCommand = "\"" + eipixToolsData.updatePath + "curl.exe" + "\"" + " -s -k -X GET https://api.github.com/repos/koaleksa/eipix-tools/git/refs/heads/deploy";
+		var repoURL = app.settings.getSetting("EipixTools", "Repo URL");
+		var latestCommitCommand = "\"" + eipixToolsData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + repoURL + "/git/refs/heads/deploy";
 		var latestCommitResponse = system.callSystem(latestCommitCommand);
 		var latestCommitJSON = JSON.parse(latestCommitResponse);
-		var localSha = eipixToolsData.commitHash;
-		var repoSha = latestCommitJSON.object.sha;
+		var localSha = eipixToolsData.localHash;
 
-		//compare
-		if (localSha == repoSha) {
+		//check if able to pull data from github repo
+		if (latestCommitJSON.object == undefined) {
+			alert(eipixToolsData.errCouldNotUpdate);
 			return false;
 		} else {
+			var repoSha = latestCommitJSON.object.sha;
+
+			//get latest commit date
+			var latestShaCommand = "\"" + eipixToolsData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + repoURL + "/commits/" + repoSha;
+			var latestShaResponse = system.callSystem(latestShaCommand);
+			var latestShaJSON = JSON.parse(latestShaResponse);
+			var localDate = eipixToolsData.localDate;
+			var latestCommitDate = latestShaJSON.commit.author.date;
+	
 			eipixToolsData.commitHash = repoSha;
-			return true;
+			eipixToolsData.commitDate = latestCommitDate;
+	
+			//compare
+			if (localSha == repoSha) {
+				return false;
+			} else {
+				return true;
+			}
 		}
 	}
 
@@ -125,7 +203,8 @@
 			system.callSystem("cmd.exe /c mkdir \"" + tempFolder.fsName + "\"");
 		}
 
-		var downloadUpdateCommand = "(eipixTools)/update/curl.exe -L -k -s https://api.github.com/repos/koaleksa/eipix-tools/zipball/deploy -o (eipixTools)/update/deploy.zip";
+		var repoURL = app.settings.haveSetting("EipixTools", "Repo URL");
+		var downloadUpdateCommand = "(eipixTools)/update/curl.exe -L -k -s " + repoURL + "/zipball/deploy -o (eipixTools)/update/deploy.zip";
 		var downloadUpdateResponse = system.callSystem(downloadUpdateCommand);
 
 		var unzipUpdateCommand = "\"" + eipixToolsData.updatePath + "unzip.vbs\" " + "\"" + eipixToolsData.updatePath + "deploy.zip" + "\"" + " " + "\"" + tempFolder.fsName + "\"";
@@ -153,36 +232,52 @@
 		system.callSystem("cmd.exe /c rmdir /s /q \"" + tempFolder.fsName + "\"");
 
 		//update hash (eipixToolsData.commitHash)
-		var hashFile = new File(eipixToolsData.updatePath + "sha");
-		hashFile.open("w");
-		hashFile.write(eipixToolsData.commitHash);
-		hashFile.close();
+		app.settings.saveSetting("EipixTools", "Commit Hash", eipixToolsData.commitHash);
+		app.settings.saveSetting("EipixTools", "Commit Date", eipixToolsData.commitDate);
+		//var hashFile = new File(eipixToolsData.updatePath + "sha");
+		//hashFile.open("w");
+		//hashFile.write(eipixToolsData.commitHash);
+		//hashFile.close();
 
 		//alert message
-		alert(eipixToolsData.strUpdate + eipixToolsData.commitHash);
+		alert(eipixToolsData.strUpdate + eipixToolsData.commitHash + "\n" + eipixToolsData.commitDate);
 	}
 
 
 	// getScriptsInSubfolders()
 	// Function for getting jsx files in subfolders
 	function getScriptsInSubfolders(theFolder) {
-		var myFileList = theFolder.getFiles();
-		for (var i = 0; i < myFileList.length; i++) {
-			var myFile = myFileList[i];
-			if (myFile instanceof Folder) {
-				getScriptsInSubfolders(myFile);
-			} else if (myFile instanceof File && myFile.name.match(/\.jsx$/i)) {
-				myFiles.push(myFile);
+		var ignoreFilesList = app.settings.getSetting("EipixTools", "Ignore List");
+		var ignoreFiles = ignoreFilesList.split(',');
+
+		var scriptFileList = theFolder.getFiles();
+		for (var i = 0; i < scriptFileList.length; i++) {
+			var scriptFile = scriptFileList[i];
+
+			var ignore = false;
+			if (scriptFile instanceof File && scriptFile.name.match(/\.jsx$/i)) {
+				var scriptFileName = scriptFile.toString().split(/(\\|\/)/g).pop();
+				if (ignoreFiles.indexOf(scriptFileName) != -1) {
+					ignore = true;
+				}
+			}
+
+			if (scriptFile instanceof Folder) {
+				getScriptsInSubfolders(scriptFile);
+			} else if (scriptFile instanceof File && scriptFile.name.match(/\.jsx$/i)) {
+				if (ignore == false) {
+					loadFiles.push(scriptFile);
+				}
 			}
 		}
-	    return myFiles;
+	    return loadFiles;
 	}
 
 
 	// eipixTools_buildUI()
 	// Function for creating the user interface
 	function eipixTools_buildUI(thisObj) {
-		var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", eipixToolsData.scriptName, [200, 200, 600, 500], {
+		var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", eipixToolsData.scriptName, [200, 200, 600, 200], {
 			resizeable: true
 		});
 		if (pal != null) {
@@ -195,6 +290,212 @@
 		}
 		return pal;
 	}
+
+    // Build Settings UI
+    function eipixTools_buildSettingsUI(thisObj) {
+        var pal = new Window("dialog", eipixToolsData.settingsTitle, undefined, {resizeable:true });
+        if (pal !== null) {
+            var res =
+                "group { \
+                    orientation:'column', alignment:['fill','fill'], \
+                    vers: Panel { \
+                        alignment:['fill','top'], \
+                        text: '" + eipixToolsData.strVersion + "', alignment:['fill','top'] \
+                        dte: Group { \
+                            alignment:['fill','top'], \
+                            txt1: StaticText { text:'" + eipixToolsData.strDate + ":', preferredSize:[80,20] }, \
+                            txt2: StaticText { text:'', preferredSize:[300,20] }, \
+                        }, \
+                        sha: Group { \
+                            alignment:['fill','top'], \
+                            txt1: StaticText { text:'" + eipixToolsData.strHash + ":', preferredSize:[80,20] }, \
+                            txt2: StaticText { text:'" + eipixToolsData.localHash + "', preferredSize:[300,20] }, \
+                        }, \
+                    }, \
+                    opts: Panel { \
+                        alignment:['fill','top'], \
+                        text: '" + eipixToolsData.strOptions + "', alignment:['fill','top'] \
+                        dnu: Group { \
+                            alignment:['fill','top'], \
+                            txt: StaticText { text:'', preferredSize:[80,20] }, \
+                            box: Checkbox { text:'" + eipixToolsData.strCheckForUpdates + "', alignment:['fill','top'] }, \
+                        }, \
+                        rpo: Group { \
+                            alignment:['fill','top'], \
+                            txt: StaticText { text:'" + eipixToolsData.strRepoURL + "', preferredSize:[80,20] }, \
+                            fld: EditText { alignment:['fill','center'], preferredSize:[300,20] },  \
+                        }, \
+                        ign: Group { \
+                            alignment:['fill','top'], \
+                            txt: StaticText { text:'" + eipixToolsData.strIgnoreList + "', preferredSize:[80,20] }, \
+                            fld: EditText { alignment:['fill','center'], preferredSize:[240,20] },  \
+                            btn: Button { text:'" + eipixToolsData.strChoose + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        }, \
+                    }, \
+                    sepr: Group { \
+                        orientation:'row', alignment:['fill','top'], \
+                        rule: Panel { height: 2, alignment:['fill','center'] }, \
+                    }, \
+                    cmds: Group { \
+                        alignment:['fill','top'], \
+                        saveBtn: Button { text:'" + eipixToolsData.strBtnSave + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        cancelBtn: Button { text:'" + eipixToolsData.strBtnCancel + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                    }, \
+                }, \
+            }";
+            pal.grp = pal.add(res);
+
+            pal.layout.layout(true);
+            pal.grp.minimumSize = pal.grp.size;
+
+            pal.grp.vers.dte.txt2.text = eipixToolsData.localDate.slice(0,10) + " " + eipixToolsData.localDate.slice(11,16);
+
+            if (app.settings.haveSetting("EipixTools", "Update")) {
+                var updateSetting = (app.settings.getSetting("EipixTools", "Update") === "false") ? false : true;
+                pal.grp.opts.dnu.box.value = updateSetting;
+            }
+
+            if (app.settings.haveSetting("EipixTools", "Repo URL")) {
+                var repoSetting = app.settings.getSetting("EipixTools", "Repo URL");
+                pal.grp.opts.rpo.fld.text = repoSetting;
+            }
+
+            if (app.settings.haveSetting("EipixTools", "Ignore List")) {
+                var ignoreSetting = app.settings.getSetting("EipixTools", "Ignore List");
+                pal.grp.opts.ign.fld.text = ignoreSetting;
+            }
+
+			pal.grp.opts.ign.btn.onClick = eipixTools_doChooseUI;
+            pal.grp.cmds.saveBtn.onClick = eipixTools_doConfigureSave;
+            pal.grp.cmds.cancelBtn.onClick = eipixTools_doConfigureCancel;
+        }
+        return pal;
+    }
+
+    // Settings UI
+    var eipixTools_settingsPal;
+    function eipixTools_doSettingsUI() {
+        eipixTools_settingsPal = eipixTools_buildSettingsUI(thisObj);
+        if (eipixTools_settingsPal !== null) {
+            if (eipixTools_settingsPal instanceof Window) {
+                // Show the palette
+                eipixTools_settingsPal.center();
+                eipixTools_settingsPal.show();
+            } else {
+                eipixTools_settingsPal.layout.layout(true);
+            }
+        }
+    }
+
+    // Build Choose UI
+    function eipixTools_buildChooseUI(thisObj) {
+        var pal = new Window("dialog", eipixToolsData.ChooseTitle, undefined, {resizeable:false });
+        if (pal !== null) {
+            var res =
+                "group { \
+                    orientation:'column', alignment:['fill','fill'], \
+                    list: Panel { \
+                        alignment:['fill','top'], \
+                        lst: ListBox { alignment:['fill','fill'], size:[250,400], properties:{numberOfColumns:1, showHeaders:false, columnTitles: ['Number', 'Script'], columnWidths:[30,200], multiselect: true} }, \
+                    }, \
+                    sepr: Group { \
+                        orientation:'row', alignment:['fill','top'], \
+                        rule: Panel { height: 2, alignment:['fill','center'] }, \
+                    }, \
+                    cmds: Group { \
+                        alignment:['fill','top'], \
+                        okBtn: Button { text:'" + eipixToolsData.strBtnOk + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                    }, \
+                }, \
+            }";
+            pal.grp = pal.add(res);
+
+            pal.layout.layout(true);
+            pal.grp.minimumSize = pal.grp.size;
+
+            for (var i = 0; i < eipixToolsData.scripts.length; i++) {
+            	var insertScript = eipixToolsData.scripts[i].toString().split(/(\\|\/)/g).pop();
+            	var insertScriptPath = eipixToolsData.scripts[i].toString();
+            	var scriptIcon = new File((insertScriptPath.substring(0, insertScriptPath.length - 3)) + "png");
+            	var selectionItems = pal.grp.list.lst.add("item", insertScript);
+            	if (scriptIcon.exists) {
+            		selectionItems.image = scriptIcon;
+            	}
+            }
+
+            pal.grp.cmds.okBtn.onClick = eipixTools_doChoose;
+        }
+        return pal;
+    }
+
+    // Choose UI
+    var eipixTools_choosePal;
+    function eipixTools_doChooseUI() {
+        eipixTools_choosePal = eipixTools_buildChooseUI(thisObj);
+        if (eipixTools_choosePal !== null) {
+            if (eipixTools_choosePal instanceof Window) {
+                // Show the palette
+                eipixTools_choosePal.center();
+                eipixTools_choosePal.show();
+            } else {
+                eipixTools_choosePal.layout.layout(true);
+            }
+        }
+    }
+
+	// Choose files to ignore
+    function eipixTools_doChoose() {
+    	//gather choosen
+    	var selectionList = eipixTools_choosePal.grp.list.lst.selection;
+    	var ignoreListSelection = [];
+
+    	//push into array
+    	if (selectionList != null) {
+    		//insert
+			for (var i = 0; i < selectionList.length; i++) {
+				ignoreListSelection.push(selectionList[i].text);
+			}
+
+			//insert choosen into field
+			var ignoreBoxText = eipixTools_settingsPal.grp.opts.ign.fld.text;
+			if (ignoreBoxText != "") {
+				var ignoredScripts = ignoreBoxText.split(',');
+			} else {
+				var ignoredScripts = [];
+			}
+			
+			for (var i = 0; i < ignoreListSelection.length; i++) {
+				ignoredScripts.push(ignoreListSelection[i]);
+			}
+    		eipixTools_settingsPal.grp.opts.ign.fld.text = ignoredScripts;
+		}
+
+		//close
+    	eipixTools_choosePal.close();
+    }
+
+    // Save settings
+    function eipixTools_doConfigureSave() {
+        //save update setting
+        var updateSetting = eipixTools_settingsPal.grp.opts.dnu.box.value.toString();
+        app.settings.saveSetting("EipixTools", "Update", updateSetting);
+
+        //save repo setting
+        var repoSetting = eipixTools_settingsPal.grp.opts.rpo.fld.text;
+        app.settings.saveSetting("EipixTools", "Repo URL", repoSetting);
+
+        //save ignorelist setting
+        var ignorelistSetting = eipixTools_settingsPal.grp.opts.ign.fld.text;
+        app.settings.saveSetting("EipixTools", "Ignore List", ignorelistSetting);
+
+        //close config
+        eipixTools_settingsPal.close();
+    }
+
+    // Configure Cancel
+    function eipixTools_doConfigureCancel() {
+        eipixTools_settingsPal.close();
+    }
 
 
 	// eipixTools_filterJSXFiles()
@@ -276,7 +577,8 @@
 		palObj.settingsBtn.helpTip = eipixToolsData.strSettingsTip;
 		palObj.settingsBtn.onClick = function() {
 			// Get the scripts in the selected scripts folder
-			prompt(eipixToolsData.strCurrentHash, eipixToolsData.commitHash);
+			//prompt(eipixToolsData.strCurrentHash, eipixToolsData.commitHash);
+			eipixTools_doSettingsUI();
 		}
 
 		var helpBtnIconFile = new File(eipixToolsData.thisScriptsFolder.fsName + "/(eipixTools)/eipixTools_help.png");
@@ -325,6 +627,26 @@
 	}
 
 
+	// Init Configuration
+	// 
+    function eipixTools_initSettings() {
+        if (!(app.settings.haveSetting("EipixTools", "Commit Hash"))) {
+            app.settings.saveSetting("EipixTools", "Commit Hash", "073f406dc3851e887a4c42b34dbbb67a0d11a986");
+        }
+        if (!(app.settings.haveSetting("EipixTools", "Commit Date"))) {
+            app.settings.saveSetting("EipixTools", "Commit Date", "2015-04-28T09:35:12Z");
+        }
+        if (!(app.settings.haveSetting("EipixTools", "Update"))) {
+            app.settings.saveSetting("EipixTools", "Update", "true");
+        }
+        if (!(app.settings.haveSetting("EipixTools", "Repo URL"))) {
+            app.settings.saveSetting("EipixTools", "Repo URL", "https://api.github.com/repos/koaleksa/eipix-tools");
+        }
+        if (!(app.settings.haveSetting("EipixTools", "Ignore List"))) {
+            app.settings.saveSetting("EipixTools", "Ignore List", "");
+        }
+    }
+
 	// main:
 	// 
 	if (parseFloat(app.version) < 9) {
@@ -334,25 +656,35 @@
 		alert(eipixToolsData.strErrAccessDenied);
 		return;
 	} else {
-		// Get local update hash
-		currentVersionHash();
+		// set settings
+		eipixTools_initSettings();
+
+		// Get local hash
+		getLocalVersion();
 
 		// Update check
-		if (netCheck() == true) {
-			if (isUpdateNeeded() == true) {
-				var confirmPrompt = confirm(eipixToolsData.scriptName + ":\n" + eipixToolsData.strConfirmUpdate);
-				if (confirmPrompt == true) {
-				    updateFromGithub();
+		var updateEnabled = (app.settings.getSetting("EipixTools", "Update") === "false") ? false : true;
+		if (updateEnabled == true) {
+			if (netCheck() == true) {
+				if (isUpdateNeeded() == true) {
+					var confirmPrompt = confirm(eipixToolsData.scriptName + ":\n" + eipixToolsData.strConfirmUpdate);
+					if (confirmPrompt == true) {
+					    updateFromGithub();
+					}
 				}
+			} else {
+				alert(eipixToolsData.errConnection);
 			}
-		} else {
-			alert(eipixToolsData.errConnection);
 		}
+
+		// Get ignore list
+		var ignoreListSetting = app.settings.getSetting("EipixTools", "Ignore List");
+		eipixToolsData.ignoreList = [ignoreListSetting];
 
 		// Gather scripts
 		eipixToolsData.scripts = [];
 		eipixToolsData.setsFolder = new Folder(eipixToolsData.scriptsPath);
-		myFiles = [];
+		var loadFiles = [];
 		eipixToolsData.scripts = getScriptsInSubfolders(eipixToolsData.setsFolder);
 		// Build buttons
 
@@ -362,7 +694,6 @@
 			if (eipixToolsPal instanceof Window) {
 				// Center the palette
 				eipixToolsPal.center();
-
 				// Show the UI
 				eipixToolsPal.show();
 			} else {
