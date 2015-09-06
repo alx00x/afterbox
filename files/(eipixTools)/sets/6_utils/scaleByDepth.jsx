@@ -117,7 +117,7 @@
             var animCamCTRL = activeItem.layers.addNull();
             animCamCTRL.threeDLayer = true;
             animCamCTRL.position.setValue([centerX, centerY, -zoomValue]);
-            animCamCTRL.name = "animCamCTRL";
+            animCamCTRL.source.name = "animCamCTRL";
             animCam.parent = animCamCTRL;
 
             //add smooth wiggle controll
