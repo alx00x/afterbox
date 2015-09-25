@@ -1,7 +1,7 @@
 ﻿// scaleByDepth.jsx
 // 
 // Name: scaleByDepth
-// Version: 1.2
+// Version: 1.3
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -20,7 +20,7 @@
 
     sbzData.scriptNameShort = "SBZ";
     sbzData.scriptName = "Scale By Depth";
-    sbzData.scriptVersion = "1.2";
+    sbzData.scriptVersion = "1.3";
     sbzData.scriptTitle = sbzData.scriptName + " v" + sbzData.scriptVersion;
     sbzData.strMinAE = {en: "This script sets up selected layers for scaling by depth."};
     sbzData.strErrNoSelected = {en: "Please select layers you wish to setup for scaling by depth."};
