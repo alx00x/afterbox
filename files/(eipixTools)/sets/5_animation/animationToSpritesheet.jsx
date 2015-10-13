@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 1.4
+// Version: 1.5
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,13 +24,16 @@
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "1.4";
+    a2sData.scriptVersion = "1.5";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
     a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     a2sData.strActiveCompErr = {en: "Please select a composition."};
     a2sData.strExecute = {en: "Execute"};
     a2sData.strCancel = {en: "Cancel"};
+
+    a2sData.strFrameSkip = {en: "Skip"};
+    a2sData.strFrameSkipOpts = [0, 1, 2, 5];
 
     a2sData.strExportTo = {en: "Export To"};
     a2sData.strBrowse = {en: "Browse"};
@@ -136,6 +139,11 @@
                             loader: Progressbar { text:'Progressbar', minvalue:0, maxvalue:100, preferredSize:[260,5]},\
                             box1: Checkbox { text:'" + animationToSpritesheet_localize(a2sData.strCrop) + "' }, \
                         }, \
+                        skp: Group { \
+                            alignment:['fill','top'], \
+                            text: StaticText { text:'" + animationToSpritesheet_localize(a2sData.strFrameSkip) + ":', preferredSize:[120,20] }, \
+                            list: DropDownList { alignment:['fill','center'], preferredSize:[120,20] }, \
+                        }, \
                         sam: Group { \
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + animationToSpritesheet_localize(a2sData.strSamples) + ":', preferredSize:[120,20] }, \
@@ -146,7 +154,7 @@
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + animationToSpritesheet_localize(a2sData.strColumns) + ":', preferredSize:[120,20] }, \
                             fld: EditText { text:'1', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:1, minvalue:1, maxvalue:32, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            sld: Slider { value:1, minvalue:1, maxvalue:64, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                         hor: Group { \
                             alignment:['fill','top'], \
@@ -188,6 +196,13 @@
                 animationToSpritesheet_doBrowse();
             }
 
+            //Skip dropdown menu
+            var skipItems = a2sData.strFrameSkipOpts;
+            for (var i = 0; i < skipItems.length; i++) {
+                pal.grp.options.skp.list.add("item", skipItems[i]);
+            }
+            pal.grp.options.skp.list.selection = 1;
+
             //Samples slider change
             pal.grp.options.sam.fld.onChange = function() {
                 var value = parseInt(this.text);
@@ -210,6 +225,8 @@
                 this.parent.fld.text = value.toString();
             }
 
+            pal.grp.options.skp.text.enabled = false;
+            pal.grp.options.skp.list.enabled = false;
             pal.grp.options.crp.box1.value = false;
             pal.grp.options.crp.text.visible = false;
             pal.grp.options.crp.text.enabled = false;
@@ -221,6 +238,8 @@
 
             pal.grp.options.crp.box1.onClick = function() {
                 if (pal.grp.options.crp.box1.value == true) {
+                    pal.grp.options.skp.text.enabled = true;
+                    pal.grp.options.skp.list.enabled = true;
                     pal.grp.options.sam.text.enabled = true;
                     pal.grp.options.sam.fld.enabled = true;
                     pal.grp.options.sam.sld.enabled = true;
@@ -231,6 +250,8 @@
                         warningShow = false;
                     }
                 } else {
+                    pal.grp.options.skp.text.enabled = false;
+                    pal.grp.options.skp.list.enabled = false;
                     pal.grp.options.sam.text.enabled = false;
                     pal.grp.options.sam.fld.enabled = false;
                     pal.grp.options.sam.sld.enabled = false;
@@ -317,6 +338,7 @@
     // Main Functions:
     //
 
+    // Browse for location
     function animationToSpritesheet_doBrowse() {
         var spreadSheetFile = a2sData.projectFolder.saveDlg(animationToSpritesheet_localize(a2sData.strBrowseText),"PNG:*.png");
         if (spreadSheetFile != null) {
@@ -324,7 +346,8 @@
         }
     }
 
-    function animationToSpritesheet_edgeDetect(comp, target, samples) {
+    // Detect edges for cropping
+    function animationToSpritesheet_edgeDetect(comp, target, samples, skip) {
         //add null
         var addNull = comp.layers.addNull();
     
@@ -338,15 +361,15 @@
     
         var fx1 = compWidth; //left
         var fx2 = -1; //right
-        var fy1 = -1; //top
+        var fy1 = compHeight; //top
         var fy2 = -1; //bottom
     
         var x1 = compWidth; //left
         var x2 = -1; //right
-        var y1 = -1; //top
+        var y1 = compHeight; //top
         var y2 = -1; //bottom
     
-        for (i = 0; i < compFrames; i++) {
+        for (i = 0; i < compFrames; i += skip) {
             updateProgresstext(a2sPal, i + " / " + compFrames);
             var ySwitch = false;
 
@@ -361,10 +384,7 @@
                     //find right edge
                     if ((value > 0) && (x2 < a)) {x2 = a;}
                     //find top edge
-                    if ((value > 0) && (ySwitch == false)) {
-                        y1 = b;
-                        ySwitch = true;
-                    }
+                    if ((value > 0) && (b < y1)) {y1 = b;}
                     //find bottom edge
                     if ((value > 0) && (y2 < b)) {y2 = b;}
                 }
@@ -373,7 +393,7 @@
 
             if (x1 < fx1) {fx1 = x1;}
             if (x2 > fx2) {fx2 = x2;}
-            if (y1 > fy1) {fy1 = y1;}
+            if (y1 < fy1) {fy1 = y1;}
             if (y2 > fy2) {fy2 = y2;}
         }
         updateProgresstext(a2sPal, compFrames + " / " + compFrames);
@@ -414,7 +434,8 @@
         if (a2sPal.grp.options.crp.box1.value == true) {
             //detect edges
             var numOfSamples = parseInt(a2sPal.grp.options.sam.fld.text);
-            var targetEdges = animationToSpritesheet_edgeDetect(spriteComp, spriteComp.layers[1].name, numOfSamples);
+            var skipValue = parseInt(String(a2sPal.grp.options.skp.list.selection)) + 1;
+            var targetEdges = animationToSpritesheet_edgeDetect(spriteComp, spriteComp.layers[1].name, numOfSamples, skipValue);
 
             //offset active comp layer to accommodate new dimensions
             var layerPos = spriteComp.layers[1].property("Transform").property("Position").value;
