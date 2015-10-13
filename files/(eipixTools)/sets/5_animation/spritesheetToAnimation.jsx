@@ -1,7 +1,7 @@
 ﻿// spritesheetToAnimation.jsx
 // 
 // Name: spritesheetToAnimation
-// Version: 1.1
+// Version: 1.2
 // Author: Aleksandar Kocic
 // 
 // Description: Turns sprite tiled sheets into sequences.
@@ -14,7 +14,7 @@
 
     s2aData.scriptNameShort = "STA";
     s2aData.scriptName = "Spritesheet To Animation";
-    s2aData.scriptVersion = "1.1";
+    s2aData.scriptVersion = "1.2";
     s2aData.scriptTitle = s2aData.scriptName + " v" + s2aData.scriptVersion;
 
     s2aData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -61,7 +61,7 @@
                         text: '" + spritesheetToAnimation_localize(s2aData.strSpriteSheet) + "', alignment:['fill','top'], \
                         select: Group { \
                             alignment:['fill','top'], \
-                            fld: EditText { alignment:['fill','center'], preferredSize:[250,20] },  \
+                            fld: EditText { alignment:['fill','center'], preferredSize:[350,20] },  \
                             btn: Button { text:'" + spritesheetToAnimation_localize(s2aData.strBrowse) + "', preferredSize:[-1,20] }, \
                         }, \
                     }, \
@@ -72,13 +72,13 @@
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + spritesheetToAnimation_localize(s2aData.strColumns) + ":', preferredSize:[120,20] }, \
                             fld: EditText { text:'1', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:1, minvalue:1, maxvalue:32, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            sld: Slider { value:1, minvalue:1, maxvalue:64, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                         hor: Group { \
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + spritesheetToAnimation_localize(s2aData.strRows) + ":', preferredSize:[120,20] }, \
                             fld: EditText { text:'1', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:1, minvalue:1, maxvalue:32, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            sld: Slider { value:1, minvalue:1, maxvalue:64, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                         fps: Group { \
                             alignment:['fill','top'], \
