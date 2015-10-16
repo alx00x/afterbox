@@ -1,7 +1,7 @@
-// transparentOGV.jsx
+﻿// transparentOGV.jsx
 // 
 // Name: transparentOGV
-// Version: 2.1
+// Version: 2.2
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -27,7 +27,7 @@
 
     togvData.scriptNameShort = "TOGV";
     togvData.scriptName = "Transparent OGV";
-    togvData.scriptVersion = "2.1";
+    togvData.scriptVersion = "2.2";
     togvData.scriptTitle = togvData.scriptName + " v" + togvData.scriptVersion;
 
     togvData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -252,64 +252,66 @@
     }
 
     // Detect edges for cropping
-    function transparentOGV_edgeDetect(comp, target, samples, skip) {
+    function transparentOGV_edgeDetect(comp, samples, skip) {
+
+        //create duplicate comp
+        var analizeComp = comp.duplicate();
+        analizeComp.name = "analizeComp_(" + comp.name + ")";
+        var analizeFrames = analizeComp.layers.precompose([1], "analizeFrames_(" + comp.name + ")", true);
+        var target = analizeComp.layers[1].name
+
+        //duplicate layer and distribute frames to single frame
+        var compFrames = Math.round(analizeFrames.duration * analizeFrames.frameRate);
+
+        for (i = 0; i < compFrames; i += skip) {
+            var firstLayer = analizeFrames.layers[1];
+            var newLayer = firstLayer.duplicate()
+            var newLayerStartTime = newLayer.startTime;
+            newLayer.startTime = newLayerStartTime - (analizeFrames.frameDuration * skip);
+        }
+
         //add null
-        var addNull = comp.layers.addNull();
-    
+        var addNull = analizeComp.layers.addNull();
+
         //add slider property to null
         var addSlider = addNull.Effects.addProperty("ADBE Slider Control");
-    
-        //analize frame by frame for x1, x2, y1 and y2
-        var compFrames = Math.round(comp.duration * comp.frameRate);
-        var compHeight = comp.height;
-        var compWidth = comp.width;
-    
-        var fx1 = compWidth; //left
-        var fx2 = -1; //right
-        var fy1 = compHeight; //top
-        var fy2 = -1; //bottom
-    
+
+        //analize for x1, x2, y1 and y2
+        var compHeight = analizeComp.height;
+        var compWidth = analizeComp.width;
+ 
         var x1 = compWidth; //left
         var x2 = -1; //right
         var y1 = compHeight; //top
         var y2 = -1; //bottom
-    
-        for (i = 0; i < compFrames; i += skip) {
-            updateProgresstext(togvPal, i + " / " + compFrames);
-            var ySwitch = false;
 
-            for (b = 0; b < compHeight; b += samples) {
-                for (a = 0; a < compWidth; a += samples) {
-                    var expr = "thisComp.layer('" + target + "').sampleImage([" + a + "," + b + "], [" + samples + "," + samples + "]/2, true, " + (i * comp.frameDuration) + ")[3]";
-                    addSlider.property(1).expressionEnabled = true;
-                    addSlider.property(1).expression = expr;
-                    var value = addSlider(1).value;
-                    //find left edge
-                    if ((value > 0) && (a < x1)) {x1 = a;}
-                    //find right edge
-                    if ((value > 0) && (x2 < a)) {x2 = a;}
-                    //find top edge
-                    if ((value > 0) && (b < y1)) {y1 = b;}
-                    //find bottom edge
-                    if ((value > 0) && (y2 < b)) {y2 = b;}
-                }
-                updateProgressbar(togvPal, 0, b+1, compHeight);
+        for (b = 0; b < compHeight; b += samples) {
+            for (a = 0; a < compWidth; a += samples) {
+                var expr = "thisComp.layer('" + target + "').sampleImage([" + a + "," + b + "], [" + samples + "," + samples + "]/2, true, " + analizeComp.frameDuration + ")[3]";
+                addSlider.property(1).expressionEnabled = true;
+                addSlider.property(1).expression = expr;
+                var value = addSlider(1).value;
+                //find left edge
+                if ((value > 0) && (a < x1)) {x1 = a;}
+                //find right edge
+                if ((value > 0) && (x2 < a)) {x2 = a;}
+                //find top edge
+                if ((value > 0) && (b < y1)) {y1 = b;}
+                //find bottom edge
+                if ((value > 0) && (y2 < b)) {y2 = b;}
             }
-
-            if (x1 < fx1) {fx1 = x1;}
-            if (x2 > fx2) {fx2 = x2;}
-            if (y1 < fy1) {fy1 = y1;}
-            if (y2 > fy2) {fy2 = y2;}
+            updateProgresstext(togvPal, b + " / " + compHeight);
+            updateProgressbar(togvPal, 0, b+1, compHeight);
         }
-        updateProgresstext(togvPal, compFrames + " / " + compFrames);
 
-        addNull.remove();
+        analizeComp.remove();
+        analizeFrames.remove();
 
-        var arr = [Math.round(fx1 - (samples / 2)), Math.round(fx2 + (samples / 2)), Math.round(fy1 - (samples / 2)), Math.round(fy2 + (samples / 2))];
+        var arr = [Math.round(x1 - (samples / 2)), Math.round(x2 + (samples / 2)), Math.round(y1 - (samples / 2)), Math.round(y2 + (samples / 2))];
         return arr;
     }
 
-    // 
+    // Check Template
     function checkTemplate(templateName) {
         var renderQ = app.project.renderQueue;
         var tempComp = app.project.items.addComp("setProxyTempComp", 100, 100, 1, 1, 25);
@@ -340,6 +342,7 @@
         var activeComp = togvData.activeItem;
         var activeWidth = togvData.activeItem.width;
         var activeHeight = togvData.activeItem.height;
+        var activeCompName = activeComp.name;
         var activeDuration = togvData.activeItem.duration;
         var activeFramerate = togvData.activeItem.frameRate;
         var activeFrameDuration = togvData.activeItem.frameDuration;
@@ -347,7 +350,7 @@
         var selectedLayersIndices = [];
 
         //create main folder
-        var mainFolderItem = app.project.items.addFolder(activeComp.name + "_OGV");
+        var mainFolderItem = app.project.items.addFolder(activeCompName + "_OGV");
 
         selectedLayers = activeComp.selectedLayers;
         //get each selected layer's index
@@ -357,7 +360,7 @@
 
         //copy source of activeComp
         var activeCompAlpha = activeComp.duplicate();
-        activeCompAlpha.name = "alpha(" + activeComp.name + ")";
+        activeCompAlpha.name = "alpha(" + activeCompName + ")";
         activeCompAlpha.parentFolder = mainFolderItem;
 
         //set selected layers as guides in copy of mainComp
@@ -366,7 +369,7 @@
         }
 
         //create container for activeComp
-        var mainCompName = "main_" + activeComp.name;
+        var mainCompName = "main_" + activeCompName;
         var mainCompWidth = activeWidth;
         var mainCompHeight = activeHeight;
         var mainCompFramerate = activeFramerate;
@@ -375,7 +378,7 @@
         mainComp.layers.add(activeComp);
 
         //create container for activeCompAlpha
-        var mainCompAlphaName = "alpha_" + activeComp.name;
+        var mainCompAlphaName = "alpha_" + activeCompName;
         var mainCompAlphaWidth = activeWidth;
         var mainCompAlphaHeight = activeHeight;
         var mainCompAlphaFramerate = activeFramerate;
@@ -388,7 +391,7 @@
             //detect edges
             var numOfSamples = parseInt(togvPal.grp.options.sam.fld.text);
             var skipValue = parseInt(String(togvPal.grp.options.skp.list.selection)) + 1;
-            var targetEdges = transparentOGV_edgeDetect(mainCompAlpha, mainCompAlpha.layers[1].name, numOfSamples, skipValue);
+            var targetEdges = transparentOGV_edgeDetect(mainCompAlpha, numOfSamples, skipValue);
 
             //offset mainComp layer to accommodate new dimensions
             var layerPos = mainComp.layers[1].property("Transform").property("Position").value;
@@ -445,7 +448,7 @@
             renderQueueComp.timeSpanStart = 0;
             renderQueueComp.timeSpanDuration = newComp.duration;
             renderQueueComp.outputModules[1].applyTemplate(togvData.outputTemplateVid);
-            renderQueueComp.outputModules[1].file = new File(togvData.outputPath.fsName.toString() + "\\" + activeComp.name + "_a.avi");
+            renderQueueComp.outputModules[1].file = new File(togvData.outputPath.fsName.toString() + "\\" + activeCompName + "_a.avi");
             //add png to render queue
             var renderQueueThumb = app.project.renderQueue.items.add(mainComp);
             var renderQueueThumbIndex = app.project.renderQueue.numItems;
@@ -453,12 +456,15 @@
             renderQueueThumb.timeSpanStart = endFrame;
             renderQueueThumb.timeSpanDuration = oneFrame;
             renderQueueThumb.outputModules[1].applyTemplate(togvData.outputTemplateImg);
-            renderQueueThumb.outputModules[1].file = new File(togvData.outputPath.fsName.toString() + "\\" + activeComp.name + "_[#####].png");
+            renderQueueThumb.outputModules[1].file = new File(togvData.outputPath.fsName.toString() + "\\" + activeCompName + "_[#####].png");
             //render
             app.project.renderQueue.render();
         } catch (err) {
             alert(err.toString());
         }
+
+        mainComp.openInViewer()
+
     }
 
     // Button Functions:

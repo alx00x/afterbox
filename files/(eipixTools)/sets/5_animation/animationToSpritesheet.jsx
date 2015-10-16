@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 1.5
+// Version: 1.6
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,7 +24,7 @@
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "1.5";
+    a2sData.scriptVersion = "1.6";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
     a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -347,60 +347,62 @@
     }
 
     // Detect edges for cropping
-    function animationToSpritesheet_edgeDetect(comp, target, samples, skip) {
+    function animationToSpritesheet_edgeDetect(comp, samples, skip) {
+
+        //create duplicate comp
+        var analizeComp = comp.duplicate();
+        analizeComp.name = "analizeComp_(" + comp.name + ")";
+        var analizeFrames = analizeComp.layers.precompose([1], "analizeFrames_(" + comp.name + ")", true);
+        var target = analizeComp.layers[1].name
+
+        //duplicate layer and distribute frames to single frame
+        var compFrames = Math.round(analizeFrames.duration * analizeFrames.frameRate);
+
+        for (i = 0; i < compFrames; i += skip) {
+            var firstLayer = analizeFrames.layers[1];
+            var newLayer = firstLayer.duplicate()
+            var newLayerStartTime = newLayer.startTime;
+            newLayer.startTime = newLayerStartTime - (analizeFrames.frameDuration * skip);
+        }
+
         //add null
-        var addNull = comp.layers.addNull();
-    
+        var addNull = analizeComp.layers.addNull();
+
         //add slider property to null
         var addSlider = addNull.Effects.addProperty("ADBE Slider Control");
-    
-        //analize frame by frame for x1, x2, y1 and y2
-        var compFrames = Math.round(comp.duration * comp.frameRate);
-        var compHeight = comp.height;
-        var compWidth = comp.width;
-    
-        var fx1 = compWidth; //left
-        var fx2 = -1; //right
-        var fy1 = compHeight; //top
-        var fy2 = -1; //bottom
-    
+
+        //analize for x1, x2, y1 and y2
+        var compHeight = analizeComp.height;
+        var compWidth = analizeComp.width;
+ 
         var x1 = compWidth; //left
         var x2 = -1; //right
         var y1 = compHeight; //top
         var y2 = -1; //bottom
-    
-        for (i = 0; i < compFrames; i += skip) {
-            updateProgresstext(a2sPal, i + " / " + compFrames);
-            var ySwitch = false;
 
-            for (b = 0; b < compHeight; b += samples) {
-                for (a = 0; a < compWidth; a += samples) {
-                    var expr = "thisComp.layer('" + target + "').sampleImage([" + a + "," + b + "], [" + samples + "," + samples + "]/2, true, " + (i * comp.frameDuration) + ")[3]";
-                    addSlider.property(1).expressionEnabled = true;
-                    addSlider.property(1).expression = expr;
-                    var value = addSlider(1).value;
-                    //find left edge
-                    if ((value > 0) && (a < x1)) {x1 = a;}
-                    //find right edge
-                    if ((value > 0) && (x2 < a)) {x2 = a;}
-                    //find top edge
-                    if ((value > 0) && (b < y1)) {y1 = b;}
-                    //find bottom edge
-                    if ((value > 0) && (y2 < b)) {y2 = b;}
-                }
-                updateProgressbar(a2sPal, 0, b+1, compHeight);
+        for (b = 0; b < compHeight; b += samples) {
+            for (a = 0; a < compWidth; a += samples) {
+                var expr = "thisComp.layer('" + target + "').sampleImage([" + a + "," + b + "], [" + samples + "," + samples + "]/2, true, " + analizeComp.frameDuration + ")[3]";
+                addSlider.property(1).expressionEnabled = true;
+                addSlider.property(1).expression = expr;
+                var value = addSlider(1).value;
+                //find left edge
+                if ((value > 0) && (a < x1)) {x1 = a;}
+                //find right edge
+                if ((value > 0) && (x2 < a)) {x2 = a;}
+                //find top edge
+                if ((value > 0) && (b < y1)) {y1 = b;}
+                //find bottom edge
+                if ((value > 0) && (y2 < b)) {y2 = b;}
             }
-
-            if (x1 < fx1) {fx1 = x1;}
-            if (x2 > fx2) {fx2 = x2;}
-            if (y1 < fy1) {fy1 = y1;}
-            if (y2 > fy2) {fy2 = y2;}
+            updateProgresstext(a2sPal, b + " / " + compHeight);
+            updateProgressbar(a2sPal, 0, b+1, compHeight);
         }
-        updateProgresstext(a2sPal, compFrames + " / " + compFrames);
 
-        addNull.remove();
+        analizeComp.remove();
+        analizeFrames.remove();
 
-        var arr = [Math.round(fx1 - (samples / 2)), Math.round(fx2 + (samples / 2)), Math.round(fy1 - (samples / 2)), Math.round(fy2 + (samples / 2))];
+        var arr = [Math.round(x1 - (samples / 2)), Math.round(x2 + (samples / 2)), Math.round(y1 - (samples / 2)), Math.round(y2 + (samples / 2))];
         return arr;
     }
 
@@ -435,7 +437,7 @@
             //detect edges
             var numOfSamples = parseInt(a2sPal.grp.options.sam.fld.text);
             var skipValue = parseInt(String(a2sPal.grp.options.skp.list.selection)) + 1;
-            var targetEdges = animationToSpritesheet_edgeDetect(spriteComp, spriteComp.layers[1].name, numOfSamples, skipValue);
+            var targetEdges = animationToSpritesheet_edgeDetect(spriteComp, numOfSamples, skipValue);
 
             //offset active comp layer to accommodate new dimensions
             var layerPos = spriteComp.layers[1].property("Transform").property("Position").value;
