@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 1.6
+// Version: 1.7
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,16 +24,13 @@
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "1.6";
+    a2sData.scriptVersion = "1.7";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
     a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     a2sData.strActiveCompErr = {en: "Please select a composition."};
     a2sData.strExecute = {en: "Execute"};
     a2sData.strCancel = {en: "Cancel"};
-
-    a2sData.strFrameSkip = {en: "Skip"};
-    a2sData.strFrameSkipOpts = [0, 1, 2, 5];
 
     a2sData.strExportTo = {en: "Export To"};
     a2sData.strBrowse = {en: "Browse"};
@@ -44,7 +41,7 @@
     a2sData.strRows = {en: "Rows"};
     a2sData.strRowsInfo = {en: "(this value is calculated automaticaly)"};
 
-    a2sData.strWarning = {en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Using less than 10 samples is not recommended"};
+    a2sData.strWarning = {en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Setting smaller than 5 sample size is not recommended"};
     a2sData.strPNGWarning = {en: "Warning: Could not find \"PNG Sequence\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now."};
     a2sData.strSpreadsheetErr = {en: "You need to specify output first."};
     a2sData.strOutputErr = {en: "Output is not valid."};
@@ -53,7 +50,12 @@
     a2sData.strFramerateErr = {en: "Your composition framerate is not 25fps. Do you wish to continue?"};
 
     a2sData.strCrop = {en: "Crop to Edges"};
-    a2sData.strSamples = {en: "Samples"};
+    a2sData.strSamples = {en: "Sample size"};
+    a2sData.strFrameSkip = {en: "Skip frames"};
+    a2sData.strFrameSkipOpts = [0, 1, 2, 5];
+
+    a2sData.strSamplesHelpTip = {en: "Lower the value, slower the execution."};
+    a2sData.strFrameSkipHelpTip = {en: "Lower the value, slower the execution."};
 
     a2sData.strHelp = {en: "?"};
     a2sData.strHelpTitle = {en: "Help"};
@@ -147,8 +149,12 @@
                         sam: Group { \
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + animationToSpritesheet_localize(a2sData.strSamples) + ":', preferredSize:[120,20] }, \
-                            fld: EditText { text:'10', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:10, minvalue:1, maxvalue:20, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            fld: EditText { text:'5', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
+                            sld: Slider { value:5, minvalue:1, maxvalue:20, alignment:['fill','center'], preferredSize:[200,20] }, \
+                        }, \
+                        sepr: Group { \
+                            orientation:'row', alignment:['fill','top'], \
+                            rule: Panel { height: 2, alignment:['fill','center'] }, \
                         }, \
                         ver: Group { \
                             alignment:['fill','top'], \
@@ -196,12 +202,16 @@
                 animationToSpritesheet_doBrowse();
             }
 
+            pal.grp.options.crp.box1.helpTip = transparentOGV_localize(a2sData.strWarning);
+            pal.grp.options.skp.list.helpTip = transparentOGV_localize(a2sData.strFrameSkipHelpTip);
+            pal.grp.options.sam.sld.helpTip = transparentOGV_localize(a2sData.strSamplesHelpTip);
+
             //Skip dropdown menu
             var skipItems = a2sData.strFrameSkipOpts;
             for (var i = 0; i < skipItems.length; i++) {
                 pal.grp.options.skp.list.add("item", skipItems[i]);
             }
-            pal.grp.options.skp.list.selection = 1;
+            pal.grp.options.skp.list.selection = 0;
 
             //Samples slider change
             pal.grp.options.sam.fld.onChange = function() {
@@ -234,7 +244,7 @@
             pal.grp.options.sam.text.enabled = false;
             pal.grp.options.sam.fld.enabled = false;
             pal.grp.options.sam.sld.enabled = false;
-            var warningShow = true;
+            //var warningShow = true;
 
             pal.grp.options.crp.box1.onClick = function() {
                 if (pal.grp.options.crp.box1.value == true) {
@@ -245,10 +255,10 @@
                     pal.grp.options.sam.sld.enabled = true;
                     pal.grp.options.crp.text.visible = true;
                     pal.grp.options.crp.loader.visible = true;
-                    if (warningShow == true) {
-                        alert(animationToSpritesheet_localize(a2sData.strWarning));
-                        warningShow = false;
-                    }
+                    //if (warningShow == true) {
+                    //    alert(animationToSpritesheet_localize(a2sData.strWarning));
+                    //    warningShow = false;
+                    //}
                 } else {
                     pal.grp.options.skp.text.enabled = false;
                     pal.grp.options.skp.list.enabled = false;
@@ -382,7 +392,7 @@
 
         for (b = 0; b < compHeight; b += samples) {
             for (a = 0; a < compWidth; a += samples) {
-                var expr = "thisComp.layer('" + target + "').sampleImage([" + a + "," + b + "], [" + samples + "," + samples + "]/2, true, " + analizeComp.frameDuration + ")[3]";
+                var expr = "thisComp.layer('" + target + "').sampleImage([" + a + "," + b + "], [" + samples + "," + samples + "]/2, true, 0)[3]";
                 addSlider.property(1).expressionEnabled = true;
                 addSlider.property(1).expression = expr;
                 var value = addSlider(1).value;
