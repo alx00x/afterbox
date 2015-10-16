@@ -1,7 +1,7 @@
 ﻿// transparentOGV.jsx
 // 
 // Name: transparentOGV
-// Version: 2.2
+// Version: 2.3
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -27,15 +27,12 @@
 
     togvData.scriptNameShort = "TOGV";
     togvData.scriptName = "Transparent OGV";
-    togvData.scriptVersion = "2.2";
+    togvData.scriptVersion = "2.3";
     togvData.scriptTitle = togvData.scriptName + " v" + togvData.scriptVersion;
 
     togvData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     togvData.strActiveCompErr = {en: "Please select a composition."};
     togvData.strNoSelectErr = {en: "Select at least one background layer."};
-
-    togvData.strFrameSkip = {en: "Skip"};
-    togvData.strFrameSkipOpts = [0, 1, 2, 5];
 
     togvData.strExecute = {en: "Execute"};
     togvData.strCancel = {en: "Cancel"};
@@ -46,13 +43,18 @@
 
     togvData.strOptions = {en: "Options"};
 
-    togvData.strWarning = {en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Using less than 10 samples is not recommended"};
+    togvData.strWarning = {en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Setting smaller than 5 sample size is not recommended"};
     togvData.strPNGWarning = {en: "Warning: Could not find \"" + togvData.outputTemplateName + "\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now."};
     togvData.strSpreadsheetErr = {en: "You need to specify output first."};
     togvData.strOutputErr = {en: "Output is not valid."};
 
     togvData.strCrop = {en: "Crop to Edges"};
     togvData.strSamples = {en: "Samples"};
+    togvData.strFrameSkip = {en: "Skip frames"};
+    togvData.strFrameSkipOpts = [0, 1, 2, 5];
+
+    togvData.strSamplesHelpTip = {en: "Lower the value, slower the execution."};
+    togvData.strFrameSkipHelpTip = {en: "Lower the value, slower the execution."};
 
     togvData.strHelp = {en: "?"};
     togvData.strHelpTitle = {en: "Help"};
@@ -102,8 +104,8 @@
                         sam: Group { \
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + transparentOGV_localize(togvData.strSamples) + ":', preferredSize:[120,20] }, \
-                            fld: EditText { text:'10', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:10, minvalue:1, maxvalue:20, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            fld: EditText { text:'5', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
+                            sld: Slider { value:5, minvalue:1, maxvalue:20, alignment:['fill','center'], preferredSize:[200,20] }, \
                         }, \
                     }, \
                     output: Panel { \
@@ -139,12 +141,16 @@
                 transparentOGV_doBrowse();
             }
 
+            pal.grp.options.crp.box1.helpTip = transparentOGV_localize(togvData.strWarning);
+            pal.grp.options.skp.list.helpTip = transparentOGV_localize(togvData.strFrameSkipHelpTip);
+            pal.grp.options.sam.sld.helpTip = transparentOGV_localize(togvData.strSamplesHelpTip);
+
             //Skip dropdown menu
             var skipItems = togvData.strFrameSkipOpts;
             for (var i = 0; i < skipItems.length; i++) {
                 pal.grp.options.skp.list.add("item", skipItems[i]);
             }
-            pal.grp.options.skp.list.selection = 1;
+            pal.grp.options.skp.list.selection = 0;
 
             //Samples slider change
             pal.grp.options.sam.fld.onChange = function() {
@@ -177,7 +183,7 @@
             pal.grp.options.sam.text.enabled = false;
             pal.grp.options.sam.fld.enabled = false;
             pal.grp.options.sam.sld.enabled = false;
-            var warningShow = true;
+            //var warningShow = true;
 
             pal.grp.options.crp.box1.onClick = function() {
                 if (pal.grp.options.crp.box1.value == true) {
@@ -188,10 +194,10 @@
                     pal.grp.options.sam.sld.enabled = true;
                     pal.grp.options.crp.text.visible = true;
                     pal.grp.options.crp.loader.visible = true;
-                    if (warningShow == true) {
-                        alert(transparentOGV_localize(togvData.strWarning));
-                        warningShow = false;
-                    }
+                    //if (warningShow == true) {
+                    //    alert(transparentOGV_localize(togvData.strWarning));
+                    //    warningShow = false;
+                    //}
                 } else {
                     pal.grp.options.skp.text.enabled = false;
                     pal.grp.options.skp.list.enabled = false;
@@ -287,7 +293,7 @@
 
         for (b = 0; b < compHeight; b += samples) {
             for (a = 0; a < compWidth; a += samples) {
-                var expr = "thisComp.layer('" + target + "').sampleImage([" + a + "," + b + "], [" + samples + "," + samples + "]/2, true, " + analizeComp.frameDuration + ")[3]";
+                var expr = "thisComp.layer('" + target + "').sampleImage([" + a + "," + b + "], [" + samples + "," + samples + "]/2, true, 0)[3]";
                 addSlider.property(1).expressionEnabled = true;
                 addSlider.property(1).expression = expr;
                 var value = addSlider(1).value;
@@ -482,7 +488,7 @@
                     app.beginUndoGroup(togvData.scriptName);
                     var checkPoint = checkTemplate(togvData.outputTemplateName);
                     if (checkPoint == false) {
-                        alert(transparentOGV_localize(togvData.strWarning));
+                        alert(transparentOGV_localize(togvData.strPNGWarning));
                     }
                     transparentOGV_main();
                     app.endUndoGroup();
