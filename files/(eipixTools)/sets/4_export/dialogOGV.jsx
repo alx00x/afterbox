@@ -1,7 +1,7 @@
 ﻿// dialogOGV.jsx
 // 
 // Name: dialogOGV
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -22,7 +22,7 @@
 
     dogvData.scriptNameShort = "DOGV";
     dogvData.scriptName = "Dialog OGV";
-    dogvData.scriptVersion = "1.0";
+    dogvData.scriptVersion = "1.1";
     dogvData.scriptTitle = dogvData.scriptName + " v" + dogvData.scriptVersion;
 
     dogvData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -32,7 +32,6 @@
     dogvData.strCancel = {en: "Cancel"};
 
     dogvData.strSelect = {en: "Select"};
-    dogvData.strInputSelectErr = {en: "No selected sequences."};
     dogvData.strSelectText = {en: "Import sequences into project panel, select them and press the button:"};
     dogvData.strExportTo = {en: "Export To"};
     dogvData.strBrowse = {en: "Browse"};
@@ -52,6 +51,10 @@
 
     dogvData.strSamplesHelpTip = {en: "Lower the value, slower the execution."};
     dogvData.strFrameSkipHelpTip = {en: "Lower the value, slower the execution."};
+
+    dogvData.strInputSelectErr = {en: "No selected sequences."};
+    dogvData.strErrNotCorrectExt = {en: "Following item is not a PNG sequence:"};
+    dogvData.strErrNotCorrectFPS = {en: "Following item is not interpreted as 25fps sequence:"};
 
     dogvData.strHelp = {en: "?"};
     dogvData.strHelpTitle = {en: "Help"};
@@ -163,7 +166,7 @@
             for (var i = 0; i < skipItems.length; i++) {
                 pal.grp.options.skp.list.add("item", skipItems[i]);
             }
-            pal.grp.options.skp.list.selection = 0;
+            pal.grp.options.skp.list.selection = 3;
 
             //Samples slider change
             pal.grp.options.sam.fld.onChange = function() {
@@ -274,9 +277,13 @@
             //check if source is a png sequence
             if (currentItem instanceof FootageItem && currentItem.mainSource.isStill == false && currentItem.mainSource.hasAlpha == true) {
                 var file = currentItem.file.toString();
-                if (file.slice(-3) == "png") {
-                    dogvData.sequenceItems.push(currentItem);
+                if (file.slice(-3) != "png") {
+                    alert(dialogOGV_localize(dogvData.strErrNotCorrectExt) + "\n" + currentItem.name, "Warning");
                 }
+                if (currentItem.frameRate != 25) {
+                    alert(dialogOGV_localize(dogvData.strErrNotCorrectFPS) + "\n" + currentItem.name, "Warning");
+                }    
+                dogvData.sequenceItems.push(currentItem);
             }
         }
         //populate list
@@ -367,7 +374,7 @@
     function dialogOGV_export(item) {
         var itemName = item.name.split("_[")[0];
         //create item comp
-        var currentItem = app.project.items.addComp(itemName, item.width, item.height, item.pixelAspect, item.duration, 25);
+        var currentItem = app.project.items.addComp(itemName, item.width, item.height, item.pixelAspect, item.duration, item.frameRate);
         var colorLayer = currentItem.layers.add(item);
         colorLayer.property("Effects").addProperty("Simple Choker");
         colorLayer.property("Effects").property("Simple Choker").property("Choke Matte").setValue(0.5);
