@@ -1,16 +1,21 @@
 ﻿// backgroundRender.jsx
-// 
+//
 // Name: backgroundRender
-// Version: 1.4
+// Version: 1.5
 // Author: Aleksandar Kocic
-// 
+//
 // Description:
 // This script renders saves the project and renders the active composition
 // in after effects native command-line renderer.
-//  
+//
 
 
 (function backgroundRender(thisObj) {
+
+    if (app.project.file == null) {
+        alert("Save the project first.");
+        return;
+    }
 
     // Localize
     function backgroundRender_localize(strVar) {
@@ -22,7 +27,7 @@
 
     bgrData.scriptNameShort = "BGR";
     bgrData.scriptName = "Background Render";
-    bgrData.scriptVersion = "1.4";
+    bgrData.scriptVersion = "1.5";
     bgrData.scriptTitle = bgrData.scriptName + " v" + bgrData.scriptVersion;
 
     bgrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
@@ -248,7 +253,7 @@
     }
 
     // Add quotes
-    function addQuotes(string) { 
+    function addQuotes(string) {
         return "\""+ string + "\"";
     }
 

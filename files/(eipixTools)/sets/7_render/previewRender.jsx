@@ -1,23 +1,28 @@
 // previewRender.jsx
-// 
+//
 // Name: previewRender
-// Version: 1.2
+// Version: 1.3
 // Author: Aleksandar Kocic
-// 
-// Description:     
+//
+// Description:
 // This script renders saves the project and renders the active composition
 // as a preview video with draft settings.
-//  
+//
 
 
 (function previewRender(thisObj) {
+
+    if (app.project.file == null) {
+        alert("Save the project first.");
+        return;
+    }
 
     // Define main variables
     var prrData = new Object();
 
     prrData.scriptNameShort = "PRR";
     prrData.scriptName = "Preview Render";
-    prrData.scriptVersion = "1.2";
+    prrData.scriptVersion = "1.3";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strRenderSettings = {en: "Render Settings"};
