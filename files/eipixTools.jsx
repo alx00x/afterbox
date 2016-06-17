@@ -1,19 +1,19 @@
 ﻿#include "(eipixTools)/update/json.js"
 // eipixTools.jsx
-// 
+//
 // Name: eipixTools
-// Version: 3.5
+// Version: 3.6
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
-// 
+//
 // Description:
 // This is a heavely modified script originally created by Jeff Almasol.
 // It provides a button launcher for scripts located in:
 // \Support Files\Scripts\ScriptUI Panels\(eipixTools)\sets\
-// 
+//
 // Button icons must be 30x30 PNG image or smaller.
-//  
-// Note: This version of the script requires After Effects CS4 
+//
+// Note: This version of the script requires After Effects CS4
 // or later.
 
 
@@ -22,7 +22,7 @@
 	// Global variables
 	var eipixToolsData = new Object();
 	eipixToolsData.scriptName = "Eipix Tools";
-	eipixToolsData.version = "3.5";
+	eipixToolsData.version = "3.6";
 	eipixToolsData.thisScriptsFolder = new Folder((new File($.fileName)).path);
 	eipixToolsData.scriptsPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\sets\\";
 	eipixToolsData.etcPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\etc\\";
@@ -95,7 +95,7 @@
 	            return -1;
 	        }
 	        var n = +fromIndex || 0;
-	
+
 	        if (Math.abs(n) === Infinity) {
 	            n = 0;
 	        }
@@ -179,10 +179,10 @@
 			var latestShaJSON = JSON.parse(latestShaResponse);
 			var localDate = eipixToolsData.localDate;
 			var latestCommitDate = latestShaJSON.commit.author.date;
-	
+
 			eipixToolsData.commitHash = repoSha;
 			eipixToolsData.commitDate = latestCommitDate;
-	
+
 			//compare
 			if (localSha == repoSha) {
 				return false;
@@ -470,7 +470,7 @@
 			} else {
 				var ignoredScripts = [];
 			}
-			
+
 			for (var i = 0; i < ignoreListSelection.length; i++) {
 				ignoredScripts.push(ignoreListSelection[i]);
 			}
@@ -635,7 +635,7 @@
 
 
 	// Init Configuration
-	// 
+	//
     function eipixTools_initSettings() {
         if (!(app.settings.haveSetting("EipixTools", "Commit Hash"))) {
             app.settings.saveSetting("EipixTools", "Commit Hash", "073f406dc3851e887a4c42b34dbbb67a0d11a986");
@@ -655,7 +655,7 @@
     }
 
 	// main:
-	// 
+	//
 	if (parseFloat(app.version) < 9) {
 		alert(eipixToolsData.strErrMinAE90, eipixToolsData.scriptName);
 		return;
