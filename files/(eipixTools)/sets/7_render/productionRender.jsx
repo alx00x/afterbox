@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.1
+// Version: 0.3
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -22,13 +22,13 @@
 
     prrData.scriptNameShort = "PRR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.1";
+    prrData.scriptVersion = "0.3";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
     prrData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     prrData.strActiveCompErr = {en: "Please select a composition."};
-    prrData.strModulesErr = {en: "Export modules not found. Install them by initiating importRenderTemplates.jsx script.\n\nHint:\n[IMP REND] button"};
+    prrData.strModulesErr = {en: "Export modules not found. Do you wish to install them?"};
     prrData.strFFmppegErr = {en: "FFmpeg not found. Install new version of eipixTools."};
 
     prrData.strSaveActionMsg = {en: "Project needs to be saved now. Do you wish to continue?"};
@@ -309,7 +309,7 @@
          if(str !== null) {
              if(str.length > 0) {
                  if (!isNaN(str)) {
-                     retValue = parseInt(str);
+                     retValue = parseInt(str, 10);
                  }
              }
          }
@@ -328,6 +328,39 @@
             }
         }
         return renderPathOut;
+    }
+
+    // Get files recursivly
+    function getFilesRecursively(dir, type, array) {
+        var array = array;
+        var folder = new Folder(dir.toString());
+        var files = folder.getFiles();
+        for (var i = 0; i < files.length; i++) {
+            if (files[i] instanceof Folder) {
+                 getFilesRecursively(files[i], type, array);
+            } else if ((files[i] instanceof File) && (files[i].toString().slice(-3) == type)) {
+                array.push(files[i]);
+            }
+        }
+        return array;
+    }
+
+    // Run import output modules script (importRenderTemplates.jsx)
+    function importRenderTemplates() {
+        var setsFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/sets");
+        var jsxFiles = getFilesRecursively(setsFolder.fsName, "jsx", []);
+        for (var i = 0; i < jsxFiles.length; i++) {
+            var currentScript = new File(jsxFiles[i]);
+            var currentScriptName = currentScript.fsName.replace(/^.*[\\\/]/, '')
+            if (currentScriptName == "importOutputTemplates.jsx") {
+                var scriptText = "";
+                currentScript.open("r");
+                while (!currentScript.eof)
+                scriptText += currentScript.readln() + "\r\n";
+                currentScript.close();
+                eval(scriptText);
+            }
+        }
     }
 
     // Main
@@ -379,9 +412,10 @@
             var pi = foldersInPath[i].toString();
             var fi = pi.substr(pi.length - 3);
             var fiInt = TryParseInt(fi, null);
-            if (!(fiInt == null) && (fi > folderIncrement)) {
+            if (!(fiInt == null) && (fiInt > folderIncrement)) {
                 folderIncrement = fiInt;
             }
+
         }
         var folderIncrementString = pad(folderIncrement + 1, 3);
 
@@ -401,11 +435,12 @@
         app.project.save();
 
         // Get frame path and ogv output path
-        var sequenceFramePath = renderFolder.fsName + "\\" + prrData.activeItemName + "\\" + prrData.activeItemName + "_%%05d.png";
+        var sequenceFramePath = sequenceFolder.fsName + "\\" + prrData.activeItemName + "_%%05d.png";
         var fileOutPath = renderFolder.fsName + "\\" + prrData.activeItemName;
 
         // Write bat file
         var aerenderEXE = new File(Folder.appPackage.fullName + "/aerender.exe");
+        var zipScript = new File(prrData.etcFolder.fsName + "/zipscript.vbs");
 
         var batContent = "@echo off\r\n";
         batContent += "title Please Wait\r\n"
@@ -416,6 +451,8 @@
         batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " + addQuotes(fileOutPath) + ".mp4\r\n";;
         batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -i " + addQuotes(fileOutPath) + ".wav" + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath) + ".ogg\r\n";;
         batContent += "echo Converting Finished\r\n"
+        batContent += addQuotes(zipScript.fsName) + " " + addQuotes(sequenceFolder.fsName) + " " + addQuotes(sequenceFolder.fsName + ".zip") + "\r\n"
+        batContent += "echo Cleanup Finished\r\n"
         batContent += "%SystemRoot%\\explorer.exe " + addQuotes(renderFolder.fsName) + "\r\n"
         batContent += "pause";
 
@@ -442,6 +479,7 @@
         app.project.renderQueue.item(renderQueueItemIndex).remove();
 
         // Close interface
+        app.executeCommand(app.findMenuCommandId("Increment and Save"))
         prrPal.close();
     }
 
@@ -511,7 +549,14 @@
     if (parseFloat(app.version) < 9.0) {
         alert(productionRender_localize(prrData.strMinAE));
     } else if (checkmodules() == false) {
-        alert(productionRender_localize(prrData.strModulesErr));
+        var confirmImportModules = confirm(productionRender_localize(prrData.strModulesErr));
+        if (confirmImportModules == true) {
+            try {
+                importRenderTemplates();
+            } catch (err) {
+                alert(err.toString());
+            }
+        }
     } else if (!(app.project.activeItem instanceof CompItem) || (app.project.activeItem == null)) {
         alert(productionRender_localize(prrData.strActiveCompErr));
     } else {
