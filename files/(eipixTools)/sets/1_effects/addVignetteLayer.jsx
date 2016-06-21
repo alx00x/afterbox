@@ -5,8 +5,8 @@
 // Author: Aleksandar Kocic
 //
 // Description:
-// This script creates a new solid and makes a mask to
-// simulate the lens vignetting effect.
+// This script creates a new solid and makes a mask to simulate the
+// lens vignetting effect.
 //
 
 (function addVignetteLayer(thisObj) {
