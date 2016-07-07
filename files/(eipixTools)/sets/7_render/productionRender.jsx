@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.4
+// Version: 0.5
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -22,7 +22,7 @@
 
     prrData.scriptNameShort = "PRR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.4";
+    prrData.scriptVersion = "0.5";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
@@ -438,6 +438,7 @@
         playBatContent += 'if not exist %Video% goto NOVIDEO\r\n';
         playBatContent += 'if not exist %Audio% goto NOAUDIO\r\n';
         playBatContent += 'if not exist %Subtitle% goto NOSUBTITLE\r\n';
+        playBatContent += 'goto EXECUTE\r\n';
         playBatContent += ':NOVLC\r\n';
         playBatContent += 'echo No VLC found\r\n';
         playBatContent += 'pause\r\n';
