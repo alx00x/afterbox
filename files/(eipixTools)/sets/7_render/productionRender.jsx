@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.5
+// Version: 0.8
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -22,7 +22,7 @@
 
     prrData.scriptNameShort = "PRR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.5";
+    prrData.scriptVersion = "0.8";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
@@ -271,6 +271,11 @@
                 productionRender_doBrowse();
             }
 
+            pal.grp.inst.enabled = true;
+            pal.grp.opts.enabled = false;
+            pal.grp.video.enabled = false;
+            pal.grp.audio.enabled = false;
+
             var outputPath = checkIfStandardStructure();
             pal.grp.outputPath.main.box.text = outputPath;
 
@@ -432,6 +437,7 @@
         playBatContent += 'set VLC="C:\\Program Files\\VideoLAN\\VLC\\vlc.exe"\r\n';
         playBatContent += 'if not exist %VLC% (set VLC="C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe")\r\n';
         playBatContent += 'if not exist %VLC% goto NOVLC\r\n';
+        playBatContent += 'set NetPath=%~dp0\r\n';
         playBatContent += 'set Video=%NetPath%' + prrData.activeItemName + '.ogv\r\n';
         playBatContent += 'set Audio=%NetPath%' + prrData.activeItemName + '.ogg\r\n';
         playBatContent += 'set Subtitle=%NetPath%' + prrData.activeItemName + '.srt\r\n';
@@ -477,9 +483,13 @@
             }
         }
 
-        // Output
-        renderQueueItem.outputModules[1].file = new File(renderFolder.fsName + "\\" + prrData.activeItemName + "\\" + prrData.activeItemName + "_[#####]");
-        renderQueueItem.outputModules[2].file = new File(renderFolder.fsName + "\\" + prrData.activeItemName);
+        // Define output files
+        var sequenceOutput = new File(renderFolder.fsName + "\\" + prrData.activeItemName + "\\" + prrData.activeItemName + "_[#####]");
+        var audioOutput = new File(renderFolder.fsName + "\\" + prrData.activeItemName);
+
+        // Add output modules
+        renderQueueItem.outputModules[1].file = sequenceOutput;
+        renderQueueItem.outputModules[2].file = audioOutput;
 
         // Save the project
         app.project.save();
@@ -497,9 +507,12 @@
         batContent += "start \"\" /b " + "/low" + " /wait "
         batContent += addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
         batContent += "echo Rendering Finished\r\n"
+        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -i " + addQuotes(fileOutPath) + ".wav" + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath) + ".ogg\r\n";;
+        // temp file for preview
+        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -i " + addQuotes(fileOutPath) + ".wav" + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -c:a aac " + addQuotes(fileOutPath) + "_preview.mp4\r\n";;
+        //continue
         batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath) + ".ogv\r\n";
         batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " + addQuotes(fileOutPath) + ".mp4\r\n";;
-        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -i " + addQuotes(fileOutPath) + ".wav" + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath) + ".ogg\r\n";;
         batContent += "echo Converting Finished\r\n"
         batContent += "mkdir " + addQuotes(renderFolder.fsName + "\\" + prrData.activeItemName + "_temp") + "\r\n"
         batContent += "move " + addQuotes(sequenceFolder.fsName) + " " + addQuotes(renderFolder.fsName + "\\" + prrData.activeItemName + "_temp") + "\r\n"
