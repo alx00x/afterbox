@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.8
+// Version: 0.4
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -22,7 +22,7 @@
 
     prrData.scriptNameShort = "PRR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.8";
+    prrData.scriptVersion = "0.4";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
@@ -271,11 +271,6 @@
                 productionRender_doBrowse();
             }
 
-            pal.grp.inst.enabled = true;
-            pal.grp.opts.enabled = false;
-            pal.grp.video.enabled = false;
-            pal.grp.audio.enabled = false;
-
             var outputPath = checkIfStandardStructure();
             pal.grp.outputPath.main.box.text = outputPath;
 
@@ -432,64 +427,9 @@
         var sequenceFolder = new Folder(renderFolder.fsName + "\\" + prrData.activeItemName);
         sequenceFolder.create();
 
-        // Write play with vlc bat file
-        var playBatContent = '@echo off\r\n';
-        playBatContent += 'set VLC="C:\\Program Files\\VideoLAN\\VLC\\vlc.exe"\r\n';
-        playBatContent += 'if not exist %VLC% (set VLC="C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe")\r\n';
-        playBatContent += 'if not exist %VLC% goto NOVLC\r\n';
-        playBatContent += 'set NetPath=%~dp0\r\n';
-        playBatContent += 'set Video=%NetPath%' + prrData.activeItemName + '.ogv\r\n';
-        playBatContent += 'set Audio=%NetPath%' + prrData.activeItemName + '.ogg\r\n';
-        playBatContent += 'set Subtitle=%NetPath%' + prrData.activeItemName + '.srt\r\n';
-        playBatContent += 'if not exist %Video% goto NOVIDEO\r\n';
-        playBatContent += 'if not exist %Audio% goto NOAUDIO\r\n';
-        playBatContent += 'if not exist %Subtitle% goto NOSUBTITLE\r\n';
-        playBatContent += 'goto EXECUTE\r\n';
-        playBatContent += ':NOVLC\r\n';
-        playBatContent += 'echo No VLC found\r\n';
-        playBatContent += 'pause\r\n';
-        playBatContent += 'goto :eof\r\n';
-        playBatContent += ':NOVIDEO\r\n';
-        playBatContent += 'echo No Video file found\r\n';
-        playBatContent += 'pause\r\n';
-        playBatContent += 'goto :eof\r\n';
-        playBatContent += ':NOAUDIO\r\n';
-        playBatContent += 'echo No Audio file found\r\n';
-        playBatContent += 'goto EXECUTENOAUDIO\r\n';
-        playBatContent += ':NOSUBTITLE\r\n';
-        playBatContent += 'echo No Subtitle file found\r\n';
-        playBatContent += 'goto EXECUTENOSUBTITLE\r\n';
-        playBatContent += ':EXECUTE\r\n';
-        playBatContent += 'start "" %VLC% %Video% --input-slave=%Audio% --sub-file=%Subtitle%\r\n';
-        playBatContent += 'goto :eof\r\n';
-        playBatContent += ':EXECUTENOAUDIO\r\n';
-        playBatContent += 'start "" %VLC% %Video%\r\n';
-        playBatContent += 'goto :eof\r\n';
-        playBatContent += ':EXECUTENOSUBTITLE\r\n';
-        playBatContent += 'start "" %VLC% %Video% --input-slave=%Audio%\r\n';
-        playBatContent += 'goto :eof\r\n';
-
-        var playWithVLCFile = new File(renderFolder.fsName + "\\" + prrData.activeItemName + ".bat");
-        if (playWithVLCFile.exists == true) {
-            playWithVLCFile.remove();
-        }
-        if (playWithVLCFile.open("w")) {
-            try {
-                playWithVLCFile.write(playBatContent);
-            } catch (err) {
-                alert(err.toString());
-            } finally {
-                playWithVLCFile.close();
-            }
-        }
-
-        // Define output files
-        var sequenceOutput = new File(renderFolder.fsName + "\\" + prrData.activeItemName + "\\" + prrData.activeItemName + "_[#####]");
-        var audioOutput = new File(renderFolder.fsName + "\\" + prrData.activeItemName);
-
-        // Add output modules
-        renderQueueItem.outputModules[1].file = sequenceOutput;
-        renderQueueItem.outputModules[2].file = audioOutput;
+        // Output
+        renderQueueItem.outputModules[1].file = new File(renderFolder.fsName + "\\" + prrData.activeItemName + "\\" + prrData.activeItemName + "_[#####]");
+        renderQueueItem.outputModules[2].file = new File(renderFolder.fsName + "\\" + prrData.activeItemName);
 
         // Save the project
         app.project.save();
@@ -498,7 +438,7 @@
         var sequenceFramePath = sequenceFolder.fsName + "\\" + prrData.activeItemName + "_%%05d.png";
         var fileOutPath = renderFolder.fsName + "\\" + prrData.activeItemName;
 
-        // Write render bat file
+        // Write bat file
         var aerenderEXE = new File(Folder.appPackage.fullName + "/aerender.exe");
         var zipScript = new File(prrData.etcFolder.fsName + "/zipscript.vbs");
 
@@ -507,16 +447,10 @@
         batContent += "start \"\" /b " + "/low" + " /wait "
         batContent += addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
         batContent += "echo Rendering Finished\r\n"
-        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -i " + addQuotes(fileOutPath) + ".wav" + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath) + ".ogg\r\n";;
-        // temp file for preview
-        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -i " + addQuotes(fileOutPath) + ".wav" + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -c:a aac " + addQuotes(fileOutPath) + "_preview.mp4\r\n";;
-        //continue
-        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath) + ".ogv\r\n";
-        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " + addQuotes(fileOutPath) + ".mp4\r\n";;
+        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
+        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " + addQuotes(fileOutPath + ".mp4") + "\r\n";;
+        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -i " + addQuotes(fileOutPath) + ".wav" + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath + ".ogg") + "\r\n";;
         batContent += "echo Converting Finished\r\n"
-        batContent += "mkdir " + addQuotes(renderFolder.fsName + "\\" + prrData.activeItemName + "_temp") + "\r\n"
-        batContent += "move " + addQuotes(sequenceFolder.fsName) + " " + addQuotes(renderFolder.fsName + "\\" + prrData.activeItemName + "_temp") + "\r\n"
-        batContent += "ren " + addQuotes(renderFolder.fsName + "\\" + prrData.activeItemName + "_temp") + " " + prrData.activeItemName + "\r\n"
         batContent += addQuotes(zipScript.fsName) + " " + addQuotes(sequenceFolder.fsName) + " " + addQuotes(sequenceFolder.fsName + ".zip") + "\r\n"
         batContent += "echo Cleanup Finished\r\n"
         batContent += "%SystemRoot%\\explorer.exe " + addQuotes(renderFolder.fsName) + "\r\n"
