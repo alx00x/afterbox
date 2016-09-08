@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.5
+// Version: 0.6
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -22,7 +22,7 @@
 
     prrData.scriptNameShort = "PRR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.5";
+    prrData.scriptVersion = "0.6";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
@@ -450,11 +450,11 @@
         batContent += addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
         batContent += "echo Rendering Finished\r\n";
 
-        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -i " + addQuotes(fileOutPath + ".wav") + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath + ".ogg") + "\r\n";
-        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
-        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " + addQuotes(fileOutPath + ".mp4") + "\r\n";
-        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -i " + addQuotes(fileOutPath + ".wav") + " -c:v libx264 -pix_fmt yuv420p -preset veryslow -qp 0 -c:a aac -b:a 320k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
-        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -an -f mp4 NUL && " + addQuotes(prrData.ffmpegPath.fsName) + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate +
+        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -i " + addQuotes(fileOutPath + ".wav") + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath + ".ogg") + "\r\n";
+        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
+        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " + addQuotes(fileOutPath + ".mp4") + "\r\n";
+        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -i " + addQuotes(fileOutPath + ".wav") + " -c:v libx264 -pix_fmt yuv420p -preset veryslow -qp 0 -c:a aac -b:a 320k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
+        batContent += addQuotes(prrData.ffmpegPath.fsName) + " -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -an -f mp4 NUL && " + addQuotes(prrData.ffmpegPath.fsName) + " -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate +
         " -i " + addQuotes(fileOutPath + ".wav") + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
 
         batContent += "echo Converting Finished\r\n";
