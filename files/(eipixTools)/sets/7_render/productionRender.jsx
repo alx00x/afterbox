@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.7
+// Version: 0.8
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -22,7 +22,7 @@
 
     prrData.scriptNameShort = "PPR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.7";
+    prrData.scriptVersion = "0.8";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
@@ -45,6 +45,7 @@
     prrData.strRenderSettings = {en: "Render Settings"};
     prrData.strOutputModule = {en: "Output Module"};
     prrData.strTimeSpan = {en: "Time Span"};
+    prrData.strMultiprocessing = {en: "Multiprocessing"};
 
     prrData.strBrowse = {en: "Browse"};
     prrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
@@ -178,6 +179,11 @@
                     opts: Panel { \
                         alignment:['fill','top'], \
                         text: '" + productionRender_localize(prrData.strOptions) + "', alignment:['fill','top'] \
+                        mp: Group { \
+                            alignment:['fill','top'], \
+                            text: StaticText { text:'" + productionRender_localize(prrData.strMultiprocessing) + ":', preferredSize:[120,20] }, \
+                            box1: Checkbox { text:'', alignment:['fill','top'] }, \
+                        }, \
                         rset: Group { \
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + productionRender_localize(prrData.strRenderSettings) + ":', preferredSize:[120,20] }, \
@@ -239,6 +245,8 @@
             pal.grp.header.help.onClick = function() {
                 alert(prrData.scriptTitle + "\n" + productionRender_localize(prrData.strHelpText), productionRender_localize(prrData.strHelpTitle));
             }
+
+            pal.grp.opts.mp.box1.value = true;
 
             var rsItems = prrData.rsTemplates;
             for (var i = 0; i < rsItems.length; i++) {
@@ -366,6 +374,8 @@
 
     // Main
     function productionRender_main() {
+        // Add black solid at the end to fix transition problems
+        // code
 
         // Add to render queue
         var renderQueueItem = app.project.renderQueue.items.add(prrData.activeItem);
@@ -397,6 +407,11 @@
         }
 
         var renderFrames = endFrame - startFrame;
+
+        var mpString = "";
+        if (prrPal.grp.opts.mp.box1.value  == true) {
+            mpString = " -mp";
+        }
 
         // Define usepath
         var usePath;
@@ -463,7 +478,7 @@
 
         batContent += "title Rendering: " + renderFrames + " frames\r\n";
         batContent += "start \"\" /b " + "/low" + " /wait " +
-        addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
+        addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + "\r\n";
         batContent += "echo Rendering Finished\r\n";
 
         batContent += "title Converting, Please Wait\r\n";
