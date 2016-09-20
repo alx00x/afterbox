@@ -1,7 +1,7 @@
 // previewRender.jsx
 //
 // Name: previewRender
-// Version: 1.3
+// Version: 1.4
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -18,58 +18,60 @@
     }
 
     // Define main variables
-    var prrData = new Object();
+    var pvrData = new Object();
 
-    prrData.scriptNameShort = "PRR";
-    prrData.scriptName = "Preview Render";
-    prrData.scriptVersion = "1.3";
-    prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
+    pvrData.scriptNameShort = "PVR";
+    pvrData.scriptName = "Preview Render";
+    pvrData.scriptVersion = "1.4";
+    pvrData.scriptTitle = pvrData.scriptName + " v" + pvrData.scriptVersion;
 
-    prrData.strRenderSettings = {en: "Render Settings"};
-    prrData.strOutputModule = {en: "Output Module"};
-    prrData.strOutputPath = {en: "Output Path"};
-    prrData.strPath = {en: "Path"};
-    prrData.strBrowse = {en: "Browse"};
-    prrData.strTimeSpan = {en: "Time Span"};
-    prrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
+    pvrData.strRenderSettings = {en: "Render Settings"};
+    pvrData.strOutputModule = {en: "Output Module"};
+    pvrData.strOutputPath = {en: "Output Path"};
+    pvrData.strPath = {en: "Path"};
+    pvrData.strBrowse = {en: "Browse"};
+    pvrData.strTimeSpan = {en: "Time Span"};
+    pvrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
 
-    prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
-    prrData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
-    prrData.strActiveCompErr = {en: "Please select a composition."};
-    prrData.strSaveActionMsg = {en: "Project needs to be saved now. Do you wish to continue?"};
-    prrData.strInstructions = {en: "Rendering with following settings:"};
-    prrData.strQuestion = {en: "Do you wish to proceed?"};
-    prrData.strExecute = {en: "Yes"};
-    prrData.strCancel = {en: "No"};
+    pvrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
+    pvrData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
+    pvrData.strActiveCompErr = {en: "Please select a composition."};
+    pvrData.strSaveActionMsg = {en: "Project needs to be saved now. Do you wish to continue?"};
+    pvrData.strInstructions = {en: "Rendering with following settings:"};
+    pvrData.strQuestion = {en: "Do you wish to proceed?"};
+    pvrData.strExecute = {en: "Yes"};
+    pvrData.strCancel = {en: "No"};
 
-    prrData.strHelp = {en: "?"};
-    prrData.strHelpTitle = {en: "Help"};
-    prrData.strHelpText = {en: "This script saves the project and renders the active composition in After Effects native command-line renderer."};
+    pvrData.strHelp = {en: "?"};
+    pvrData.strHelpTitle = {en: "Help"};
+    pvrData.strHelpText = {en: "This script saves the project and renders the active composition in After Effects native command-line renderer."};
 
     if (!(app.project.activeItem instanceof CompItem) || (app.project.activeItem == null)) {
-        alert(prrData.strActiveCompErr);
+        alert(pvrData.strActiveCompErr);
         return;
     }
 
     // Define project variables
-    prrData.activeItem = app.project.activeItem;
-    prrData.activeItemName = app.project.activeItem.name;
-    prrData.activeItemRes = prrData.activeItem.width / 2 + " x " + prrData.activeItem.height / 2;
-    prrData.projectName = app.project.file.name;
-    prrData.projectNameFix = prrData.projectName.replace("%20", " ")
-    prrData.projectFile = app.project.file;
-    prrData.projectRoot = app.project.file.fsName.replace(prrData.projectNameFix, "");
+    pvrData.activeItem = app.project.activeItem;
+    pvrData.activeItemName = app.project.activeItem.name;
+    pvrData.activeItemRes = pvrData.activeItem.width / 2 + " x " + pvrData.activeItem.height / 2;
+    pvrData.projectName = app.project.file.name;
+    pvrData.projectNameFix = pvrData.projectName.replace("%20", " ")
+    pvrData.projectFile = app.project.file;
+    pvrData.projectRoot = app.project.file.fsName.replace(pvrData.projectNameFix, "");
 
     // Define render queue variables
-    prrData.renderSettingsTemplate = "Draft Settings";
-    prrData.outputModuleTemplate = "Lossless";
-    prrData.timeSpanStart = 0;
-    prrData.timeSpanDuration = prrData.activeItem.duration;
-    prrData.desktopPath = new Folder("~/Desktop");
-    prrData.outputPath = prrData.desktopPath.fsName;
+    pvrData.renderSettingsTemplate = "Draft Settings";
+    pvrData.outputModuleTemplate = "Lossless";
 
-    prrData.workAreaStart = prrData.activeItem.workAreaStart;
-    prrData.workAreaDuration = prrData.activeItem.workAreaDuration;
+    pvrData.activeItemFPS = pvrData.activeItem.frameRate;
+    pvrData.timeSpanStart = pvrData.activeItem.displayStartTime * pvrData.activeItemFPS;
+    pvrData.timeSpanDuration = pvrData.activeItem.duration;
+    pvrData.desktopPath = new Folder("~/Desktop");
+    pvrData.outputPath = pvrData.desktopPath.fsName;
+
+    pvrData.workAreaStart = pvrData.activeItem.workAreaStart;
+    pvrData.workAreaDuration = pvrData.activeItem.workAreaDuration;
 
     // Localize
     function previewRender_localize(strVar) {
@@ -78,7 +80,7 @@
 
     // Build UI
     function previewRender_buildUI(thisObj) {
-        var pal = new Window("dialog", prrData.scriptName, undefined, {
+        var pal = new Window("dialog", pvrData.scriptName, undefined, {
             resizeable: false
         });
         if (pal !== null) {
@@ -87,8 +89,8 @@
                     orientation:'column', alignment:['fill','fill'], \
                     header: Group { \
                         alignment:['fill','top'], \
-                        title: StaticText { text:'" + prrData.scriptNameShort + " v" + prrData.scriptVersion + "', alignment:['fill','center'] }, \
-                        help: Button { text:'" + previewRender_localize(prrData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
+                        title: StaticText { text:'" + pvrData.scriptNameShort + " v" + pvrData.scriptVersion + "', alignment:['fill','center'] }, \
+                        help: Button { text:'" + previewRender_localize(pvrData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
                     sepr: Group { \
                         orientation:'row', alignment:['fill','top'], \
@@ -96,15 +98,15 @@
                     }, \
                     inst: Group { \
                         alignment:['fill','top'], \
-                        stt: StaticText { text:'" + previewRender_localize(prrData.strInstructions) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
+                        stt: StaticText { text:'" + previewRender_localize(pvrData.strInstructions) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
                     }, \
                     renderSettings: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + previewRender_localize(prrData.strRenderSettings) + "', alignment:['fill','top'] \
+                        text: '" + previewRender_localize(pvrData.strRenderSettings) + "', alignment:['fill','top'] \
                         temp: Group { \
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Template:', preferredSize:[120,20] }, \
-                            sst2: StaticText { text:'" + prrData.renderSettingsTemplate + "', preferredSize:[-1,20] }, \
+                            sst2: StaticText { text:'" + pvrData.renderSettingsTemplate + "', preferredSize:[-1,20] }, \
                         }, \
                         qual: Group { \
                             alignment:['fill','top'], \
@@ -114,7 +116,7 @@
                         res: Group { \
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Resolution:', preferredSize:[120,20] }, \
-                            sst2: StaticText { text:'" + prrData.activeItemRes + "', preferredSize:[-1,20] }, \
+                            sst2: StaticText { text:'" + pvrData.activeItemRes + "', preferredSize:[-1,20] }, \
                         }, \
                         frbl: Group { \
                             alignment:['fill','top'], \
@@ -128,36 +130,36 @@
                         }, \
                         time: Group { \
                             alignment:['fill','top'], \
-                            text: StaticText { text:'" + previewRender_localize(prrData.strTimeSpan) + ":', preferredSize:[120,20] }, \
+                            text: StaticText { text:'" + previewRender_localize(pvrData.strTimeSpan) + ":', preferredSize:[120,20] }, \
                             list: DropDownList { alignment:['fill','center'], preferredSize:[120,20] }, \
                         }, \
                     }, \
                     outputModules: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + previewRender_localize(prrData.strOutputModule) + "', alignment:['fill','top'], \
+                        text: '" + previewRender_localize(pvrData.strOutputModule) + "', alignment:['fill','top'], \
                         temp: Group { \
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Template:', preferredSize:[120,20] }, \
-                            sst2: StaticText { text:'" + prrData.outputModuleTemplate + "', preferredSize:[-1,20] }, \
+                            sst2: StaticText { text:'" + pvrData.outputModuleTemplate + "', preferredSize:[-1,20] }, \
                         }, \
                     }, \
                     outputPath: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + previewRender_localize(prrData.strOutputPath) + "', alignment:['fill','top'], \
+                        text: '" + previewRender_localize(pvrData.strOutputPath) + "', alignment:['fill','top'], \
                         main: Group { \
                             alignment:['fill','top'], \
-                            btn: Button { text:'" + previewRender_localize(prrData.strBrowse) + "', preferredSize:[-1,20] }, \
+                            btn: Button { text:'" + previewRender_localize(pvrData.strBrowse) + "', preferredSize:[-1,20] }, \
                             box: EditText { alignment:['fill','center'], preferredSize:[120,20] },  \
                         }, \
                     }, \
                     ques: Group { \
                         alignment:['fill','top'], \
-                        stt: StaticText { text:'" + previewRender_localize(prrData.strQuestion) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
+                        stt: StaticText { text:'" + previewRender_localize(pvrData.strQuestion) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
                     }, \
                     cmds: Group { \
                         alignment:['fill','top'], \
-                        executeBtn: Button { text:'" + previewRender_localize(prrData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
-                        cancelBtn: Button { text:'" + previewRender_localize(prrData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        executeBtn: Button { text:'" + previewRender_localize(pvrData.strExecute) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        cancelBtn: Button { text:'" + previewRender_localize(pvrData.strCancel) + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                     }, \
                 }, \
             }";
@@ -170,14 +172,14 @@
                 this.layout.resize();
             }
 
-            var timeItems = previewRender_localize(prrData.strTimeOpts);
+            var timeItems = previewRender_localize(pvrData.strTimeOpts);
             for (var i = 0; i < timeItems.length; i++) {
                 pal.grp.renderSettings.time.list.add("item", timeItems[i]);
             }
             pal.grp.renderSettings.time.list.selection = 1;
 
             pal.grp.header.help.onClick = function() {
-                alert(prrData.scriptTitle + "\n" + previewRender_localize(prrData.strHelpText), previewRender_localize(prrData.strHelpTitle));
+                alert(pvrData.scriptTitle + "\n" + previewRender_localize(pvrData.strHelpText), previewRender_localize(pvrData.strHelpTitle));
             }
 
             pal.grp.outputPath.main.btn.onClick = function() {
@@ -198,7 +200,7 @@
     // Dialog to let users define render location
     function previewRender_doBrowse() {
         var browseOutputPath = Folder.selectDialog().fsName;
-        prrPal.grp.outputPath.main.box.text = browseOutputPath.toString();
+        pvrPal.grp.outputPath.main.box.text = browseOutputPath.toString();
     }
 
     // Add quotres around path
@@ -208,33 +210,33 @@
 
     function previewRender_main() {
         // Add to render queue
-        var renderQueueItem = app.project.renderQueue.items.add(prrData.activeItem);
+        var renderQueueItem = app.project.renderQueue.items.add(pvrData.activeItem);
         var renderQueueItemIndex = app.project.renderQueue.numItems;
-        renderQueueItem.applyTemplate(prrData.renderSettingsTemplate);
+        renderQueueItem.applyTemplate(pvrData.renderSettingsTemplate);
         renderQueueItem.skipFrames = 2;
-        renderQueueItem.outputModules[1].applyTemplate(prrData.outputModuleTemplate);
+        renderQueueItem.outputModules[1].applyTemplate(pvrData.outputModuleTemplate);
 
-        if (prrPal.grp.renderSettings.time.list.selection.index == 1) {
-            renderQueueItem.timeSpanStart = prrData.workAreaStart;
-            renderQueueItem.timeSpanDuration = prrData.workAreaDuration;
+        if (pvrPal.grp.renderSettings.time.list.selection.index == 1) {
+            renderQueueItem.timeSpanStart = pvrData.workAreaStart;
+            renderQueueItem.timeSpanDuration = pvrData.workAreaDuration;
         } else {
-            renderQueueItem.timeSpanStart = prrData.timeSpanStart;
-            renderQueueItem.timeSpanDuration = prrData.timeSpanDuration;
+            renderQueueItem.timeSpanStart = pvrData.timeSpanStart;
+            renderQueueItem.timeSpanDuration = pvrData.timeSpanDuration;
         }
         var usePath;
-        var editboxOutputPath = prrPal.grp.outputPath.main.box.text;
+        var editboxOutputPath = pvrPal.grp.outputPath.main.box.text;
         if (editboxOutputPath == "") {
-            usePath = prrData.outputPath;
+            usePath = pvrData.outputPath;
         } else {
             var usePathFolder = new Folder(editboxOutputPath);
             if (usePathFolder.exists == true) {
                 usePath = editboxOutputPath;
             } else {
-                alert(previewRender_localize(prrData.strPathErr));
-                usePath = prrData.outputPath;
+                alert(previewRender_localize(pvrData.strPathErr));
+                usePath = pvrData.outputPath;
             }
         }
-        renderQueueItem.outputModules[1].file = new File(usePath.toString() + "\\" + prrData.activeItemName + "_[" + renderQueueItemIndex + "]_preview.avi");
+        renderQueueItem.outputModules[1].file = new File(usePath.toString() + "\\" + pvrData.activeItemName + "_[" + renderQueueItemIndex + "]_preview.avi");
 
         // Save the project
         app.project.save();
@@ -245,7 +247,7 @@
         var batContent = "@echo off\r\n";
         batContent += "title Please Wait\r\n"
         batContent += "start \"\" /b " + "/low" + " /wait "
-        batContent += addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
+        batContent += addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(pvrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
         batContent += "title Rendering Finished\r\n"
         batContent += "pause";
 
@@ -272,26 +274,26 @@
         app.project.renderQueue.item(renderQueueItemIndex).remove();
 
         // Close interface
-        prrPal.close();
+        pvrPal.close();
     }
 
     // Execute
     function previewRender_doExecute() {
-        var saveAction = confirm(previewRender_localize(prrData.strSaveActionMsg));
+        var saveAction = confirm(previewRender_localize(pvrData.strSaveActionMsg));
         if (saveAction == true) {
-            app.beginUndoGroup(prrData.scriptName);
+            app.beginUndoGroup(pvrData.scriptName);
 
             previewRender_main()
 
             app.endUndoGroup();
-            prrPal.close();
+            pvrPal.close();
         } else {
             return;
         }
     }
 
     function previewRender_doCancel() {
-        prrPal.close();
+        pvrPal.close();
     }
 
     // Main code:
@@ -299,19 +301,19 @@
 
     // Warning
     if (parseFloat(app.version) < 9.0) {
-        alert(previewRender_localize(prrData.strMinAE));
+        alert(previewRender_localize(pvrData.strMinAE));
     } else if (!(app.project.activeItem instanceof CompItem) || (app.project.activeItem == null)) {
-        alert(previewRender_localize(prrData.strActiveCompErr));
+        alert(previewRender_localize(pvrData.strActiveCompErr));
     } else {
         // Build and show the floating palette
-        var prrPal = previewRender_buildUI(thisObj);
-        if (prrPal !== null) {
-            if (prrPal instanceof Window) {
+        var pvrPal = previewRender_buildUI(thisObj);
+        if (pvrPal !== null) {
+            if (pvrPal instanceof Window) {
                 // Show the palette
-                prrPal.center();
-                prrPal.show();
+                pvrPal.center();
+                pvrPal.show();
             } else {
-                prrPal.layout.layout(true);
+                pvrPal.layout.layout(true);
             }
         }
     }
