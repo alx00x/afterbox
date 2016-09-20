@@ -1,7 +1,7 @@
 ﻿// backgroundRender.jsx
 //
 // Name: backgroundRender
-// Version: 1.5
+// Version: 1.6
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     bgrData.scriptNameShort = "BGR";
     bgrData.scriptName = "Background Render";
-    bgrData.scriptVersion = "1.5";
+    bgrData.scriptVersion = "1.6";
     bgrData.scriptTitle = bgrData.scriptName + " v" + bgrData.scriptVersion;
 
     bgrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
@@ -66,7 +66,8 @@
     bgrData.projectRoot = app.project.file.fsName.replace(bgrData.projectNameFix, "");
 
     // Define render queue variables
-    bgrData.timeSpanStart = 0;
+    bgrData.activeItemFPS = bgrData.activeItem.frameRate;
+    bgrData.timeSpanStart = bgrData.activeItem.displayStartTime * bgrData.activeItemFPS;
     bgrData.timeSpanDuration = bgrData.activeItem.duration;
     bgrData.desktopPath = new Folder("~/Desktop");
     bgrData.outputPath = bgrData.desktopPath.fsName;

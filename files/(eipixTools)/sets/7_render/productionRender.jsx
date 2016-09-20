@@ -20,7 +20,7 @@
     // Define main variables
     var prrData = new Object();
 
-    prrData.scriptNameShort = "PRR";
+    prrData.scriptNameShort = "PPR";
     prrData.scriptName = "Production Render";
     prrData.scriptVersion = "0.7";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
@@ -58,18 +58,19 @@
     prrData.activeItemName = app.project.activeItem.name;
     prrData.activeItemRes = prrData.activeItem.width + " x " + prrData.activeItem.height;
     prrData.projectName = app.project.file.name;
-    prrData.projectNameFix = prrData.projectName.replace("%20", " ")
+    prrData.projectNameFix = prrData.projectName.replace("%20", " ");
     prrData.projectFile = app.project.file;
     prrData.projectRoot = app.project.file.fsName.replace(prrData.projectNameFix, "");
 
+    prrData.activeItemFPS = prrData.activeItem.frameRate;
+    prrData.timeSpanStart = prrData.activeItem.displayStartTime * prrData.activeItemFPS;
+    prrData.timeSpanDuration = prrData.activeItem.duration;
     prrData.workAreaStart = prrData.activeItem.workAreaStart;
     prrData.workAreaDuration = prrData.activeItem.workAreaDuration;
 
     prrData.frameRate = app.project.activeItem.frameRate;
 
     // Define render queue variables
-    prrData.timeSpanStart = 0;
-    prrData.timeSpanDuration = prrData.activeItem.duration;
     prrData.desktopPath = new Folder("~/Desktop");
     prrData.outputPath = prrData.desktopPath.fsName;
 
@@ -251,7 +252,7 @@
                 pal.grp.opts.time.list.add("item", timeItems[i]);
             }
             pal.grp.opts.time.list.selection = 0;
-            pal.grp.opts.time.list.enabled = false;
+            pal.grp.opts.time.list.enabled = true;
 
             var omItems = prrData.omTemplates;
             for (var i = 0; i < omItems.length; i++) {
@@ -380,12 +381,17 @@
 
         // Assign Time Span choice
         var startFrame;
+        var endFrame;
         if (prrPal.grp.opts.time.list.selection.index == 1) {
+            // work area
             startFrame = prrData.workAreaStart * prrData.frameRate;
+            endFrame = (prrData.workAreaStart + prrData.workAreaDuration) * prrData.frameRate;
             renderQueueItem.timeSpanStart = prrData.workAreaStart;
             renderQueueItem.timeSpanDuration = prrData.workAreaDuration;
         } else {
+            // lenght of comp
             startFrame = prrData.timeSpanStart * prrData.frameRate;
+            endFrame = (prrData.timeSpanStart + prrData.timeSpanDuration) * prrData.frameRate;
             renderQueueItem.timeSpanStart = prrData.timeSpanStart;
             renderQueueItem.timeSpanDuration = prrData.timeSpanDuration;
         }
@@ -445,6 +451,7 @@
         // var zipScript = new File(prrData.etcFolder.fsName + "/zipscript.vbs");
 
         var batContent = "@echo off\r\n";
+        batContent += "title Please Wait\r\n";
         batContent += "echo Please Wait\r\n";
         batContent += "cd %~dp0\r\n";
 
@@ -452,11 +459,12 @@
         batContent += "if exist ffmpeg2pass-0.log (del ffmpeg2pass-0.log)\r\n";
         batContent += "if exist ffmpeg2pass-0.log.mbtree (del ffmpeg2pass-0.log.mbtree)\r\n";
 
-        batContent += "title Please Wait\r\n";
-        batContent += "start \"\" /b " + "/low" + " /wait ";
-        batContent += addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
+        batContent += "title Rendering: " + endFrame + " frames\r\n";
+        batContent += "start \"\" /b " + "/low" + " /wait " +
+        addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
         batContent += "echo Rendering Finished\r\n";
 
+        batContent += "title Converting, Please Wait\r\n";
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Audio\r\n";
         batContent += addQuotes(prrData.ffmpegPath.fsName) + " -y -i " + addQuotes(fileOutPath + ".wav") + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath + ".ogg") + "\r\n";
@@ -485,6 +493,7 @@
         batContent += "rmdir /s /q " + addQuotes(sequenceFolder.fsName) + "\r\n";
         batContent += "echo Cleanup Finished\r\n";
         batContent += "%SystemRoot%\\explorer.exe " + addQuotes(renderFolder.fsName) + "\r\n";
+        batContent += "title Finished\r\n";
         batContent += "pause";
 
         var batFile = new File(app.project.file.fsName.replace(".aep", ".bat"));
