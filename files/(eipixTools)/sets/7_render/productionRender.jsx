@@ -396,6 +396,8 @@
             renderQueueItem.timeSpanDuration = prrData.timeSpanDuration;
         }
 
+        var renderFrames = endFrame - startFrame;
+
         // Define usepath
         var usePath;
         var editboxOutputPath = prrPal.grp.outputPath.main.box.text;
@@ -459,7 +461,7 @@
         batContent += "if exist ffmpeg2pass-0.log (del ffmpeg2pass-0.log)\r\n";
         batContent += "if exist ffmpeg2pass-0.log.mbtree (del ffmpeg2pass-0.log.mbtree)\r\n";
 
-        batContent += "title Rendering: " + endFrame + " frames\r\n";
+        batContent += "title Rendering: " + renderFrames + " frames\r\n";
         batContent += "start \"\" /b " + "/low" + " /wait " +
         addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
         batContent += "echo Rendering Finished\r\n";
