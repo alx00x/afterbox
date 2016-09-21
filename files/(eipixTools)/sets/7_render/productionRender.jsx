@@ -553,7 +553,7 @@
         batContent += "echo [Converting] Lossless Video\r\n";
         batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v qtrle -c:a copy " + addQuotes(fileOutPath + "_lossless.mov") + "\r\n";
 
-        batContent += "echo.\r\n";r
+        batContent += "echo.\r\n";
         batContent += "echo [Converting] Preview Video\r\n";
         batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
         " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -an -f mp4 NUL && " +
