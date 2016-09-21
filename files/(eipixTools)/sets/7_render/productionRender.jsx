@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.9
+// Version: 0.11
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -22,17 +22,18 @@
 
     prrData.scriptNameShort = "PPR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.9";
+    prrData.scriptVersion = "0.11";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
-    prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
+    prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
+    prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop.\rDo you wish to continue?"};
     prrData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
     prrData.strActiveCompErr = {en: "Please select a composition."};
     prrData.strModulesErr = {en: "Export modules not found. Do you wish to install them?"};
     prrData.strFFmppegErr = {en: "FFmpeg not found. Install new version of eipixTools."};
 
-    prrData.strSaveActionMsg = {en: "Project needs to be saved now. Do you wish to continue?"};
-    prrData.strInstructions = {en: "Rendering with following settings:"};
+    prrData.strSaveActionMsg = {en: "Project needs to be saved now. Are you ready to render?"};
+    prrData.strInstructions = {en: "Rendering with the following settings:"};
     prrData.strQuestion = {en: "Do you wish to proceed?"};
     prrData.strExecute = {en: "Yes"};
     prrData.strCancel = {en: "No"};
@@ -48,6 +49,8 @@
 
     prrData.strMultiprocessing = {en: "Enable multiprocessing"};
     prrData.strContinueOnMissing = {en: "Continue on missing footage"};
+    prrData.strDeleteSequence = {en: "Delete png sequence when finished"};
+    prrData.strOpenInExplorer = {en: "Open in explorer when finished"};
 
     prrData.strBrowse = {en: "Browse"};
     prrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
@@ -201,6 +204,14 @@
                             alignment:['fill','top'], \
                             box: Checkbox { text:'  " + productionRender_localize(prrData.strContinueOnMissing) + "', alignment:['fill','top'] }, \
                         }, \
+                        del: Group { \
+                            alignment:['fill','top'], \
+                            box: Checkbox { text:'  " + productionRender_localize(prrData.strDeleteSequence) + "', alignment:['fill','top'] }, \
+                        }, \
+                        open: Group { \
+                            alignment:['fill','top'], \
+                            box: Checkbox { text:'  " + productionRender_localize(prrData.strOpenInExplorer) + "', alignment:['fill','top'] }, \
+                        }, \
                     }, \
                     video: Panel { \
                         alignment:['fill','top'], \
@@ -255,6 +266,8 @@
 
             pal.grp.opts.mp.box.value = true;
             pal.grp.opts.cont.box.value = true;
+            pal.grp.opts.del.box.value = true;
+            pal.grp.opts.open.box.value = true;
 
             var rsItems = prrData.rsTemplates;
             for (var i = 0; i < rsItems.length; i++) {
@@ -343,6 +356,9 @@
             if (renderPath.exists == true) {
                 renderPathOut = renderPath.fsName;
             }
+        } else{
+            alert(productionRender_localize(prrData.strStandardStructureErr));
+            renderPathOut = prrData.projectRoot
         }
         return renderPathOut;
     }
@@ -381,9 +397,8 @@
     }
 
     // Main
-    function productionRender_main() {
-        // Add black solid at the end to fix transition problems
-        // code
+    function productionRender_main(path) {
+        var usePath = path;
 
         // Add to render queue
         var renderQueueItem = app.project.renderQueue.items.add(prrData.activeItem);
@@ -424,21 +439,6 @@
         var contOnMissingString = "";
         if (prrPal.grp.opts.cont.box.value  == true) {
             contOnMissingString = " -continueOnMissingFootage";
-        }
-
-        // Define usepath
-        var usePath;
-        var editboxOutputPath = prrPal.grp.outputPath.main.box.text;
-        if (editboxOutputPath == "") {
-            usePath = prrData.outputPath;
-        } else {
-            var usePathFolder = new Folder(editboxOutputPath);
-            if (usePathFolder.exists == true) {
-                usePath = editboxOutputPath;
-            } else {
-                alert(productionRender_localize(prrPal.strPathErr));
-                usePath = prrData.outputPath;
-            }
         }
 
         // Define render folder
@@ -512,9 +512,8 @@
         addQuotes(fileOutPath + ".mp4") + "\r\n";
 
         batContent += "echo.\r\n";
-        batContent += "echo [Converting] H264 Lossless\r\n";
-        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + prrData.activeItemWidth + "x" + prrData.activeItemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" +
-        " -r " + prrData.frameRate + " -c:v libx264 -pix_fmt yuv420p -preset veryslow -qp 0 -c:a aac -b:a 320k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
+        batContent += "echo [Converting] Lossless Video\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v copy -c:a copy " + addQuotes(fileOutPath + "_lossless.mov") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Preview Video\r\n";
@@ -527,9 +526,13 @@
 
         batContent += "del ffmpeg2pass-0.log\r\n";
         batContent += "del ffmpeg2pass-0.log.mbtree\r\n";
-        batContent += "rmdir /s /q " + addQuotes(sequenceFolder.fsName) + "\r\n";
+        if (prrPal.grp.opts.del.box.value  == true) {
+            batContent += "rmdir /s /q " + addQuotes(sequenceFolder.fsName) + "\r\n";
+        }
         batContent += "echo Cleanup Finished\r\n";
-        batContent += "%SystemRoot%\\explorer.exe " + addQuotes(renderFolder.fsName) + "\r\n";
+        if (prrPal.grp.opts.open.box.value  == true) {
+            batContent += "%SystemRoot%\\explorer.exe " + addQuotes(renderFolder.fsName) + "\r\n";
+        }
         batContent += "title Finished\r\n";
         batContent += "pause";
 
@@ -562,12 +565,29 @@
 
     // Execute
     function productionRender_doExecute() {
+
+        // Define usepath
+        var usePath;
+        var editboxOutputPath = prrPal.grp.outputPath.main.box.text;
+        if (editboxOutputPath == "") {
+            usePath = prrData.outputPath;
+        } else {
+            var usePathFolder = new Folder(editboxOutputPath);
+            if (usePathFolder.exists == true) {
+                usePath = editboxOutputPath;
+            } else {
+                var prompt = confirm(productionRender_localize(prrData.strPathErr));
+                if (prompt == false) {
+                    return;
+                }
+                usePath = prrData.outputPath;
+            }
+        }
+
         var saveAction = confirm(productionRender_localize(prrData.strSaveActionMsg));
         if (saveAction == true) {
             app.beginUndoGroup(prrData.scriptName);
-
-            productionRender_main()
-
+            productionRender_main(usePath);
             app.endUndoGroup();
             prrPal.close();
         } else {
