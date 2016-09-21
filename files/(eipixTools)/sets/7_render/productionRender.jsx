@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.11
+// Version: 0.12
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -17,17 +17,22 @@
         return;
     }
 
+    if (app.project.activeItem == null) {
+        alert("Select the composition you wish to render.");
+        return;
+    }
+
     // Define main variables
     var prrData = new Object();
 
     prrData.scriptNameShort = "PPR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.11";
+    prrData.scriptVersion = "0.12";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
     prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop.\rDo you wish to continue?"};
-    prrData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
+    prrData.strMinAE = {en: "This script requires Adobe After Effects CC2014 or later."};
     prrData.strActiveCompErr = {en: "Please select a composition."};
     prrData.strModulesErr = {en: "Export modules not found. Do you wish to install them?"};
     prrData.strFFmppegErr = {en: "FFmpeg not found. Install new version of eipixTools."};
@@ -85,6 +90,10 @@
     // ffmpeg
     prrData.etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/etc");
     prrData.ffmpegPath = new File(prrData.etcFolder.fsName + "/ffmpeg.exe");
+
+    // Images
+    prrData.imgFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/sets/images");
+    prrData.headerImage = new File(prrData.imgFolder.fsName + "/productionRender_header.png");
 
     // Templates
     prrData.rsTemplates = [];
@@ -163,11 +172,13 @@
       return array.indexOf(value) > -1;
     }
 
+    var imageFile = new File("C:\\Program Files\\Adobe\\Adobe After Effects CC 2014\\Support Files\\Scripts\\ScriptUI Panels\\(eipixTools)\\sets\\7_render\\productionRender_header.png");
+
     // Build UI
     function productionRender_buildUI(thisObj) {
         var pal = new Window("dialog", prrData.scriptName, undefined, {resizeable:false});
         if (pal !== null) {
-            var res =
+            var head =
                 "group { \
                     orientation:'column', alignment:['fill','fill'], \
                     header: Group { \
@@ -175,10 +186,12 @@
                         title: StaticText { text:'" + prrData.scriptNameShort + " v" + prrData.scriptVersion + "', alignment:['fill','center'] }, \
                         help: Button { text:'" + productionRender_localize(prrData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
-                    sepr: Group { \
-                        orientation:'row', alignment:['fill','top'], \
-                        rule: Panel { height: 2, alignment:['fill','center'] }, \
-                    }, \
+                }, \
+            }";
+
+            var res =
+                "group { \
+                    orientation:'column', alignment:['fill','fill'], \
                     inst: Group { \
                         alignment:['fill','top'], \
                         stt: StaticText { text:'" + productionRender_localize(prrData.strInstructions) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
@@ -251,6 +264,9 @@
                     }, \
                 }, \
             }";
+
+            pal.hdr = pal.add(head);
+            pal.img = pal.add("image", undefined, prrData.headerImage);
             pal.grp = pal.add(res);
 
             pal.layout.layout(true);
@@ -260,7 +276,7 @@
                 this.layout.resize();
             }
 
-            pal.grp.header.help.onClick = function() {
+            pal.hdr.header.help.onClick = function() {
                 alert(prrData.scriptTitle + "\n" + productionRender_localize(prrData.strHelpText), productionRender_localize(prrData.strHelpTitle));
             }
 
@@ -274,7 +290,7 @@
                 pal.grp.opts.rset.list.add("item", rsItems[i]);
             }
             pal.grp.opts.rset.list.selection = prrData.rsTemplates.indexOf("Best Settings");
-            pal.grp.opts.rset.enabled = false;
+            pal.grp.opts.rset.enabled = true;
 
             var timeItems = productionRender_localize(prrData.strTimeOpts);
             for (var i = 0; i < timeItems.length; i++) {
@@ -407,6 +423,28 @@
         // Assign Render Settings template
         renderQueueItem.applyTemplate(prrPal.grp.opts.rset.list.selection);
 
+        // Get Render Settings resolution
+        // activeItem.resolutionFactor
+        var itemHeight;
+        var itemWidth;
+        var itemResolution = renderQueueItem.getSetting("Resolution");
+        var itemResolutionP = itemResolution.substring(1, itemResolution.length-1);
+        var itemResolutionJSON = JSON.parse(itemResolutionP);
+
+        if (itemResolutionJSON["x"] == 0) {
+            itemHeight = prrData.activeItemHeight / prrData.activeItem.resolutionFactor[0];
+        } else {
+            itemHeight = prrData.activeItemHeight / itemResolutionJSON["x"];
+        }
+        itemHeight = Math.round(itemHeight / 2) * 2;
+
+        if (itemResolutionJSON["y"] == 0) {
+            itemWidth = prrData.activeItemWidth / prrData.activeItem.resolutionFactor[1];
+        } else {
+            itemWidth = prrData.activeItemWidth / itemResolutionJSON["y"];
+        }
+        itemWidth = Math.round(itemWidth / 2) * 2;
+
         // Assign Output Module template
         renderQueueItem.outputModules.add()
         renderQueueItem.outputModules[1].applyTemplate("PNG Sequence");
@@ -503,23 +541,23 @@
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Video\r\n";
-        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + prrData.activeItemWidth + "x" + prrData.activeItemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
+        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
         " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] iOS Video\r\n";
-        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + prrData.activeItemWidth + "x" + prrData.activeItemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
+        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
         addQuotes(fileOutPath + ".mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Lossless Video\r\n";
-        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v copy -c:a copy " + addQuotes(fileOutPath + "_lossless.mov") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v qtrle -c:a copy " + addQuotes(fileOutPath + "_lossless.mov") + "\r\n";
 
-        batContent += "echo.\r\n";
+        batContent += "echo.\r\n";r
         batContent += "echo [Converting] Preview Video\r\n";
-        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + prrData.activeItemWidth + "x" + prrData.activeItemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
+        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
         " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -an -f mp4 NUL && " +
-        "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + prrData.activeItemWidth + "x" + prrData.activeItemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" +
+        "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" +
         " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
 
         batContent += "echo Converting Finished\r\n";
@@ -643,7 +681,7 @@
     }
 
     // Warning
-    if (parseFloat(app.version) < 9.0) {
+    if (parseFloat(app.version) < 13.0) {
         alert(productionRender_localize(prrData.strMinAE));
     } else if (checkmodules() == false) {
         var confirmImportModules = confirm(productionRender_localize(prrData.strModulesErr));
