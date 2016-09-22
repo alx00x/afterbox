@@ -175,8 +175,6 @@
       return array.indexOf(value) > -1;
     }
 
-    var imageFile = new File("C:\\Program Files\\Adobe\\Adobe After Effects CC 2014\\Support Files\\Scripts\\ScriptUI Panels\\(eipixTools)\\sets\\7_render\\productionRender_header.png");
-
     // Build UI
     function productionRender_buildUI(thisObj) {
         var pal = new Window("dialog", prrData.scriptName, undefined, {resizeable:false});
@@ -306,7 +304,7 @@
             for (var i = 0; i < omItems.length; i++) {
                 pal.grp.video.omv.list.add("item", omItems[i]);
             }
-            pal.grp.video.omv.list.selection = prrData.omTemplates.indexOf("PNG Sequence");
+            pal.grp.video.omv.list.selection = prrData.omTemplates.indexOf("PNG Seq Colors");
             pal.grp.video.omv.enabled = false;
 
             var omItems = prrData.omTemplates;
@@ -450,7 +448,7 @@
 
         // Assign Output Module template
         renderQueueItem.outputModules.add()
-        renderQueueItem.outputModules[1].applyTemplate("PNG Sequence Colors");
+        renderQueueItem.outputModules[1].applyTemplate("PNG Seq Colors");
         renderQueueItem.outputModules[2].applyTemplate("WAV");
 
         // Assign Time Span choice
@@ -644,7 +642,7 @@
     // Main code:
     //
 
-    // Check if PNG Sequenxce output template exists
+    // Check if PNG Sequence output template exists
     function checkmodules() {
         var check = false;
 
@@ -654,8 +652,8 @@
         var tempCompQueueItemIndex = renderQ.numItems;
         var templateArray = renderQ.item(tempCompQueueItemIndex).outputModules[1].templates;
 
-        PNGcheck = isInArray("PNG Sequence Colors", templateArray);
-        WAVcheck = isInArray("WAV", templateArray);
+        var PNGcheck = isInArray("PNG Seq Colors", templateArray);
+        var WAVcheck = isInArray("WAV", templateArray);
 
         if ((PNGcheck == true) && (WAVcheck == true)) {
             var check = true;
