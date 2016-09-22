@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.12
+// Version: 0.14
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PPR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.12";
+    prrData.scriptVersion = "0.14";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
@@ -51,6 +51,9 @@
     prrData.strRenderSettings = {en: "Render Settings"};
     prrData.strOutputModule = {en: "Output Module"};
     prrData.strTimeSpan = {en: "Time Span"};
+
+    prrData.strOMVHelpTip = {en: "This option is not settable."};
+    prrData.strOMAHelpTip = {en: "This option is not settable."};
 
     prrData.strMultiprocessing = {en: "Enable multiprocessing"};
     prrData.strContinueOnMissing = {en: "Continue on missing footage"};
@@ -232,7 +235,7 @@
                         omv: Group { \
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + productionRender_localize(prrData.strOutputModule) + ":', preferredSize:[120,20] }, \
-                            list: DropDownList { alignment:['fill','center'], preferredSize:[120,20] }, \
+                            list: DropDownList { helpTip: '" + productionRender_localize(prrData.strOMVHelpTip) + "',alignment:['fill','center'], preferredSize:[120,20] }, \
                         }, \
                     }, \
                     audio: Panel { \
@@ -241,7 +244,7 @@
                         oma: Group { \
                             alignment:['fill','top'], \
                             text: StaticText { text:'" + productionRender_localize(prrData.strOutputModule) + ":', preferredSize:[120,20] }, \
-                            list: DropDownList { alignment:['fill','center'], preferredSize:[120,20] }, \
+                            list: DropDownList { helpTip: '" + productionRender_localize(prrData.strOMAHelpTip) + "',alignment:['fill','center'], preferredSize:[120,20] }, \
                         }, \
                     }, \
                     outputPath: Panel { \
@@ -660,7 +663,7 @@
         // Get Render Settings Templates
         var rsTemplatesAll = renderQ.item(tempCompQueueItemIndex).templates;
         for (var i = 0; i < rsTemplatesAll.length; i++) {
-            if (rsTemplatesAll[i].startsWith("_HIDDEN") == false) {
+            if ((rsTemplatesAll[i].startsWith("_HIDDEN") == false) && (rsTemplatesAll[i].startsWith("Multi-Machine") == false)) {
                 prrData.rsTemplates.push(rsTemplatesAll[i]);
             }
         }
@@ -676,6 +679,7 @@
         // Cleanup
         tempCompQueueItem.remove();
         tempComp.remove();
+        app.activeViewer.setActive();
 
         return check;
     }
