@@ -2,7 +2,7 @@
 // eipixTools.jsx
 //
 // Name: eipixTools
-// Version: 3.6
+// Version: 3.8
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
 //
@@ -22,7 +22,7 @@
 	// Global variables
 	var eipixToolsData = new Object();
 	eipixToolsData.scriptName = "Eipix Tools";
-	eipixToolsData.version = "3.6";
+	eipixToolsData.version = "3.8";
 	eipixToolsData.thisScriptsFolder = new Folder((new File($.fileName)).path);
 	eipixToolsData.scriptsPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\sets\\";
 	eipixToolsData.etcPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\etc\\";
@@ -225,14 +225,14 @@
 		var extractedFolderPath = extractedArray[0].fsName;
 
 		//delete etc and sets from (eipixTools)
-		system.callSystem("cmd.exe /c rmdir /s /q \"" + eipixToolsData.etcPath + "\"");
+		//system.callSystem("cmd.exe /c rmdir /s /q \"" + eipixToolsData.etcPath + "\"");
 		system.callSystem("cmd.exe /c rmdir /s /q \"" + eipixToolsData.scriptsPath + "\"");
 
 		//replace etc and sets in (eipixTools)
-		var tempEtcPath = extractedFolderPath + "\\files\\(eipixTools)\\etc"
+		//var tempEtcPath = extractedFolderPath + "\\files\\(eipixTools)\\etc"
 		var tempSetsPath = extractedFolderPath + "\\files\\(eipixTools)\\sets"
 
-		system.callSystem("robocopy -e \"" + tempEtcPath + "\" \"" + eipixToolsData.etcPath.substring(0, eipixToolsData.etcPath.length - 1) + "\"");
+		//system.callSystem("robocopy -e \"" + tempEtcPath + "\" \"" + eipixToolsData.etcPath.substring(0, eipixToolsData.etcPath.length - 1) + "\"");
 		system.callSystem("robocopy -e \"" + tempSetsPath + "\" \"" + eipixToolsData.scriptsPath.substring(0, eipixToolsData.scriptsPath.length - 1) + "\"");
 
 		//delete temp folder

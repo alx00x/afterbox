@@ -1,13 +1,13 @@
 ﻿// addVignetteLayer.jsx
-// 
+//
 // Name: addVignetteLayer
 // Version: 1.3
 // Author: Aleksandar Kocic
-// 
-// Description:     
-// This script creates a new solid and creates a mask to 
-// simulate the lens vignetting effect.
-//  
+//
+// Description:
+// This script creates a new solid and makes a mask to simulate the
+// lens vignetting effect.
+//
 
 (function addVignetteLayer(thisObj) {
     var activeItem = app.project.activeItem;
@@ -61,16 +61,16 @@
         var v = newSolid.height/2;
         var th = h*ratio;
         var tv = v*ratio;
-        
+
         var newMask = newSolid.Masks.addProperty("ADBE Mask Atom");
         newMask.maskMode = MaskMode.SUBTRACT;
-    
+
         var maskShape = newMask.property("ADBE Mask Shape").value;
         maskShape.vertices = [[h,0],[0,v],[h,2*v],[2*h,v]];
         maskShape.inTangents = [[th,0],[0,-tv],[-th,0],[0,tv]];
         maskShape.outTangents = [[-th,0],[0,tv],[th,0],[0,-tv]];
         maskShape.closed = true;
-        
+
         newMask.property("ADBE Mask Shape").setValue(maskShape);
         newMask.property("ADBE Mask Feather").setValue([60,60]);
         newMask.property("ADBE Mask Offset").setValue(30);

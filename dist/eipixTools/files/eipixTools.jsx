@@ -2,7 +2,7 @@
 // eipixTools.jsx
 //
 // Name: eipixTools
-// Version: 3.7
+// Version: 3.8
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
 //
@@ -22,7 +22,7 @@
 	// Global variables
 	var eipixToolsData = new Object();
 	eipixToolsData.scriptName = "Eipix Tools";
-	eipixToolsData.version = "3.7";
+	eipixToolsData.version = "3.8";
 	eipixToolsData.thisScriptsFolder = new Folder((new File($.fileName)).path);
 	eipixToolsData.scriptsPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\sets\\";
 	eipixToolsData.etcPath = eipixToolsData.thisScriptsFolder.fsName + "\\(eipixTools)\\etc\\";
