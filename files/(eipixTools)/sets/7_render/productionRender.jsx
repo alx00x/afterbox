@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.14
+// Version: 0.15
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PPR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.14";
+    prrData.scriptVersion = "0.15";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
@@ -463,7 +463,7 @@
             renderQueueItem.timeSpanStart = prrData.workAreaStart;
             renderQueueItem.timeSpanDuration = prrData.workAreaDuration;
         } else {
-            // lenght of comp
+            // length of comp
             startFrame = prrData.timeSpanStart * prrData.frameRate;
             endFrame = (prrData.timeSpanStart + prrData.timeSpanDuration) * prrData.frameRate;
             renderQueueItem.timeSpanStart = prrData.timeSpanStart;
@@ -544,24 +544,24 @@
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Video\r\n";
-        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
+        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
         " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] iOS Video\r\n";
-        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
+        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
         addQuotes(fileOutPath + ".mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Lossless Video\r\n";
-        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v qtrle -c:a copy " + addQuotes(fileOutPath + "_lossless.mov") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v libx264 -preset veryslow -pix_fmt yuv420p -crf 10 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Preview Video\r\n";
-        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
-        " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -an -f mp4 NUL && " +
-        "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" +
-        " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
+        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r "
+        + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -an -f mp4 NUL && " + "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -r "
+        + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" + " -r "
+        + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
 
         batContent += "echo Converting Finished\r\n";
 
