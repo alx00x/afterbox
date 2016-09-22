@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.15
+// Version: 0.16
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PPR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.15";
+    prrData.scriptVersion = "0.16";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
@@ -175,8 +175,6 @@
       return array.indexOf(value) > -1;
     }
 
-    var imageFile = new File("C:\\Program Files\\Adobe\\Adobe After Effects CC 2014\\Support Files\\Scripts\\ScriptUI Panels\\(eipixTools)\\sets\\7_render\\productionRender_header.png");
-
     // Build UI
     function productionRender_buildUI(thisObj) {
         var pal = new Window("dialog", prrData.scriptName, undefined, {resizeable:false});
@@ -306,7 +304,7 @@
             for (var i = 0; i < omItems.length; i++) {
                 pal.grp.video.omv.list.add("item", omItems[i]);
             }
-            pal.grp.video.omv.list.selection = prrData.omTemplates.indexOf("PNG Sequence");
+            pal.grp.video.omv.list.selection = prrData.omTemplates.indexOf("PNG Seq Colors");
             pal.grp.video.omv.enabled = false;
 
             var omItems = prrData.omTemplates;
@@ -450,7 +448,7 @@
 
         // Assign Output Module template
         renderQueueItem.outputModules.add()
-        renderQueueItem.outputModules[1].applyTemplate("PNG Sequence");
+        renderQueueItem.outputModules[1].applyTemplate("PNG Seq Colors");
         renderQueueItem.outputModules[2].applyTemplate("WAV");
 
         // Assign Time Span choice
@@ -527,7 +525,7 @@
         batContent += "cd %~dp0\r\n";
         batContent += "set ffmpeg=" + prrData.ffmpegPath.fsName + "\r\n";
 
-        batContent += "if exist NUL (del NUL)\r\n";
+        //batContent += "if exist NUL (del NUL)\r\n";
         batContent += "if exist ffmpeg2pass-0.log (del ffmpeg2pass-0.log)\r\n";
         batContent += "if exist ffmpeg2pass-0.log.mbtree (del ffmpeg2pass-0.log.mbtree)\r\n";
 
@@ -540,26 +538,27 @@
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Audio\r\n";
-        batContent += "\"%ffmpeg%\"" + " -y -i " + addQuotes(fileOutPath + ".wav") + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath + ".ogg") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y " + " -i " + addQuotes(fileOutPath + ".wav") + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath + ".ogg") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Video\r\n";
-        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
+        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
         " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] iOS Video\r\n";
-        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
+        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
         addQuotes(fileOutPath + ".mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Lossless Video\r\n";
-        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v libx264 -preset veryslow -pix_fmt yuv420p -crf 10 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" + " -r "
+        + prrData.frameRate + " -c:v libx264 -preset veryslow -pix_fmt yuv420p -qp 0 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Preview Video\r\n";
-        batContent += "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r "
-        + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -an -f mp4 NUL && " + "\"%ffmpeg%\"" + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -y -start_number " + startFrame + " -r "
+        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r "
+        + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -an -f mp4 NUL && " + "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r "
         + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" + " -r "
         + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
 
@@ -643,7 +642,7 @@
     // Main code:
     //
 
-    // Check if PNG Sequenxce output template exists
+    // Check if PNG Sequence output template exists
     function checkmodules() {
         var check = false;
 
@@ -653,8 +652,8 @@
         var tempCompQueueItemIndex = renderQ.numItems;
         var templateArray = renderQ.item(tempCompQueueItemIndex).outputModules[1].templates;
 
-        PNGcheck = isInArray("PNG Sequence", templateArray);
-        WAVcheck = isInArray("WAV", templateArray);
+        var PNGcheck = isInArray("PNG Seq Colors", templateArray);
+        var WAVcheck = isInArray("WAV", templateArray);
 
         if ((PNGcheck == true) && (WAVcheck == true)) {
             var check = true;

@@ -1,7 +1,7 @@
 ﻿// importOutputSettings.jsx
 //
 // Name: importOutputSettings
-// Version: 1.2
+// Version: 1.3
 // Author: Simon Bjork, bjork.simon@gmail.com
 // Edited by: Aleksandar Kocic
 //
@@ -43,8 +43,11 @@
             var myRQ = app.project.renderQueue;
             var templateArray = app.project.renderQueue.item(1).outputModules[1].templates;
 
+            var outputNameArray = [];
+
             for (var i = 1; i <= myRQ.numItems; i++) {
                 var outputName = app.project.item(i).name.substr(3);
+                outputNameArray.push(outputName);
                 var templateExists = false;
                 for (var j = 0; j <= templateArray.length; j++) {
                     if (templateArray[j] == outputName) {
@@ -58,9 +61,13 @@
                 }
             }
 
+            if ((outputNameArray.indexOf("WAV") == -1) || (outputNameArray.indexOf("PNG Seq Colors") == -1)) {
+                alert("WORNING:\r\rIt seems that you dont have the latest version of eipixTools! Some scripts may not work properly.");
+            }
+
             // See if any templates were added.
             if (counter == myRQ.numItems) {
-                alert("All output templates already exists.");
+                alert("All output templates already installed.");
             }
 
             // Open old project.
