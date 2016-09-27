@@ -1,12 +1,12 @@
 ﻿// addElement.jsx
-// 
+//
 // Name: addElement
 // Version: 1.3
 // Author: Aleksandar Kocic
-// 
-// Description:     
+//
+// Description:
 // This script creates a new solid and adds Element3D to it.
-//  
+// 
 
 
 (function addElement(thisObj) {
@@ -37,9 +37,9 @@
                 }
             }
         }
-    
+
         app.beginUndoGroup("addElement");
-    
+
         var solidName = "element " + (layerNumber + 1);
         var solidW = activeItem.width;
         var solidH = activeItem.height;
@@ -50,7 +50,7 @@
             newSolid.moveBefore(selectedLayer);
         }
         var addElement = newSolid.property("Effects").addProperty("Element");
-    
+
         app.endUndoGroup();
     } else {
         alert("You dont have trapcode VideoCopilot Element3D installed.");
