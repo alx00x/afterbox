@@ -1,7 +1,7 @@
 // previewRender.jsx
 //
 // Name: previewRender
-// Version: 1.4
+// Version: 1.5
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -22,7 +22,7 @@
 
     pvrData.scriptNameShort = "PVR";
     pvrData.scriptName = "Preview Render";
-    pvrData.scriptVersion = "1.4";
+    pvrData.scriptVersion = "1.5";
     pvrData.scriptTitle = pvrData.scriptName + " v" + pvrData.scriptVersion;
 
     pvrData.strRenderSettings = {en: "Render Settings"};
@@ -73,6 +73,10 @@
     pvrData.workAreaStart = pvrData.activeItem.workAreaStart;
     pvrData.workAreaDuration = pvrData.activeItem.workAreaDuration;
 
+    // Images
+    pvrData.imgFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/sets/images");
+    pvrData.headerImage = new File(pvrData.imgFolder.fsName + "/previewRender_header.png");
+
     // Localize
     function previewRender_localize(strVar) {
         return strVar["en"];
@@ -84,7 +88,7 @@
             resizeable: false
         });
         if (pal !== null) {
-            var res =
+            var head =
                 "group { \
                     orientation:'column', alignment:['fill','fill'], \
                     header: Group { \
@@ -92,6 +96,16 @@
                         title: StaticText { text:'" + pvrData.scriptNameShort + " v" + pvrData.scriptVersion + "', alignment:['fill','center'] }, \
                         help: Button { text:'" + previewRender_localize(pvrData.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
                     }, \
+                    sepr: Group { \
+                        orientation:'row', alignment:['fill','top'], \
+                        rule: Panel { height: 2, alignment:['fill','center'] }, \
+                    }, \
+                }, \
+            }";
+
+            var res =
+                "group { \
+                    orientation:'column', alignment:['fill','fill'], \
                     sepr: Group { \
                         orientation:'row', alignment:['fill','top'], \
                         rule: Panel { height: 2, alignment:['fill','center'] }, \
@@ -163,6 +177,8 @@
                     }, \
                 }, \
             }";
+            pal.head = pal.add(head);
+            pal.img = pal.add("image", undefined, pvrData.headerImage);
             pal.grp = pal.add(res);
 
             pal.layout.layout(true);
@@ -178,7 +194,7 @@
             }
             pal.grp.renderSettings.time.list.selection = 1;
 
-            pal.grp.header.help.onClick = function() {
+            pal.head.header.help.onClick = function() {
                 alert(pvrData.scriptTitle + "\n" + previewRender_localize(pvrData.strHelpText), previewRender_localize(pvrData.strHelpTitle));
             }
 

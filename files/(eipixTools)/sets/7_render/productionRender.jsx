@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.16
+// Version: 0.17
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -25,9 +25,9 @@
     // Define main variables
     var prrData = new Object();
 
-    prrData.scriptNameShort = "PPR";
+    prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.16";
+    prrData.scriptVersion = "0.17";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};

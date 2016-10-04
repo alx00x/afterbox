@@ -1,15 +1,15 @@
 ﻿// dialogOGV.jsx
-// 
+//
 // Name: dialogOGV
-// Version: 1.1
+// Version: 1.2
 // Author: Aleksandar Kocic
-// 
-// Description:     
+//
+// Description:
 // This script prepares a dialog sequence and adds render items
-// for engine use. Script checks if dimensions are dividable 
-// by 16 and offers an option to reduce unnecessarily space 
+// for engine use. Script checks if dimensions are dividable
+// by 16 and offers an option to reduce unnecessarily space
 // around the object.
-// 
+//
 
 (function dialogOGV(thisObj) {
     if (app.project.file == null) {
@@ -22,7 +22,7 @@
 
     dogvData.scriptNameShort = "DOGV";
     dogvData.scriptName = "Dialog OGV";
-    dogvData.scriptVersion = "1.1";
+    dogvData.scriptVersion = "1.2";
     dogvData.scriptTitle = dogvData.scriptName + " v" + dogvData.scriptVersion;
 
     dogvData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
@@ -256,7 +256,7 @@
     //
 
     // Calculate first divisible by 16
-    function dialogOGV_factorisation16(inputValue) {
+    function factorisation16(inputValue) {
         var valueDiv = 16;
         while (inputValue % valueDiv != 0) {
             inputValue += 1;
@@ -282,7 +282,7 @@
                 }
                 if (currentItem.frameRate != 25) {
                     alert(dialogOGV_localize(dogvData.strErrNotCorrectFPS) + "\n" + currentItem.name, "Warning");
-                }    
+                }
                 dogvData.sequenceItems.push(currentItem);
             }
         }
@@ -329,7 +329,7 @@
         //analize for x1, x2, y1 and y2
         var compHeight = analizeComp.height;
         var compWidth = analizeComp.width;
- 
+
         var x1 = compWidth; //left
         var x2 = -1; //right
         var y1 = compHeight; //top
@@ -453,20 +453,20 @@
             var newHeight = mainCompHeight - (targetEdges[2] + (mainCompHeight - targetEdges[3]));
 
             //crop mainComp
-            mainComp.width = dialogOGV_factorisation16(newWidth);
-            mainComp.height = dialogOGV_factorisation16(newHeight);
+            mainComp.width = factorisation16(newWidth);
+            mainComp.height = factorisation16(newHeight);
 
             //crop mainCompAlpha
-            mainCompAlpha.width = dialogOGV_factorisation16(newWidth);
-            mainCompAlpha.height = dialogOGV_factorisation16(newHeight);
+            mainCompAlpha.width = factorisation16(newWidth);
+            mainCompAlpha.height = factorisation16(newHeight);
         } else {
             //crop mainComp
-            mainComp.width = dialogOGV_factorisation16(mainComp.width);
-            mainComp.height = dialogOGV_factorisation16(mainComp.height);
+            mainComp.width = factorisation16(mainComp.width);
+            mainComp.height = factorisation16(mainComp.height);
 
             //crop mainCompAlpha
-            mainCompAlpha.width = dialogOGV_factorisation16(mainComp.width);
-            mainCompAlpha.height = dialogOGV_factorisation16(mainComp.height);
+            mainCompAlpha.width = factorisation16(mainComp.width);
+            mainCompAlpha.height = factorisation16(mainComp.height);
         }
 
         //setup the export

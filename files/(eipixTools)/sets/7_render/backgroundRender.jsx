@@ -140,6 +140,7 @@
 
     // Remove temp render queue item
     app.project.renderQueue.item(tempRenderQueueItemIndex).remove();
+    app.activeViewer.setActive();
 
     // Build UI
     function backgroundRender_buildUI(thisObj) {
