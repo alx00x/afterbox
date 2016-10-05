@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.18
+// Version: 0.19
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.18";
+    prrData.scriptVersion = "0.19";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
@@ -55,10 +55,11 @@
     prrData.strOMVHelpTip = {en: "This option is not settable."};
     prrData.strOMAHelpTip = {en: "This option is not settable."};
 
-    prrData.strMultiprocessing = {en: "Enable multiprocessing"};
     prrData.strContinueOnMissing = {en: "Continue on missing footage"};
     prrData.strDeleteSequence = {en: "Delete png sequence when finished"};
     prrData.strOpenInExplorer = {en: "Open in explorer when finished"};
+    prrData.strReuse = {en: "GUI rendering (non-background)"};
+    prrData.strMultiprocessing = {en: "Enable multiprocessing"};
 
     prrData.strBrowse = {en: "Browse"};
     prrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
@@ -222,6 +223,10 @@
                             alignment:['fill','top'], \
                             box: Checkbox { text:'  " + productionRender_localize(prrData.strOpenInExplorer) + "', alignment:['fill','top'] }, \
                         }, \
+                        reuse: Group { \
+                            alignment:['fill','top'], \
+                            box: Checkbox { text:'  " + productionRender_localize(prrData.strReuse) + "', alignment:['fill','top'] }, \
+                        }, \
                         mp: Group { \
                             alignment:['fill','top'], \
                             box: Checkbox { text:'  " + productionRender_localize(prrData.strMultiprocessing) + "', alignment:['fill','top'] }, \
@@ -284,6 +289,8 @@
             pal.grp.opts.cont.box.value = true;
             pal.grp.opts.del.box.value = true;
             pal.grp.opts.open.box.value = true;
+
+            pal.grp.opts.reuse.box.value = false;
             pal.grp.opts.mp.box.value = false;
 
             var rsItems = prrData.rsTemplates;
@@ -479,6 +486,10 @@
         if (prrPal.grp.opts.cont.box.value  == true) {
             contOnMissingString = " -continueOnMissingFootage";
         }
+        var reuseInstance = "";
+        if (prrPal.grp.opts.reuse.box.value  == true) {
+            reuseInstance = " -reuse";
+        }
 
         // Define render folder
         var foldersInPath = new Folder(usePath).getFiles(returnOnlyFolders);
@@ -531,7 +542,7 @@
 
         batContent += "title Rendering: " + renderFrames + " frames\r\n";
         batContent += "start \"\" /b " + "/low" + " /wait " +
-        addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + contOnMissingString + "\r\n";
+        addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + contOnMissingString + reuseInstance + "\r\n";
         batContent += "echo Rendering Finished\r\n";
 
         batContent += "title Converting, Please Wait\r\n";
@@ -605,7 +616,6 @@
 
     // Execute
     function productionRender_doExecute() {
-
         // Define usepath
         var usePath;
         var editboxOutputPath = prrPal.grp.outputPath.main.box.text;
