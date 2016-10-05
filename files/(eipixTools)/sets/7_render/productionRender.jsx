@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.16
+// Version: 0.18
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -25,9 +25,9 @@
     // Define main variables
     var prrData = new Object();
 
-    prrData.scriptNameShort = "PPR";
+    prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.16";
+    prrData.scriptVersion = "0.18";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
@@ -210,10 +210,6 @@
                             text: StaticText { text:'" + productionRender_localize(prrData.strTimeSpan) + ":', preferredSize:[120,20] }, \
                             list: DropDownList { alignment:['fill','center'], preferredSize:[120,20] }, \
                         }, \
-                        mp: Group { \
-                            alignment:['fill','top'], \
-                            box: Checkbox { text:'  " + productionRender_localize(prrData.strMultiprocessing) + "', alignment:['fill','top'] }, \
-                        }, \
                         cont: Group { \
                             alignment:['fill','top'], \
                             box: Checkbox { text:'  " + productionRender_localize(prrData.strContinueOnMissing) + "', alignment:['fill','top'] }, \
@@ -225,6 +221,10 @@
                         open: Group { \
                             alignment:['fill','top'], \
                             box: Checkbox { text:'  " + productionRender_localize(prrData.strOpenInExplorer) + "', alignment:['fill','top'] }, \
+                        }, \
+                        mp: Group { \
+                            alignment:['fill','top'], \
+                            box: Checkbox { text:'  " + productionRender_localize(prrData.strMultiprocessing) + "', alignment:['fill','top'] }, \
                         }, \
                     }, \
                     video: Panel { \
@@ -281,10 +281,10 @@
                 alert(prrData.scriptTitle + "\n" + productionRender_localize(prrData.strHelpText), productionRender_localize(prrData.strHelpTitle));
             }
 
-            pal.grp.opts.mp.box.value = true;
             pal.grp.opts.cont.box.value = true;
             pal.grp.opts.del.box.value = true;
             pal.grp.opts.open.box.value = true;
+            pal.grp.opts.mp.box.value = false;
 
             var rsItems = prrData.rsTemplates;
             for (var i = 0; i < rsItems.length; i++) {
@@ -644,6 +644,7 @@
 
     // Check if PNG Sequence output template exists
     function checkmodules() {
+        var activeViewer = app.activeViewer;
         var check = false;
 
         var renderQ = app.project.renderQueue;
@@ -678,7 +679,9 @@
         // Cleanup
         tempCompQueueItem.remove();
         tempComp.remove();
-        app.activeViewer.setActive();
+        if (activeViewer != null) {
+            app.activeViewer.setActive();
+        }
 
         return check;
     }

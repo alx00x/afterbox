@@ -1,7 +1,7 @@
 // setElementQuality.jsx
 //
 // Name: setElementQuality
-// Version: 2.0
+// Version: 2.1
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -18,11 +18,14 @@
 
     seqData.scriptNameShort = "SEQ";
     seqData.scriptName = "Set Element Quality";
-    seqData.scriptVersion = "2.0";
+    seqData.scriptVersion = "2.1";
     seqData.scriptTitle = seqData.scriptName + " v" + seqData.scriptVersion;
 
     seqData.strAffect = {en: "Affect"};
     seqData.strChange = {en: "Change"};
+
+    seqData.strDone = {en: "Done!"};
+    seqData.strChangedLayers = {en: "Changed"};
 
     seqData.strSelected = {en: "Selected layers only"};
     seqData.strComp = {en: "Layers in active composition"};
@@ -214,7 +217,6 @@
                     key: n,
                     index: v
                 });
-
             }
         }
         //propValDict[0]["key"]
@@ -223,43 +225,49 @@
 
     // Set on selected layers only
     function setElementQuality_changeInSelected() {
+        var changedLayers = [];
         var getPropValDict = getPropVal();
-        //check if any layers are selected
-        if (activeItem.selectedLayers.length != 0) {
-            // set property on each selected layer
-            for (var j = 0; j < activeItem.selectedLayers.length; j++) {
-                var currentLayer = activeItem.selectedLayers[j];
+        // set property on each selected layer
+        for (var j = 0; j < activeItem.selectedLayers.length; j++) {
+            var currentLayer = activeItem.selectedLayers[j];
+            if (currentLayer instanceof AVLayer) {
                 if (currentLayer.property("Effects").property("Element") != null) {
                     for (var i = 0; i < getPropValDict.length; i++) {
                         var currentProperty = getPropValDict[i]["key"];
                         var currentIndex = getPropValDict[i]["index"] + 1;
                         currentLayer.property("Effects").property("Element").property(currentProperty).setValue(currentIndex);
                     }
+                    changedLayers.push(currentLayer.name);
                 }
             }
-        } else {
-            alert(setElementQuality_localize(seqData.strNoLayersSelectedErr));
         }
+        return changedLayers;
     }
 
     // Set only on layers in active composition
     function setElementQuality_changeInComp() {
+        var changedLayers = [];
         var getPropValDict = getPropVal();
         // set property on each selected layer
         for (var j = 1; j < activeItem.layers.length; j++) {
             var currentLayer = activeItem.layers[j];
-            if (currentLayer.property("Effects").property("Element") != null) {
-                for (var i = 0; i < getPropValDict.length; i++) {
-                    var currentProperty = getPropValDict[i]["key"];
-                    var currentIndex = getPropValDict[i]["index"] + 1;
-                    currentLayer.property("Effects").property("Element").property(currentProperty).setValue(currentIndex);
+            if (currentLayer instanceof AVLayer) {
+                if (currentLayer.property("Effects").property("Element") != null) {
+                    for (var i = 0; i < getPropValDict.length; i++) {
+                        var currentProperty = getPropValDict[i]["key"];
+                        var currentIndex = getPropValDict[i]["index"] + 1;
+                        currentLayer.property("Effects").property("Element").property(currentProperty).setValue(currentIndex);
+                    }
+                    changedLayers.push(currentLayer.name);
                 }
             }
         }
+        return changedLayers;
     }
 
     // Set on all layers in project
     function setElementQuality_changeInProject() {
+        var changedLayers = [];
         var getPropValDict = getPropVal();
         // get comp items
         var compItems = app.project.items;
@@ -270,27 +278,38 @@
             if (currentItem instanceof CompItem) {
                 for (var j = 1; j <= currentItem.layers.length; j++) {
                     var currentLayer = currentItem.layers[j];
-                    if (currentLayer.property("Effects").property("Element") != null) {
-                        for (var i = 0; i < getPropValDict.length; i++) {
-                            var currentProperty = getPropValDict[i]["key"];
-                            var currentIndex = getPropValDict[i]["index"] + 1;
-                            currentLayer.property("Effects").property("Element").property(currentProperty).setValue(currentIndex);
+                    if (currentLayer instanceof AVLayer) {
+                        if (currentLayer.property("Effects").property("Element") != null) {
+                            for (var i = 0; i < getPropValDict.length; i++) {
+                                var currentProperty = getPropValDict[i]["key"];
+                                var currentIndex = getPropValDict[i]["index"] + 1;
+                                currentLayer.property("Effects").property("Element").property(currentProperty).setValue(currentIndex);
+                            }
+                            changedLayers.push(currentLayer.name);
                         }
                     }
                 }
             }
         }
+        return changedLayers;
     }
 
     // Execute
     function setElementQuality_doExecute() {
         app.beginUndoGroup(seqData.scriptName);
         if (seqPal.grp.scope.rdio.sele.value == true) {
-            setElementQuality_changeInSelected();
+            if (activeItem.selectedLayers.length != 0) {
+                var action = setElementQuality_changeInSelected();
+                alert(setElementQuality_localize(seqData.strDone) + "\r\r" + setElementQuality_localize(seqData.strChangedLayers) + ":\r" + action.toString());
+            } else {
+                alert(setElementQuality_localize(seqData.strNoLayersSelectedErr));
+            }
         } else if (seqPal.grp.scope.rdio.comp.value == true) {
-            setElementQuality_changeInComp();
+            var action = setElementQuality_changeInComp();
+            alert(setElementQuality_localize(seqData.strDone) + "\r\r" + setElementQuality_localize(seqData.strChangedLayers) + ":\r" + action.toString());
         } else {
-            setElementQuality_changeInProject();
+            var action = setElementQuality_changeInProject();
+            alert(setElementQuality_localize(seqData.strDone) + "\r\r" + setElementQuality_localize(seqData.strChangedLayers) + ":\r" + action.toString());
         }
         app.endUndoGroup();
     }
