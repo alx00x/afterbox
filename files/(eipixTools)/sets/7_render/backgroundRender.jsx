@@ -1,7 +1,7 @@
 ﻿// backgroundRender.jsx
 //
 // Name: backgroundRender
-// Version: 1.6
+// Version: 1.7
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     bgrData.scriptNameShort = "BGR";
     bgrData.scriptName = "Background Render";
-    bgrData.scriptVersion = "1.6";
+    bgrData.scriptVersion = "1.7";
     bgrData.scriptTitle = bgrData.scriptName + " v" + bgrData.scriptVersion;
 
     bgrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop."};
@@ -140,6 +140,7 @@
 
     // Remove temp render queue item
     app.project.renderQueue.item(tempRenderQueueItemIndex).remove();
+    app.activeViewer.setActive();
 
     // Build UI
     function backgroundRender_buildUI(thisObj) {
@@ -302,7 +303,8 @@
         }
 
         // Padding
-        if (outputModuleTemplate.toString().includes("Sequence") == true) {
+        var outModFileName = renderQueueItem.outputModules[1].file.toString();
+        if (outModFileName.includes("###") == true) {
             sequencePadding = "_[#####]";
         } else {
             sequencePadding = "";
