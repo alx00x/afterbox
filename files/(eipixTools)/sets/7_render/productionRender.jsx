@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.20
+// Version: 0.21
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.20";
+    prrData.scriptVersion = "0.21";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
@@ -654,7 +654,6 @@
 
     // Check if PNG Sequence output template exists
     function checkmodules() {
-        var activeViewer = app.activeViewer;
         var check = false;
 
         var renderQ = app.project.renderQueue;
@@ -689,7 +688,8 @@
         // Cleanup
         tempCompQueueItem.remove();
         tempComp.remove();
-        if (activeViewer != null) {
+
+        if (app.activeViewer != null) {
             app.activeViewer.setActive();
         }
 
