@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.17
+// Version: 0.23
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.17";
+    prrData.scriptVersion = "0.23";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
@@ -55,10 +55,11 @@
     prrData.strOMVHelpTip = {en: "This option is not settable."};
     prrData.strOMAHelpTip = {en: "This option is not settable."};
 
-    prrData.strMultiprocessing = {en: "Enable multiprocessing"};
     prrData.strContinueOnMissing = {en: "Continue on missing footage"};
     prrData.strDeleteSequence = {en: "Delete png sequence when finished"};
     prrData.strOpenInExplorer = {en: "Open in explorer when finished"};
+    prrData.strReuse = {en: "GUI rendering (non-background)"};
+    prrData.strMultiprocessing = {en: "Enable multiprocessing"};
 
     prrData.strBrowse = {en: "Browse"};
     prrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
@@ -67,8 +68,13 @@
     prrData.strHelpTitle = {en: "Help"};
     prrData.strHelpText = {en: "Starts background render and exports composition to png sequence and wav audio file, than converts using ffmpeg to production needed file formats."};
 
-    // Define project variables
+    // Define active item
     prrData.activeItem = app.project.activeItem;
+
+    // Set start frame to 0 for render composition
+    prrData.activeItem.displayStartTime = 0;
+
+    // Define project variables
     prrData.activeItemName = app.project.activeItem.name;
     prrData.activeItemRes = prrData.activeItem.width + " x " + prrData.activeItem.height;
     prrData.projectName = app.project.file.name;
@@ -79,6 +85,7 @@
     prrData.activeItemFPS = prrData.activeItem.frameRate;
     prrData.activeItemHeight = prrData.activeItem.height;
     prrData.activeItemWidth = prrData.activeItem.width;
+    prrData.activeItemPixelAspect = prrData.activeItem.pixelAspect;
     prrData.timeSpanStart = prrData.activeItem.displayStartTime * prrData.activeItemFPS;
     prrData.timeSpanDuration = prrData.activeItem.duration;
     prrData.workAreaStart = prrData.activeItem.workAreaStart;
@@ -210,10 +217,6 @@
                             text: StaticText { text:'" + productionRender_localize(prrData.strTimeSpan) + ":', preferredSize:[120,20] }, \
                             list: DropDownList { alignment:['fill','center'], preferredSize:[120,20] }, \
                         }, \
-                        mp: Group { \
-                            alignment:['fill','top'], \
-                            box: Checkbox { text:'  " + productionRender_localize(prrData.strMultiprocessing) + "', alignment:['fill','top'] }, \
-                        }, \
                         cont: Group { \
                             alignment:['fill','top'], \
                             box: Checkbox { text:'  " + productionRender_localize(prrData.strContinueOnMissing) + "', alignment:['fill','top'] }, \
@@ -225,6 +228,14 @@
                         open: Group { \
                             alignment:['fill','top'], \
                             box: Checkbox { text:'  " + productionRender_localize(prrData.strOpenInExplorer) + "', alignment:['fill','top'] }, \
+                        }, \
+                        reuse: Group { \
+                            alignment:['fill','top'], \
+                            box: Checkbox { text:'  " + productionRender_localize(prrData.strReuse) + "', alignment:['fill','top'] }, \
+                        }, \
+                        mp: Group { \
+                            alignment:['fill','top'], \
+                            box: Checkbox { text:'  " + productionRender_localize(prrData.strMultiprocessing) + "', alignment:['fill','top'] }, \
                         }, \
                     }, \
                     video: Panel { \
@@ -281,10 +292,12 @@
                 alert(prrData.scriptTitle + "\n" + productionRender_localize(prrData.strHelpText), productionRender_localize(prrData.strHelpTitle));
             }
 
-            pal.grp.opts.mp.box.value = true;
             pal.grp.opts.cont.box.value = true;
             pal.grp.opts.del.box.value = true;
             pal.grp.opts.open.box.value = true;
+
+            pal.grp.opts.reuse.box.value = false;
+            pal.grp.opts.mp.box.value = false;
 
             var rsItems = prrData.rsTemplates;
             for (var i = 0; i < rsItems.length; i++) {
@@ -417,6 +430,10 @@
     function productionRender_main(path) {
         var usePath = path;
 
+        // Add black solid at the end to avoid transparency issues (temporery solution)
+        var bgSolid = prrData.activeItem.layers.addSolid([0, 0, 0], "background", prrData.activeItemWidth, prrData.activeItemHeight, prrData.activeItemPixelAspect, prrData.timeSpanDuration);
+        bgSolid.moveToEnd()
+
         // Add to render queue
         var renderQueueItem = app.project.renderQueue.items.add(prrData.activeItem);
         var renderQueueItemIndex = app.project.renderQueue.numItems;
@@ -479,18 +496,26 @@
         if (prrPal.grp.opts.cont.box.value  == true) {
             contOnMissingString = " -continueOnMissingFootage";
         }
+        var reuseInstance = "";
+        if (prrPal.grp.opts.reuse.box.value  == true) {
+            reuseInstance = " -reuse";
+        }
 
         // Define render folder
         var foldersInPath = new Folder(usePath).getFiles(returnOnlyFolders);
         var folderIncrement = 0;
         for (var i = 0; i < foldersInPath.length; i++) {
             var pi = foldersInPath[i].toString();
-            var fi = pi.substr(pi.length - 3);
-            var fiInt = TryParseInt(fi, null);
-            if (!(fiInt == null) && (fiInt > folderIncrement)) {
-                folderIncrement = fiInt;
+            var piFold = pi.match(/([^\/]*)\/*$/)[1];
+            var ni = piFold.substr(0, prrData.activeItemName.length);
+            var niAfter = piFold.substr(prrData.activeItemName.length, 2);
+            if ((ni == prrData.activeItemName) && (niAfter == "_r")) {
+                var fi = pi.substr(pi.length - 3);
+                var fiInt = TryParseInt(fi, null);
+                if (!(fiInt == null) && (fiInt > folderIncrement)) {
+                    folderIncrement = fiInt;
+                }
             }
-
         }
         var folderIncrementString = pad(folderIncrement + 1, 3);
 
@@ -522,7 +547,7 @@
         var batContent = "@echo off\r\n";
         batContent += "title Please Wait\r\n";
         batContent += "echo Please Wait\r\n";
-        batContent += "cd %~dp0\r\n";
+        batContent += "cd " + addQuotes(renderFolder.fsName) + "\r\n";
         batContent += "set ffmpeg=" + prrData.ffmpegPath.fsName + "\r\n";
 
         //batContent += "if exist NUL (del NUL)\r\n";
@@ -531,36 +556,33 @@
 
         batContent += "title Rendering: " + renderFrames + " frames\r\n";
         batContent += "start \"\" /b " + "/low" + " /wait " +
-        addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + contOnMissingString + "\r\n";
+        addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + contOnMissingString + reuseInstance + "\r\n";
         batContent += "echo Rendering Finished\r\n";
 
         batContent += "title Converting, Please Wait\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Audio\r\n";
-        batContent += "\"%ffmpeg%\" -y " + " -i " + addQuotes(fileOutPath + ".wav") + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath + ".ogg") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -i " + addQuotes(fileOutPath + ".wav") + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath + ".ogg") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Video\r\n";
-        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
-        " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] iOS Video\r\n";
-        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
+        batContent += "\"%ffmpeg%\" -y  -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
         addQuotes(fileOutPath + ".mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Lossless Video\r\n";
-        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" + " -r "
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r "
         + prrData.frameRate + " -c:v libx264 -preset veryslow -pix_fmt yuv420p -qp 0 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Preview Video\r\n";
-        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r "
-        + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -an -f mp4 NUL && " + "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r "
-        + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" + " -r "
-        + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -passlogfile log -an -f mp4 NUL && " + "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " +
+        addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -passlogfile log -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
 
         batContent += "echo Converting Finished\r\n";
 
@@ -598,6 +620,9 @@
         // Remove queue item
         app.project.renderQueue.item(renderQueueItemIndex).remove();
 
+        // Remove background layer
+        bgSolid.remove()
+
         // Close interface
         app.executeCommand(app.findMenuCommandId("Increment and Save"))
         prrPal.close();
@@ -605,7 +630,6 @@
 
     // Execute
     function productionRender_doExecute() {
-
         // Define usepath
         var usePath;
         var editboxOutputPath = prrPal.grp.outputPath.main.box.text;
@@ -678,7 +702,10 @@
         // Cleanup
         tempCompQueueItem.remove();
         tempComp.remove();
-        app.activeViewer.setActive();
+
+        if (app.activeViewer != null) {
+            app.activeViewer.setActive();
+        }
 
         return check;
     }
