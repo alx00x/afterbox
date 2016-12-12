@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.22
+// Version: 0.23
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.22";
+    prrData.scriptVersion = "0.23";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
@@ -85,6 +85,7 @@
     prrData.activeItemFPS = prrData.activeItem.frameRate;
     prrData.activeItemHeight = prrData.activeItem.height;
     prrData.activeItemWidth = prrData.activeItem.width;
+    prrData.activeItemPixelAspect = prrData.activeItem.pixelAspect;
     prrData.timeSpanStart = prrData.activeItem.displayStartTime * prrData.activeItemFPS;
     prrData.timeSpanDuration = prrData.activeItem.duration;
     prrData.workAreaStart = prrData.activeItem.workAreaStart;
@@ -429,6 +430,10 @@
     function productionRender_main(path) {
         var usePath = path;
 
+        // Add black solid at the end to avoid transparency issues (temporery solution)
+        var bgSolid = prrData.activeItem.layers.addSolid([0, 0, 0], "background", prrData.activeItemWidth, prrData.activeItemHeight, prrData.activeItemPixelAspect, prrData.timeSpanDuration);
+        bgSolid.moveToEnd()
+
         // Add to render queue
         var renderQueueItem = app.project.renderQueue.items.add(prrData.activeItem);
         var renderQueueItemIndex = app.project.renderQueue.numItems;
@@ -562,25 +567,22 @@
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Video\r\n";
-        batContent += "\"%ffmpeg%\" -y -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
-        " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] iOS Video\r\n";
-        batContent += "\"%ffmpeg%\" -y -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
+        batContent += "\"%ffmpeg%\" -y  -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
         addQuotes(fileOutPath + ".mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Lossless Video\r\n";
-        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r "
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r "
         + prrData.frameRate + " -c:v libx264 -preset veryslow -pix_fmt yuv420p -qp 0 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Preview Video\r\n";
-        batContent += "\"%ffmpeg%\" -y -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r "
-        + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -passlogfile log -an -f mp4 NUL && " + "\"%ffmpeg%\" -y -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r "
-        + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" + " -r "
-        + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -passlogfile log -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -passlogfile log -an -f mp4 NUL && " + "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " +
+        addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -passlogfile log -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
 
         batContent += "echo Converting Finished\r\n";
 
@@ -617,6 +619,9 @@
 
         // Remove queue item
         app.project.renderQueue.item(renderQueueItemIndex).remove();
+
+        // Remove background layer
+        bgSolid.remove()
 
         // Close interface
         app.executeCommand(app.findMenuCommandId("Increment and Save"))
