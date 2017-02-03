@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.23
+// Version: 1.1
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -30,6 +30,7 @@
     prrData.scriptVersion = "0.23";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
+    prrData.strErrNotTopComp = {en: "Note: Composition you are rendering is not top composition in hierarchy."};
     prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
     prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop.\rDo you wish to continue?"};
     prrData.strMinAE = {en: "This script requires Adobe After Effects CC2014 or later."};
@@ -393,6 +394,27 @@
         return renderPathOut;
     }
 
+    // Check if active item is top item on hierarchy
+    function checkIfTopComp() {
+        if (app.project.items.length > 0) {
+            for (var i = 1; i <= app.project.items.length; i++) {
+                var currentItem = app.project.items[i];
+                if (currentItem instanceof CompItem) {
+                    if (currentItem.layers.length > 0) {
+                        for (var i = 1; i <= currentItem.layers.length; i++) {
+                            if (currentItem.layers[i].source instanceof CompItem) {
+                                if (currentItem.layers[i].source.id == prrData.activeItem.id) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     // Get files recursivly
     function getFilesRecursively(dir, type, array) {
         var array = array;
@@ -424,6 +446,96 @@
                 eval(scriptText);
             }
         }
+    }
+
+    // Audio timecode exports
+    // TODO: reimplement as lib
+    function productionRender_exportTimecode(activecomp, filepath) {
+
+        function compare(a, b) {
+            return a[1] - b[1];
+        }
+
+        function compensateTimeRemap(comp, index, value) {
+            var framerate = comp.frameRate;
+            var layer = comp.layer(index);
+            var timeRemapValue = layer.property("ADBE Time Remapping");
+            var currentTime = 0;
+            var oneFrame = 1 / framerate;
+            while (timeRemapValue.valueAtTime(currentTime, false) < value) {
+                currentTime = currentTime + oneFrame;
+            }
+            return currentTime;
+        }
+
+        var audioLayersDataDirty = [];
+        function getAudioTimeRecursively(timeRemap, parentComp, childIndex, childComp, timeOffset, timeStretch) {
+            var offsetFloat = parseFloat(timeOffset);
+            var currentLayer;
+            for (var i = 1; i <= childComp.layers.length; i++) {
+                currentLayer = childComp.layers[i];
+                if (!(currentLayer.source instanceof CompItem) && (currentLayer.source instanceof FootageItem) && (currentLayer instanceof AVLayer) && (currentLayer.source.hasAudio == true) && (currentLayer.audioEnabled == true) && (currentLayer.source.hasVideo == false)) {
+                    var sourceName = currentLayer.source.name;
+                    var layerStartTime = parseFloat(currentLayer.inPoint);
+                    var layerEndTime = parseFloat(currentLayer.outPoint);
+                    if (timeRemap == true) {
+                        var startTime = compensateTimeRemap(parentComp, childIndex, parseFloat(currentLayer.inPoint)) * timeStretch + offsetFloat;
+                        var endTime = compensateTimeRemap(parentComp, childIndex, parseFloat(currentLayer.outPoint)) * timeStretch + offsetFloat;
+                    } else {
+                        var startTime = layerStartTime * timeStretch + offsetFloat;
+                        var endTime = layerEndTime * timeStretch + offsetFloat;
+                    }
+                    audioLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
+                } else if ((currentLayer.source instanceof CompItem) && (currentLayer.audioEnabled == true)) {
+                    var timeRemapCheck = false;
+                    var getParentComp = childComp;
+                    var getChildIndex = currentLayer.index;
+                    var stretch = (currentLayer.stretch / 100) * timeStretch;
+                    var offset;
+                    if (currentLayer.timeRemapEnabled == true) {
+                        timeRemapCheck = true;
+                        offset = timeOffset;
+                    } else {
+                        offset = currentLayer.startTime + timeOffset;
+                    }
+                    getAudioTimeRecursively(timeRemapCheck, getParentComp, getChildIndex, currentLayer.source, offset, stretch);
+                }
+            }
+        }
+
+        //get audio layers information
+        getAudioTimeRecursively(false, activecomp, 0, activecomp, 0, 1);
+
+        var layersDataDirty = audioLayersDataDirty;
+        var layersDataUnique = [];
+        for (var i = 0; i < layersDataDirty.length; i++) {
+            var flag = true;
+            for (var j = 0; j < layersDataUnique.length; j++) {
+                if (layersDataUnique[j][0] == layersDataDirty[i][0]) {
+                    flag = false;
+                }
+            }
+            if (flag == true) {
+                layersDataUnique.push(layersDataDirty[i]);
+            }
+        }
+        var audioLayersData = layersDataUnique.sort(compare);
+
+        // export data to file
+        var audioTimecode_text = new File(filepath);
+
+        audioTimecode_text.open("w");
+        if (audioLayersData !== "") {
+            for (var i = 0; i < audioLayersData.length; i++) {
+                audioTimecode_text.writeln("Filename: " + audioLayersData[i][0]);
+                audioTimecode_text.writeln("Timecode: " + audioLayersData[i][1] + " --> " + audioLayersData[i][2] + "\n");
+            }
+            audioTimecode_text.writeln("----------------------------------------" + "\n");
+        } else {
+            audioTimecode_text.writeln("Note: Could not find any active audio." + "\n");
+            audioTimecode_text.writeln("----------------------------------------" + "\n");
+        }
+        audioTimecode_text.close();
     }
 
     // Main
@@ -533,6 +645,10 @@
 
         // Save the project
         app.project.save();
+
+        // Export audio timecode data
+        var timecodeFilePath = renderFolder.fsName + "\\" + prrData.activeItemName + ".txt";
+        productionRender_exportTimecode(prrData.activeItem, timecodeFilePath);
 
         // Get frame path and ogv output path
         var sequenceFramePath = sequenceFolder.fsName + "\\" + prrData.activeItemName + "_%%05d.png";
@@ -729,6 +845,9 @@
         var prrPal = productionRender_buildUI(thisObj);
         if (prrPal !== null) {
             if (prrPal instanceof Window) {
+                if (checkIfTopComp() == false) {
+                    alert(productionRender_localize(prrData.strErrNotTopComp));
+                }
                 // Show the palette
                 prrPal.center();
                 prrPal.show();
