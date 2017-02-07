@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 1.1
+// Version: 1.2
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.23";
+    prrData.scriptVersion = "1.2";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strErrNotTopComp = {en: "Note: Composition you are rendering is not top composition in hierarchy."};
@@ -401,9 +401,9 @@
                 var currentItem = app.project.items[i];
                 if (currentItem instanceof CompItem) {
                     if (currentItem.layers.length > 0) {
-                        for (var i = 1; i <= currentItem.layers.length; i++) {
-                            if (currentItem.layers[i].source instanceof CompItem) {
-                                if (currentItem.layers[i].source.id == prrData.activeItem.id) {
+                        for (var j = 1; j <= currentItem.layers.length; j++) {
+                            if (currentItem.layers[j].source instanceof CompItem) {
+                                if (currentItem.layers[j].source.id == prrData.activeItem.id) {
                                     return false;
                                 }
                             }
@@ -525,7 +525,7 @@
         var audioTimecode_text = new File(filepath);
 
         audioTimecode_text.open("w");
-        if (audioLayersData !== "") {
+        if (audioLayersData.length != 0) {
             for (var i = 0; i < audioLayersData.length; i++) {
                 audioTimecode_text.writeln("Filename: " + audioLayersData[i][0]);
                 audioTimecode_text.writeln("Timecode: " + audioLayersData[i][1] + " --> " + audioLayersData[i][2] + "\n");
