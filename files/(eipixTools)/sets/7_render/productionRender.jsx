@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 1.2
+// Version: 1.3
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,47 +27,47 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "1.2";
+    prrData.scriptVersion = "1.3";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
-    prrData.strErrNotTopComp = {en: "Note: Composition you are rendering is not top composition in hierarchy."};
-    prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
-    prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop.\rDo you wish to continue?"};
-    prrData.strMinAE = {en: "This script requires Adobe After Effects CC2014 or later."};
-    prrData.strActiveCompErr = {en: "Please select a composition."};
-    prrData.strModulesErr = {en: "Export modules not found. Do you wish to install them?"};
-    prrData.strFFmppegErr = {en: "FFmpeg not found. Install new version of eipixTools."};
+    prrData.strErrNotTopComp = { en: "Note: Composition you are rendering is not top composition in hierarchy." };
+    prrData.strStandardStructureErr = { en: "Note: Project file is not located in standard structure path." };
+    prrData.strPathErr = { en: "Specified path could not be found. Reverting to: ~/Desktop.\rDo you wish to continue?" };
+    prrData.strMinAE = { en: "This script requires Adobe After Effects CC2014 or later." };
+    prrData.strActiveCompErr = { en: "Please select a composition." };
+    prrData.strModulesErr = { en: "Export modules not found. Do you wish to install them?" };
+    prrData.strFFmppegErr = { en: "FFmpeg not found. Install new version of eipixTools." };
 
-    prrData.strSaveActionMsg = {en: "Project needs to be saved now. Are you ready to render?"};
-    prrData.strInstructions = {en: "Rendering with the following settings:"};
-    prrData.strQuestion = {en: "Do you wish to proceed?"};
-    prrData.strExecute = {en: "Yes"};
-    prrData.strCancel = {en: "No"};
+    prrData.strSaveActionMsg = { en: "Project needs to be saved now. Are you ready to render?" };
+    prrData.strInstructions = { en: "Rendering with the following settings:" };
+    prrData.strQuestion = { en: "Do you wish to proceed?" };
+    prrData.strExecute = { en: "Yes" };
+    prrData.strCancel = { en: "No" };
 
-    prrData.strOptions = {en: "Options"};
-    prrData.strVideo = {en: "Video"};
-    prrData.strAudio = {en: "Audio"};
+    prrData.strOptions = { en: "Options" };
+    prrData.strVideo = { en: "Video" };
+    prrData.strAudio = { en: "Audio" };
 
-    prrData.strOutputPath = {en: "Output Path"};
-    prrData.strRenderSettings = {en: "Render Settings"};
-    prrData.strOutputModule = {en: "Output Module"};
-    prrData.strTimeSpan = {en: "Time Span"};
+    prrData.strOutputPath = { en: "Output Path" };
+    prrData.strRenderSettings = { en: "Render Settings" };
+    prrData.strOutputModule = { en: "Output Module" };
+    prrData.strTimeSpan = { en: "Time Span" };
 
-    prrData.strOMVHelpTip = {en: "This option is not settable."};
-    prrData.strOMAHelpTip = {en: "This option is not settable."};
+    prrData.strOMVHelpTip = { en: "This option is not settable." };
+    prrData.strOMAHelpTip = { en: "This option is not settable." };
 
-    prrData.strContinueOnMissing = {en: "Continue on missing footage"};
-    prrData.strDeleteSequence = {en: "Delete png sequence when finished"};
-    prrData.strOpenInExplorer = {en: "Open in explorer when finished"};
-    prrData.strReuse = {en: "GUI rendering (non-background)"};
-    prrData.strMultiprocessing = {en: "Enable multiprocessing"};
+    prrData.strContinueOnMissing = { en: "Continue on missing footage" };
+    prrData.strDeleteSequence = { en: "Delete png sequence when finished" };
+    prrData.strOpenInExplorer = { en: "Open in explorer when finished" };
+    prrData.strReuse = { en: "GUI rendering (non-background)" };
+    prrData.strMultiprocessing = { en: "Enable multiprocessing" };
 
-    prrData.strBrowse = {en: "Browse"};
-    prrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
+    prrData.strBrowse = { en: "Browse" };
+    prrData.strTimeOpts = { en: ["Length of Comp", "Work Area Only"] };
 
-    prrData.strHelp = {en: "?"};
-    prrData.strHelpTitle = {en: "Help"};
-    prrData.strHelpText = {en: "Starts background render and exports composition to png sequence and wav audio file, than converts using ffmpeg to production needed file formats."};
+    prrData.strHelp = { en: "?" };
+    prrData.strHelpTitle = { en: "Help" };
+    prrData.strHelpText = { en: "Starts background render and exports composition to png sequence and wav audio file, than converts using ffmpeg to production needed file formats." };
 
     // Define active item
     prrData.activeItem = app.project.activeItem;
@@ -129,7 +129,7 @@
 
     // Prototype startsWith
     if (typeof String.prototype.startsWith != 'function') {
-        String.prototype.startsWith = function(str) {
+        String.prototype.startsWith = function (str) {
             return this.slice(0, str.length) == str;
         };
     }
@@ -141,7 +141,7 @@
 
     // Prototipe indexOf
     if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function(searchElement, fromIndex) {
+        Array.prototype.indexOf = function (searchElement, fromIndex) {
             var k;
             if (this == null) {
                 throw new TypeError('"this" is null or not defined');
@@ -173,19 +173,19 @@
 
     // Prototipe includs a string inside another string
     if (!String.prototype.includes) {
-        String.prototype.includes = function() {
+        String.prototype.includes = function () {
             return String.prototype.indexOf.apply(this, arguments) !== -1;
         };
     }
 
     // Is in array
     function isInArray(value, array) {
-      return array.indexOf(value) > -1;
+        return array.indexOf(value) > -1;
     }
 
     // Build UI
     function productionRender_buildUI(thisObj) {
-        var pal = new Window("dialog", prrData.scriptName, undefined, {resizeable:false});
+        var pal = new Window("dialog", prrData.scriptName, undefined, { resizeable: false });
         if (pal !== null) {
             var head =
                 "group { \
@@ -285,11 +285,11 @@
             pal.layout.layout(true);
             pal.grp.minimumSize = pal.grp.size;
             pal.layout.resize();
-            pal.onResizing = pal.onResize = function() {
+            pal.onResizing = pal.onResize = function () {
                 this.layout.resize();
             }
 
-            pal.hdr.header.help.onClick = function() {
+            pal.hdr.header.help.onClick = function () {
                 alert(prrData.scriptTitle + "\n" + productionRender_localize(prrData.strHelpText), productionRender_localize(prrData.strHelpTitle));
             }
 
@@ -328,7 +328,7 @@
             pal.grp.audio.oma.list.selection = prrData.omTemplates.indexOf("WAV");
             pal.grp.audio.oma.enabled = false;
 
-            pal.grp.outputPath.main.btn.onClick = function() {
+            pal.grp.outputPath.main.btn.onClick = function () {
                 productionRender_doBrowse();
             }
 
@@ -355,26 +355,26 @@
 
     // Add quotes
     function addQuotes(string) {
-        return "\""+ string + "\"";
+        return "\"" + string + "\"";
     }
 
     // Leading zeros padding
     function pad(num, size) {
         var s = "000000000" + num;
-        return s.substr(s.length-size);
+        return s.substr(s.length - size);
     }
 
     // Try int pars or return defaultValue
     function TryParseInt(str, defaultValue) {
-         var retValue = defaultValue;
-         if(str !== null) {
-             if(str.length > 0) {
-                 if (!isNaN(str)) {
-                     retValue = parseInt(str, 10);
-                 }
-             }
-         }
-         return retValue;
+        var retValue = defaultValue;
+        if (str !== null) {
+            if (str.length > 0) {
+                if (!isNaN(str)) {
+                    retValue = parseInt(str, 10);
+                }
+            }
+        }
+        return retValue;
     }
 
     // Check if project is in standard structure
@@ -387,7 +387,7 @@
             if (renderPath.exists == true) {
                 renderPathOut = renderPath.fsName;
             }
-        } else{
+        } else {
             alert(productionRender_localize(prrData.strStandardStructureErr));
             renderPathOut = prrData.projectRoot
         }
@@ -422,7 +422,7 @@
         var files = folder.getFiles();
         for (var i = 0; i < files.length; i++) {
             if (files[i] instanceof Folder) {
-                 getFilesRecursively(files[i], type, array);
+                getFilesRecursively(files[i], type, array);
             } else if ((files[i] instanceof File) && (files[i].toString().slice(-3) == type)) {
                 array.push(files[i]);
             }
@@ -441,7 +441,7 @@
                 var scriptText = "";
                 currentScript.open("r");
                 while (!currentScript.eof)
-                scriptText += currentScript.readln() + "\r\n";
+                    scriptText += currentScript.readln() + "\r\n";
                 currentScript.close();
                 eval(scriptText);
             }
@@ -558,7 +558,7 @@
         var itemHeight;
         var itemWidth;
         var itemResolution = renderQueueItem.getSetting("Resolution");
-        var itemResolutionP = itemResolution.substring(1, itemResolution.length-1);
+        var itemResolutionP = itemResolution.substring(1, itemResolution.length - 1);
         var itemResolutionJSON = JSON.parse(itemResolutionP);
 
         if (itemResolutionJSON["x"] == 0) {
@@ -600,16 +600,16 @@
         var renderFrames = endFrame - startFrame;
 
         var mpString = "";
-        if (prrPal.grp.opts.mp.box.value  == true) {
+        if (prrPal.grp.opts.mp.box.value == true) {
             mpString = " -mp";
         }
 
         var contOnMissingString = "";
-        if (prrPal.grp.opts.cont.box.value  == true) {
+        if (prrPal.grp.opts.cont.box.value == true) {
             contOnMissingString = " -continueOnMissingFootage";
         }
         var reuseInstance = "";
-        if (prrPal.grp.opts.reuse.box.value  == true) {
+        if (prrPal.grp.opts.reuse.box.value == true) {
             reuseInstance = " -reuse";
         }
 
@@ -640,8 +640,8 @@
         sequenceFolder.create();
 
         // Output
-        renderQueueItem.outputModules[1].file = new File(renderFolder.fsName + "\\" + prrData.activeItemName + "\\" + prrData.activeItemName + "_[#####]");
-        renderQueueItem.outputModules[2].file = new File(renderFolder.fsName + "\\" + prrData.activeItemName);
+        renderQueueItem.outputModules[1].file = new File(sequenceFolder.fsName + "\\" + prrData.activeItemName + "_[#####]");
+        renderQueueItem.outputModules[2].file = new File(renderFolder.fsName + "\\" + prrData.activeItemName + "");
 
         // Save the project
         app.project.save();
@@ -663,16 +663,19 @@
         var batContent = "@echo off\r\n";
         batContent += "title Please Wait\r\n";
         batContent += "echo Please Wait\r\n";
-        batContent += "cd " + addQuotes(renderFolder.fsName) + "\r\n";
+        batContent += "set RENDER_PATH=" + addQuotes(renderFolder.fsName) + "\r\n";
+        batContent += "cd %RENDER_PATH%\r\n";
         batContent += "set ffmpeg=" + prrData.ffmpegPath.fsName + "\r\n";
 
         //batContent += "if exist NUL (del NUL)\r\n";
         batContent += "if exist ffmpeg2pass-0.log (del ffmpeg2pass-0.log)\r\n";
         batContent += "if exist ffmpeg2pass-0.log.mbtree (del ffmpeg2pass-0.log.mbtree)\r\n";
+        batContent += "if exist log-0.log (del log-0.log)\r\n";
+        batContent += "if exist log-0.log.mbtree (del log-0.log.mbtree)\r\n";
 
         batContent += "title Rendering: " + renderFrames + " frames\r\n";
         batContent += "start \"\" /b " + "/low" + " /wait " +
-        addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + contOnMissingString + reuseInstance + "\r\n";
+            addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + contOnMissingString + reuseInstance + "\r\n";
         batContent += "echo Rendering Finished\r\n";
 
         batContent += "title Converting, Please Wait\r\n";
@@ -688,27 +691,31 @@
         batContent += "echo.\r\n";
         batContent += "echo [Converting] iOS Video\r\n";
         batContent += "\"%ffmpeg%\" -y  -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
-        addQuotes(fileOutPath + ".mp4") + "\r\n";
+            addQuotes(fileOutPath + ".mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Lossless Video\r\n";
         batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r "
-        + prrData.frameRate + " -c:v libx264 -preset veryslow -pix_fmt yuv420p -qp 0 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
+            + prrData.frameRate + " -c:v libx264 -preset veryslow -pix_fmt yuv420p -qp 0 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Preview Video\r\n";
         batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -passlogfile log -an -f mp4 NUL && " + "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " +
-        addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -passlogfile log -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
+            addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -passlogfile log -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
 
         batContent += "echo Converting Finished\r\n";
 
-        batContent += "del ffmpeg2pass-0.log\r\n";
-        batContent += "del ffmpeg2pass-0.log.mbtree\r\n";
-        if (prrPal.grp.opts.del.box.value  == true) {
+        batContent += "cd %RENDER_PATH%\r\n";
+        batContent += "if exist ffmpeg2pass-0.log (del ffmpeg2pass-0.log)\r\n";
+        batContent += "if exist ffmpeg2pass-0.log.mbtree (del ffmpeg2pass-0.log.mbtree)\r\n";
+        batContent += "if exist log-0.log (del log-0.log)\r\n";
+        batContent += "if exist log-0.log.mbtree (del log-0.log.mbtree)\r\n";
+
+        if (prrPal.grp.opts.del.box.value == true) {
             batContent += "rmdir /s /q " + addQuotes(sequenceFolder.fsName) + "\r\n";
         }
         batContent += "echo Cleanup Finished\r\n";
-        if (prrPal.grp.opts.open.box.value  == true) {
+        if (prrPal.grp.opts.open.box.value == true) {
             batContent += "%SystemRoot%\\explorer.exe " + addQuotes(renderFolder.fsName) + "\r\n";
         }
         batContent += "title Finished\r\n";
