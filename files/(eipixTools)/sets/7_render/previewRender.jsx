@@ -1,7 +1,7 @@
 // previewRender.jsx
 //
 // Name: previewRender
-// Version: 1.5
+// Version: 1.6
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -22,7 +22,7 @@
 
     pvrData.scriptNameShort = "PVR";
     pvrData.scriptName = "Preview Render";
-    pvrData.scriptVersion = "1.5";
+    pvrData.scriptVersion = "1.6";
     pvrData.scriptTitle = pvrData.scriptName + " v" + pvrData.scriptVersion;
 
     pvrData.strRenderSettings = {en: "Render Settings"};
@@ -75,7 +75,6 @@
 
     // Images
     pvrData.imgFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(eipixTools)/sets/images");
-    pvrData.headerImage = new File(pvrData.imgFolder.fsName + "/previewRender_header.png");
 
     // Localize
     function previewRender_localize(strVar) {
@@ -106,10 +105,6 @@
             var res =
                 "group { \
                     orientation:'column', alignment:['fill','fill'], \
-                    sepr: Group { \
-                        orientation:'row', alignment:['fill','top'], \
-                        rule: Panel { height: 2, alignment:['fill','center'] }, \
-                    }, \
                     inst: Group { \
                         alignment:['fill','top'], \
                         stt: StaticText { text:'" + previewRender_localize(pvrData.strInstructions) + "', alignment:['left','fill'], preferredSize:[-1,20] }, \
@@ -141,6 +136,11 @@
                             alignment:['fill','top'], \
                             sst1: StaticText { text:'Motion Blur:', preferredSize:[120,20] }, \
                             sst2: StaticText { text:'Off for Checked Layers', preferredSize:[-1,20] }, \
+                        }, \
+                        rfrm: Group { \
+                            alignment:['fill','top'], \
+                            sst1: StaticText { text:'Repeat Each:', preferredSize:[120,20] }, \
+                            sst2: StaticText { text:'2 frames', preferredSize:[-1,20] }, \
                         }, \
                         time: Group { \
                             alignment:['fill','top'], \
@@ -178,7 +178,6 @@
                 }, \
             }";
             pal.head = pal.add(head);
-            pal.img = pal.add("image", undefined, pvrData.headerImage);
             pal.grp = pal.add(res);
 
             pal.layout.layout(true);
@@ -263,7 +262,7 @@
         var batContent = "@echo off\r\n";
         batContent += "title Please Wait\r\n"
         batContent += "start \"\" /b " + "/low" + " /wait "
-        batContent += addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(pvrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -mp\r\n";
+        batContent += addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(pvrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON -i 2\r\n";
         batContent += "title Rendering Finished\r\n"
         batContent += "pause";
 

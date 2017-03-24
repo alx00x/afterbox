@@ -1,7 +1,7 @@
 ﻿// importOutputSettings.jsx
 //
 // Name: importOutputSettings
-// Version: 1.3
+// Version: 1.5
 // Author: Simon Bjork, bjork.simon@gmail.com
 // Edited by: Aleksandar Kocic
 //
@@ -48,6 +48,7 @@
             for (var i = 1; i <= myRQ.numItems; i++) {
                 var outputName = app.project.item(i).name.substr(3);
                 outputNameArray.push(outputName);
+
                 var templateExists = false;
                 for (var j = 0; j <= templateArray.length; j++) {
                     if (templateArray[j] == outputName) {
@@ -56,6 +57,7 @@
                         break;
                     }
                 }
+
                 if (templateExists == false) {
                     myRQ.item(i).outputModules[1].saveAsTemplate(outputName);
                 }

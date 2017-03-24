@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 0.16
+// Version: 1.4
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -25,50 +25,57 @@
     // Define main variables
     var prrData = new Object();
 
-    prrData.scriptNameShort = "PPR";
+    prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "0.16";
+    prrData.scriptVersion = "1.4";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
-    prrData.strStandardStructureErr = {en: "Note: Project file is not located in standard structure path."};
-    prrData.strPathErr = {en: "Specified path could not be found. Reverting to: ~/Desktop.\rDo you wish to continue?"};
-    prrData.strMinAE = {en: "This script requires Adobe After Effects CC2014 or later."};
-    prrData.strActiveCompErr = {en: "Please select a composition."};
-    prrData.strModulesErr = {en: "Export modules not found. Do you wish to install them?"};
-    prrData.strFFmppegErr = {en: "FFmpeg not found. Install new version of eipixTools."};
+    prrData.strErrNotTopComp = { en: "Note: Composition you are rendering is not top composition in hierarchy." };
+    prrData.strStandardStructureErr = { en: "Note: Project file is not located in standard structure path." };
+    prrData.strPathErr = { en: "Specified path could not be found. Reverting to: ~/Desktop.\rDo you wish to continue?" };
+    prrData.strMinAE = { en: "This script requires Adobe After Effects CC2014 or later." };
+    prrData.strActiveCompErr = { en: "Please select a composition." };
+    prrData.strModulesErr = { en: "Export modules not found. Do you wish to install them?" };
+    prrData.strFFmppegErr = { en: "FFmpeg not found. Install new version of eipixTools." };
 
-    prrData.strSaveActionMsg = {en: "Project needs to be saved now. Are you ready to render?"};
-    prrData.strInstructions = {en: "Rendering with the following settings:"};
-    prrData.strQuestion = {en: "Do you wish to proceed?"};
-    prrData.strExecute = {en: "Yes"};
-    prrData.strCancel = {en: "No"};
+    prrData.strSaveActionMsg = { en: "Project needs to be saved now. Are you ready to render?" };
+    prrData.strInstructions = { en: "Rendering with the following settings:" };
+    prrData.strQuestion = { en: "Do you wish to proceed?" };
+    prrData.strExecute = { en: "Yes" };
+    prrData.strCancel = { en: "No" };
 
-    prrData.strOptions = {en: "Options"};
-    prrData.strVideo = {en: "Video"};
-    prrData.strAudio = {en: "Audio"};
+    prrData.strOptions = { en: "Options" };
+    prrData.strVideo = { en: "Video" };
+    prrData.strAudio = { en: "Audio" };
 
-    prrData.strOutputPath = {en: "Output Path"};
-    prrData.strRenderSettings = {en: "Render Settings"};
-    prrData.strOutputModule = {en: "Output Module"};
-    prrData.strTimeSpan = {en: "Time Span"};
+    prrData.strOutputPath = { en: "Output Path" };
+    prrData.strRenderSettings = { en: "Render Settings" };
+    prrData.strOutputModule = { en: "Output Module" };
+    prrData.strTimeSpan = { en: "Time Span" };
 
-    prrData.strOMVHelpTip = {en: "This option is not settable."};
-    prrData.strOMAHelpTip = {en: "This option is not settable."};
+    prrData.strOMVHelpTip = { en: "This option is not settable." };
+    prrData.strOMAHelpTip = { en: "This option is not settable." };
 
-    prrData.strMultiprocessing = {en: "Enable multiprocessing"};
-    prrData.strContinueOnMissing = {en: "Continue on missing footage"};
-    prrData.strDeleteSequence = {en: "Delete png sequence when finished"};
-    prrData.strOpenInExplorer = {en: "Open in explorer when finished"};
+    prrData.strContinueOnMissing = { en: "Continue on missing footage" };
+    prrData.strDeleteSequence = { en: "Delete png sequence when finished" };
+    prrData.strOpenInExplorer = { en: "Open in explorer when finished" };
+    prrData.strReuse = { en: "GUI rendering (non-background)" };
+    prrData.strMultiprocessing = { en: "Enable multiprocessing" };
 
-    prrData.strBrowse = {en: "Browse"};
-    prrData.strTimeOpts = {en: ["Length of Comp", "Work Area Only"]};
+    prrData.strBrowse = { en: "Browse" };
+    prrData.strTimeOpts = { en: ["Length of Comp", "Work Area Only"] };
 
-    prrData.strHelp = {en: "?"};
-    prrData.strHelpTitle = {en: "Help"};
-    prrData.strHelpText = {en: "Starts background render and exports composition to png sequence and wav audio file, than converts using ffmpeg to production needed file formats."};
+    prrData.strHelp = { en: "?" };
+    prrData.strHelpTitle = { en: "Help" };
+    prrData.strHelpText = { en: "Starts background render and exports composition to png sequence and wav audio file, than converts using ffmpeg to production needed file formats." };
+
+    // Define active item
+    prrData.activeItem = app.project.activeItem;
+
+    // Set start frame to 0 for render composition
+    prrData.activeItem.displayStartTime = 0;
 
     // Define project variables
-    prrData.activeItem = app.project.activeItem;
     prrData.activeItemName = app.project.activeItem.name;
     prrData.activeItemRes = prrData.activeItem.width + " x " + prrData.activeItem.height;
     prrData.projectName = app.project.file.name;
@@ -79,6 +86,7 @@
     prrData.activeItemFPS = prrData.activeItem.frameRate;
     prrData.activeItemHeight = prrData.activeItem.height;
     prrData.activeItemWidth = prrData.activeItem.width;
+    prrData.activeItemPixelAspect = prrData.activeItem.pixelAspect;
     prrData.timeSpanStart = prrData.activeItem.displayStartTime * prrData.activeItemFPS;
     prrData.timeSpanDuration = prrData.activeItem.duration;
     prrData.workAreaStart = prrData.activeItem.workAreaStart;
@@ -121,7 +129,7 @@
 
     // Prototype startsWith
     if (typeof String.prototype.startsWith != 'function') {
-        String.prototype.startsWith = function(str) {
+        String.prototype.startsWith = function (str) {
             return this.slice(0, str.length) == str;
         };
     }
@@ -133,7 +141,7 @@
 
     // Prototipe indexOf
     if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function(searchElement, fromIndex) {
+        Array.prototype.indexOf = function (searchElement, fromIndex) {
             var k;
             if (this == null) {
                 throw new TypeError('"this" is null or not defined');
@@ -165,19 +173,19 @@
 
     // Prototipe includs a string inside another string
     if (!String.prototype.includes) {
-        String.prototype.includes = function() {
+        String.prototype.includes = function () {
             return String.prototype.indexOf.apply(this, arguments) !== -1;
         };
     }
 
     // Is in array
     function isInArray(value, array) {
-      return array.indexOf(value) > -1;
+        return array.indexOf(value) > -1;
     }
 
     // Build UI
     function productionRender_buildUI(thisObj) {
-        var pal = new Window("dialog", prrData.scriptName, undefined, {resizeable:false});
+        var pal = new Window("dialog", prrData.scriptName, undefined, { resizeable: false });
         if (pal !== null) {
             var head =
                 "group { \
@@ -210,10 +218,6 @@
                             text: StaticText { text:'" + productionRender_localize(prrData.strTimeSpan) + ":', preferredSize:[120,20] }, \
                             list: DropDownList { alignment:['fill','center'], preferredSize:[120,20] }, \
                         }, \
-                        mp: Group { \
-                            alignment:['fill','top'], \
-                            box: Checkbox { text:'  " + productionRender_localize(prrData.strMultiprocessing) + "', alignment:['fill','top'] }, \
-                        }, \
                         cont: Group { \
                             alignment:['fill','top'], \
                             box: Checkbox { text:'  " + productionRender_localize(prrData.strContinueOnMissing) + "', alignment:['fill','top'] }, \
@@ -225,6 +229,14 @@
                         open: Group { \
                             alignment:['fill','top'], \
                             box: Checkbox { text:'  " + productionRender_localize(prrData.strOpenInExplorer) + "', alignment:['fill','top'] }, \
+                        }, \
+                        reuse: Group { \
+                            alignment:['fill','top'], \
+                            box: Checkbox { text:'  " + productionRender_localize(prrData.strReuse) + "', alignment:['fill','top'] }, \
+                        }, \
+                        mp: Group { \
+                            alignment:['fill','top'], \
+                            box: Checkbox { text:'  " + productionRender_localize(prrData.strMultiprocessing) + "', alignment:['fill','top'] }, \
                         }, \
                     }, \
                     video: Panel { \
@@ -273,18 +285,20 @@
             pal.layout.layout(true);
             pal.grp.minimumSize = pal.grp.size;
             pal.layout.resize();
-            pal.onResizing = pal.onResize = function() {
+            pal.onResizing = pal.onResize = function () {
                 this.layout.resize();
             }
 
-            pal.hdr.header.help.onClick = function() {
+            pal.hdr.header.help.onClick = function () {
                 alert(prrData.scriptTitle + "\n" + productionRender_localize(prrData.strHelpText), productionRender_localize(prrData.strHelpTitle));
             }
 
-            pal.grp.opts.mp.box.value = true;
             pal.grp.opts.cont.box.value = true;
             pal.grp.opts.del.box.value = true;
             pal.grp.opts.open.box.value = true;
+
+            pal.grp.opts.reuse.box.value = false;
+            pal.grp.opts.mp.box.value = false;
 
             var rsItems = prrData.rsTemplates;
             for (var i = 0; i < rsItems.length; i++) {
@@ -314,7 +328,7 @@
             pal.grp.audio.oma.list.selection = prrData.omTemplates.indexOf("WAV");
             pal.grp.audio.oma.enabled = false;
 
-            pal.grp.outputPath.main.btn.onClick = function() {
+            pal.grp.outputPath.main.btn.onClick = function () {
                 productionRender_doBrowse();
             }
 
@@ -341,26 +355,26 @@
 
     // Add quotes
     function addQuotes(string) {
-        return "\""+ string + "\"";
+        return "\"" + string + "\"";
     }
 
     // Leading zeros padding
     function pad(num, size) {
         var s = "000000000" + num;
-        return s.substr(s.length-size);
+        return s.substr(s.length - size);
     }
 
     // Try int pars or return defaultValue
     function TryParseInt(str, defaultValue) {
-         var retValue = defaultValue;
-         if(str !== null) {
-             if(str.length > 0) {
-                 if (!isNaN(str)) {
-                     retValue = parseInt(str, 10);
-                 }
-             }
-         }
-         return retValue;
+        var retValue = defaultValue;
+        if (str !== null) {
+            if (str.length > 0) {
+                if (!isNaN(str)) {
+                    retValue = parseInt(str, 10);
+                }
+            }
+        }
+        return retValue;
     }
 
     // Check if project is in standard structure
@@ -373,11 +387,32 @@
             if (renderPath.exists == true) {
                 renderPathOut = renderPath.fsName;
             }
-        } else{
+        } else {
             alert(productionRender_localize(prrData.strStandardStructureErr));
             renderPathOut = prrData.projectRoot
         }
         return renderPathOut;
+    }
+
+    // Check if active item is top item on hierarchy
+    function checkIfTopComp() {
+        if (app.project.items.length > 0) {
+            for (var i = 1; i <= app.project.items.length; i++) {
+                var currentItem = app.project.items[i];
+                if (currentItem instanceof CompItem) {
+                    if (currentItem.layers.length > 0) {
+                        for (var j = 1; j <= currentItem.layers.length; j++) {
+                            if (currentItem.layers[j].source instanceof CompItem) {
+                                if (currentItem.layers[j].source.id == prrData.activeItem.id) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     // Get files recursivly
@@ -387,7 +422,7 @@
         var files = folder.getFiles();
         for (var i = 0; i < files.length; i++) {
             if (files[i] instanceof Folder) {
-                 getFilesRecursively(files[i], type, array);
+                getFilesRecursively(files[i], type, array);
             } else if ((files[i] instanceof File) && (files[i].toString().slice(-3) == type)) {
                 array.push(files[i]);
             }
@@ -406,16 +441,110 @@
                 var scriptText = "";
                 currentScript.open("r");
                 while (!currentScript.eof)
-                scriptText += currentScript.readln() + "\r\n";
+                    scriptText += currentScript.readln() + "\r\n";
                 currentScript.close();
                 eval(scriptText);
             }
         }
     }
 
+    // Audio timecode exports
+    // TODO: reimplement as lib
+    function productionRender_exportTimecode(activecomp, filepath) {
+
+        function compare(a, b) {
+            return a[1] - b[1];
+        }
+
+        function compensateTimeRemap(comp, index, value) {
+            var framerate = comp.frameRate;
+            var layer = comp.layer(index);
+            var timeRemapValue = layer.property("ADBE Time Remapping");
+            var currentTime = 0;
+            var oneFrame = 1 / framerate;
+            while (timeRemapValue.valueAtTime(currentTime, false) < value) {
+                currentTime = currentTime + oneFrame;
+            }
+            return currentTime;
+        }
+
+        var audioLayersDataDirty = [];
+        function getAudioTimeRecursively(timeRemap, parentComp, childIndex, childComp, timeOffset, timeStretch) {
+            var offsetFloat = parseFloat(timeOffset);
+            var currentLayer;
+            for (var i = 1; i <= childComp.layers.length; i++) {
+                currentLayer = childComp.layers[i];
+                if (!(currentLayer.source instanceof CompItem) && (currentLayer.source instanceof FootageItem) && (currentLayer instanceof AVLayer) && (currentLayer.source.hasAudio == true) && (currentLayer.audioEnabled == true) && (currentLayer.source.hasVideo == false)) {
+                    var sourceName = currentLayer.source.name;
+                    var layerStartTime = parseFloat(currentLayer.inPoint);
+                    var layerEndTime = parseFloat(currentLayer.outPoint);
+                    if (timeRemap == true) {
+                        var startTime = compensateTimeRemap(parentComp, childIndex, parseFloat(currentLayer.inPoint)) * timeStretch + offsetFloat;
+                        var endTime = compensateTimeRemap(parentComp, childIndex, parseFloat(currentLayer.outPoint)) * timeStretch + offsetFloat;
+                    } else {
+                        var startTime = layerStartTime * timeStretch + offsetFloat;
+                        var endTime = layerEndTime * timeStretch + offsetFloat;
+                    }
+                    audioLayersDataDirty.push([sourceName, startTime.toFixed(2), endTime.toFixed(2)]);
+                } else if ((currentLayer.source instanceof CompItem) && (currentLayer.audioEnabled == true)) {
+                    var timeRemapCheck = false;
+                    var getParentComp = childComp;
+                    var getChildIndex = currentLayer.index;
+                    var stretch = (currentLayer.stretch / 100) * timeStretch;
+                    var offset;
+                    if (currentLayer.timeRemapEnabled == true) {
+                        timeRemapCheck = true;
+                        offset = timeOffset;
+                    } else {
+                        offset = currentLayer.startTime + timeOffset;
+                    }
+                    getAudioTimeRecursively(timeRemapCheck, getParentComp, getChildIndex, currentLayer.source, offset, stretch);
+                }
+            }
+        }
+
+        //get audio layers information
+        getAudioTimeRecursively(false, activecomp, 0, activecomp, 0, 1);
+
+        var layersDataDirty = audioLayersDataDirty;
+        var layersDataUnique = [];
+        for (var i = 0; i < layersDataDirty.length; i++) {
+            var flag = true;
+            for (var j = 0; j < layersDataUnique.length; j++) {
+                if (layersDataUnique[j][0] == layersDataDirty[i][0]) {
+                    flag = false;
+                }
+            }
+            if (flag == true) {
+                layersDataUnique.push(layersDataDirty[i]);
+            }
+        }
+        var audioLayersData = layersDataUnique.sort(compare);
+
+        // export data to file
+        var audioTimecode_text = new File(filepath);
+
+        audioTimecode_text.open("w");
+        if (audioLayersData.length != 0) {
+            for (var i = 0; i < audioLayersData.length; i++) {
+                audioTimecode_text.writeln("Filename: " + audioLayersData[i][0]);
+                audioTimecode_text.writeln("Timecode: " + audioLayersData[i][1] + " --> " + audioLayersData[i][2] + "\n");
+            }
+            audioTimecode_text.writeln("----------------------------------------" + "\n");
+        } else {
+            audioTimecode_text.writeln("Note: Could not find any active audio." + "\n");
+            audioTimecode_text.writeln("----------------------------------------" + "\n");
+        }
+        audioTimecode_text.close();
+    }
+
     // Main
     function productionRender_main(path) {
         var usePath = path;
+
+        // Add black solid at the end to avoid transparency issues (temporery solution)
+        var bgSolid = prrData.activeItem.layers.addSolid([0, 0, 0], "background", prrData.activeItemWidth, prrData.activeItemHeight, prrData.activeItemPixelAspect, prrData.timeSpanDuration);
+        bgSolid.moveToEnd()
 
         // Add to render queue
         var renderQueueItem = app.project.renderQueue.items.add(prrData.activeItem);
@@ -429,7 +558,7 @@
         var itemHeight;
         var itemWidth;
         var itemResolution = renderQueueItem.getSetting("Resolution");
-        var itemResolutionP = itemResolution.substring(1, itemResolution.length-1);
+        var itemResolutionP = itemResolution.substring(1, itemResolution.length - 1);
         var itemResolutionJSON = JSON.parse(itemResolutionP);
 
         if (itemResolutionJSON["x"] == 0) {
@@ -471,13 +600,17 @@
         var renderFrames = endFrame - startFrame;
 
         var mpString = "";
-        if (prrPal.grp.opts.mp.box.value  == true) {
+        if (prrPal.grp.opts.mp.box.value == true) {
             mpString = " -mp";
         }
 
         var contOnMissingString = "";
-        if (prrPal.grp.opts.cont.box.value  == true) {
+        if (prrPal.grp.opts.cont.box.value == true) {
             contOnMissingString = " -continueOnMissingFootage";
+        }
+        var reuseInstance = "";
+        if (prrPal.grp.opts.reuse.box.value == true) {
+            reuseInstance = " -reuse";
         }
 
         // Define render folder
@@ -485,12 +618,16 @@
         var folderIncrement = 0;
         for (var i = 0; i < foldersInPath.length; i++) {
             var pi = foldersInPath[i].toString();
-            var fi = pi.substr(pi.length - 3);
-            var fiInt = TryParseInt(fi, null);
-            if (!(fiInt == null) && (fiInt > folderIncrement)) {
-                folderIncrement = fiInt;
+            var piFold = pi.match(/([^\/]*)\/*$/)[1];
+            var ni = piFold.substr(0, prrData.activeItemName.length);
+            var niAfter = piFold.substr(prrData.activeItemName.length, 2);
+            if ((ni == prrData.activeItemName) && (niAfter == "_r")) {
+                var fi = pi.substr(pi.length - 3);
+                var fiInt = TryParseInt(fi, null);
+                if (!(fiInt == null) && (fiInt > folderIncrement)) {
+                    folderIncrement = fiInt;
+                }
             }
-
         }
         var folderIncrementString = pad(folderIncrement + 1, 3);
 
@@ -503,11 +640,18 @@
         sequenceFolder.create();
 
         // Output
-        renderQueueItem.outputModules[1].file = new File(renderFolder.fsName + "\\" + prrData.activeItemName + "\\" + prrData.activeItemName + "_[#####]");
-        renderQueueItem.outputModules[2].file = new File(renderFolder.fsName + "\\" + prrData.activeItemName);
+        var outputSeqPath = sequenceFolder.fsName + "\\" + prrData.activeItemName + "_[#####]";
+        var outputAudioPath = renderFolder.fsName + "\\" + prrData.activeItemName + "";
+
+        renderQueueItem.outputModules[1].file = new File(outputSeqPath);
+        renderQueueItem.outputModules[2].file = new File(outputAudioPath);
 
         // Save the project
         app.project.save();
+
+        // Export audio timecode data
+        var timecodeFilePath = renderFolder.fsName + "\\" + prrData.activeItemName + ".txt";
+        productionRender_exportTimecode(prrData.activeItem, timecodeFilePath);
 
         // Get frame path and ogv output path
         var sequenceFramePath = sequenceFolder.fsName + "\\" + prrData.activeItemName + "_%%05d.png";
@@ -522,55 +666,59 @@
         var batContent = "@echo off\r\n";
         batContent += "title Please Wait\r\n";
         batContent += "echo Please Wait\r\n";
-        batContent += "cd %~dp0\r\n";
+        batContent += "set RENDER_PATH=" + addQuotes(renderFolder.fsName) + "\r\n";
+        batContent += "cd %RENDER_PATH%\r\n";
         batContent += "set ffmpeg=" + prrData.ffmpegPath.fsName + "\r\n";
 
         //batContent += "if exist NUL (del NUL)\r\n";
         batContent += "if exist ffmpeg2pass-0.log (del ffmpeg2pass-0.log)\r\n";
         batContent += "if exist ffmpeg2pass-0.log.mbtree (del ffmpeg2pass-0.log.mbtree)\r\n";
+        batContent += "if exist log-0.log (del log-0.log)\r\n";
+        batContent += "if exist log-0.log.mbtree (del log-0.log.mbtree)\r\n";
 
         batContent += "title Rendering: " + renderFrames + " frames\r\n";
         batContent += "start \"\" /b " + "/low" + " /wait " +
-        addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + contOnMissingString + "\r\n";
+            addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + contOnMissingString + reuseInstance + "\r\n";
         batContent += "echo Rendering Finished\r\n";
 
         batContent += "title Converting, Please Wait\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Audio\r\n";
-        batContent += "\"%ffmpeg%\" -y " + " -i " + addQuotes(fileOutPath + ".wav") + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath + ".ogg") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -i " + addQuotes(fileOutPath + ".wav") + " -vn -c:a libvorbis -q:a 10 " + addQuotes(fileOutPath + ".ogg") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Video\r\n";
-        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" +
-        " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] iOS Video\r\n";
-        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
-        addQuotes(fileOutPath + ".mp4") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y  -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -an " +
+            addQuotes(fileOutPath + ".mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Lossless Video\r\n";
-        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" + " -r "
-        + prrData.frameRate + " -c:v libx264 -preset veryslow -pix_fmt yuv420p -qp 0 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r "
+            + prrData.frameRate + " -c:v libx264 -preset veryslow -pix_fmt yuv420p -qp 0 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Preview Video\r\n";
-        batContent += "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\"" + " -r "
-        + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -an -f mp4 NUL && " + "\"%ffmpeg%\" -y " + " -f lavfi -i color=c=black:s=" + itemWidth + "x" + itemHeight + " -start_number " + startFrame + " -r "
-        + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -filter_complex \"[0:v][1:v]overlay=shortest=1,format=yuv420p[out]\" -map \"[out]\" -map 2:a" + " -r "
-        + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 1 -passlogfile log -an -f mp4 NUL && " + "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " +
+            addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r " + prrData.frameRate + " -c:v libx264 -preset slow -pix_fmt yuv420p -b:v 1200k -minrate 1200k -maxrate 1200k -bufsize 1200k -pass 2 -passlogfile log -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_preview.mp4") + "\r\n";
 
         batContent += "echo Converting Finished\r\n";
 
-        batContent += "del ffmpeg2pass-0.log\r\n";
-        batContent += "del ffmpeg2pass-0.log.mbtree\r\n";
-        if (prrPal.grp.opts.del.box.value  == true) {
+        batContent += "cd %RENDER_PATH%\r\n";
+        batContent += "if exist ffmpeg2pass-0.log (del ffmpeg2pass-0.log)\r\n";
+        batContent += "if exist ffmpeg2pass-0.log.mbtree (del ffmpeg2pass-0.log.mbtree)\r\n";
+        batContent += "if exist log-0.log (del log-0.log)\r\n";
+        batContent += "if exist log-0.log.mbtree (del log-0.log.mbtree)\r\n";
+
+        if (prrPal.grp.opts.del.box.value == true) {
             batContent += "rmdir /s /q " + addQuotes(sequenceFolder.fsName) + "\r\n";
         }
         batContent += "echo Cleanup Finished\r\n";
-        if (prrPal.grp.opts.open.box.value  == true) {
+        if (prrPal.grp.opts.open.box.value == true) {
             batContent += "%SystemRoot%\\explorer.exe " + addQuotes(renderFolder.fsName) + "\r\n";
         }
         batContent += "title Finished\r\n";
@@ -598,6 +746,9 @@
         // Remove queue item
         app.project.renderQueue.item(renderQueueItemIndex).remove();
 
+        // Remove background layer
+        bgSolid.remove()
+
         // Close interface
         app.executeCommand(app.findMenuCommandId("Increment and Save"))
         prrPal.close();
@@ -605,7 +756,6 @@
 
     // Execute
     function productionRender_doExecute() {
-
         // Define usepath
         var usePath;
         var editboxOutputPath = prrPal.grp.outputPath.main.box.text;
@@ -678,7 +828,10 @@
         // Cleanup
         tempCompQueueItem.remove();
         tempComp.remove();
-        app.activeViewer.setActive();
+
+        if (app.activeViewer != null) {
+            app.activeViewer.setActive();
+        }
 
         return check;
     }
@@ -702,6 +855,9 @@
         var prrPal = productionRender_buildUI(thisObj);
         if (prrPal !== null) {
             if (prrPal instanceof Window) {
+                if (checkIfTopComp() == false) {
+                    alert(productionRender_localize(prrData.strErrNotTopComp));
+                }
                 // Show the palette
                 prrPal.center();
                 prrPal.show();
