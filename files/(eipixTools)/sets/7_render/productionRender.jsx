@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 1.4
+// Version: 1.5
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "1.4";
+    prrData.scriptVersion = "1.5";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strErrNotTopComp = { en: "Note: Composition you are rendering is not top composition in hierarchy." };
@@ -677,7 +677,7 @@
         batContent += "if exist log-0.log.mbtree (del log-0.log.mbtree)\r\n";
 
         batContent += "title Rendering: " + renderFrames + " frames\r\n";
-        batContent += "start \"\" /b " + "/low" + " /wait " +
+        batContent += "start \"\" /b " + "/normal" + " /wait " +
             addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + contOnMissingString + reuseInstance + "\r\n";
         batContent += "echo Rendering Finished\r\n";
 
