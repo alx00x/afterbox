@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 1.3
+// Version: 1.4
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "1.3";
+    prrData.scriptVersion = "1.4";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strErrNotTopComp = { en: "Note: Composition you are rendering is not top composition in hierarchy." };
@@ -640,8 +640,11 @@
         sequenceFolder.create();
 
         // Output
-        renderQueueItem.outputModules[1].file = new File(sequenceFolder.fsName + "\\" + prrData.activeItemName + "_[#####]");
-        renderQueueItem.outputModules[2].file = new File(renderFolder.fsName + "\\" + prrData.activeItemName + "");
+        var outputSeqPath = sequenceFolder.fsName + "\\" + prrData.activeItemName + "_[#####]";
+        var outputAudioPath = renderFolder.fsName + "\\" + prrData.activeItemName + "";
+
+        renderQueueItem.outputModules[1].file = new File(outputSeqPath);
+        renderQueueItem.outputModules[2].file = new File(outputAudioPath);
 
         // Save the project
         app.project.save();

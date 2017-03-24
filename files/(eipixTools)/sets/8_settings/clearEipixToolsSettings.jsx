@@ -23,7 +23,7 @@
     if (confirm("This will clear your Eipix Tools settings. Do you wish to continue?")) {
         try {
             clearFunction();
-            alert("Settigns cleared successfully!\r\rYou should restart your Eipix Tools panel now.");
+            alert("Settings cleared successfully!\r\rYou should restart your Eipix Tools panel now.");
         } catch (e) {
             alert(e);
         }
