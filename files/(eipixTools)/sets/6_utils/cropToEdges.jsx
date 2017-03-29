@@ -1,7 +1,7 @@
 ﻿// cropToEdges.jsx
 // 
 // Name: cropToEdges
-// Version: 0.1
+// Version: 0.3
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,29 +24,29 @@
 
     cteData.scriptNameShort = "CTE";
     cteData.scriptName = "Crop To Edges";
-    cteData.scriptVersion = "0.1";
+    cteData.scriptVersion = "0.3";
     cteData.scriptTitle = cteData.scriptName + " v" + cteData.scriptVersion;
 
-    cteData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
-    cteData.strActiveCompErr = {en: "Please select a composition."};
-    cteData.strNoLayersSelectedErr = {en: "Please select at least one layer."};
-    cteData.strSelectedLayersErr = {en: "One or more layers you selected is not a precomposition."};
+    cteData.strMinAE = { en: "This script requires Adobe After Effects CS4 or later." };
+    cteData.strActiveCompErr = { en: "Please select a composition." };
+    cteData.strNoLayersSelectedErr = { en: "Please select at least one layer." };
+    cteData.strSelectedLayersErr = { en: "One or more layers you selected is not a precomposition." };
 
-    cteData.strOptions = {en: "Options"};
-    cteData.strCrop = {en: "Crop to Edges"};
-    cteData.strSamples = {en: "Samples "};
-    cteData.strBorder = {en: "Border"};
+    cteData.strOptions = { en: "Options" };
+    cteData.strCrop = { en: "Crop to Edges" };
+    cteData.strSamples = { en: "Samples " };
+    cteData.strBorder = { en: "Border" };
 
-    cteData.strSamplesHelpTip = {en: "Lower the value, more precise the execution."};
-    cteData.strBorderHelpTip = {en: "Number of pixels to retain on the edges."};
+    cteData.strSamplesHelpTip = { en: "Lower the value, more precise the execution." };
+    cteData.strBorderHelpTip = { en: "Number of pixels to add on the edges." };
 
-    cteData.strExecute = {en: "Execute"};
-    cteData.strCancel = {en: "Cancel"};
+    cteData.strExecute = { en: "Crop" };
+    cteData.strCancel = { en: "Exit" };
 
-    cteData.strHelp = {en: "?"};
-    cteData.strHelpTitle = {en: "Help"};
-    cteData.strErr = {en: "Something went wrong."};
-    cteData.strHelpText = {en: "This script crops selected precomposition layers to non opaque edges."};
+    cteData.strHelp = { en: "?" };
+    cteData.strHelpTitle = { en: "Help" };
+    cteData.strErr = { en: "Something went wrong." };
+    cteData.strHelpText = { en: "This script crops selected precomposition layers to non opaque edges." };
 
     // Localize
     function cropToEdges_localize(strVar) {
@@ -55,7 +55,7 @@
 
     // Build UI
     function cropToEdges_buildUI(thisObj) {
-        var pal = new Window("palette", cteData.scriptName, undefined, {resizeable:true});
+        var pal = new Window("palette", cteData.scriptName, undefined, { resizeable: true });
         if (pal !== null) {
             var res =
                 "group { \
@@ -68,22 +68,22 @@
                     options: Panel { \
                         alignment:['fill','top'], \
                         text: '" + cropToEdges_localize(cteData.strOptions) + "', alignment:['fill','top'], \
-                        progress: Group { \
-                            alignment:['fill','center'], \
-                            bar: Progressbar { text:'Progressbar', minvalue:0, maxvalue:100, alignment:['fill','center'], preferredSize:[300,5]},\
-                        }, \
                         sample: Group { \
                             alignment:['fill','center'], \
                             text: StaticText { text:'" + cropToEdges_localize(cteData.strSamples) + ":', preferredSize:[60,20] }, \
-                            fld: EditText { text:'5', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:5, minvalue:1, maxvalue:10, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            fld: EditText { text:'10', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
+                            sld: Slider { value:10, minvalue:2, maxvalue:20, alignment:['fill','center'], preferredSize:[160,20] }, \
                         }, \
                         border: Group { \
                             alignment:['fill','center'], \
                             text: StaticText { text:'" + cropToEdges_localize(cteData.strBorder) + ":', preferredSize:[60,20] }, \
-                            fld: EditText { text:'10', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
-                            sld: Slider { value:10, minvalue:0, maxvalue:100, alignment:['fill','center'], preferredSize:[200,20] }, \
+                            fld: EditText { text:'0', characters: 3, justify: 'center', alignment:['left','center'], preferredSize:[-1,20] }, \
+                            sld: Slider { value:0, minvalue:0, maxvalue:100, alignment:['fill','center'], preferredSize:[160,20] }, \
                         }, \
+                    }, \
+                    progress: Group { \
+                        alignment:['fill','center'], \
+                        bar: Progressbar { text:'Progressbar', minvalue:0, maxvalue:100, alignment:['fill','center'], preferredSize:[260,5]},\
                     }, \
                     sepr: Group { \
                         orientation:'row', alignment:['fill','top'], \
@@ -101,15 +101,15 @@
             pal.layout.layout(true);
             pal.grp.minimumSize = pal.grp.size;
             pal.layout.resize();
-            pal.onResizing = pal.onResize = function() {
+            pal.onResizing = pal.onResize = function () {
                 this.layout.resize();
             }
 
             pal.grp.options.sample.sld.helpTip = cropToEdges_localize(cteData.strSamplesHelpTip);
-            pal.grp.options.sample.sld.helpTip = cropToEdges_localize(cteData.strBorderHelpTip);
+            pal.grp.options.border.sld.helpTip = cropToEdges_localize(cteData.strBorderHelpTip);
 
             //Samples slider change
-            pal.grp.options.sample.fld.onChange = function() {
+            pal.grp.options.sample.fld.onChange = function () {
                 var value = parseInt(this.text);
                 if (isNaN(value)) {
                     value = this.parent.sld.value;
@@ -121,7 +121,7 @@
                 this.text = value.toString();
                 this.parent.sld.value = value;
             }
-            pal.grp.options.sample.sld.onChange = pal.grp.options.sample.sld.onChanging = function() {
+            pal.grp.options.sample.sld.onChange = pal.grp.options.sample.sld.onChanging = function () {
                 var value = parseInt(this.value);
                 if (isNaN(value)) {
                     value = parseInt(this.parent.fld.text);
@@ -131,7 +131,7 @@
             }
 
             //Border slider change
-            pal.grp.options.border.fld.onChange = function() {
+            pal.grp.options.border.fld.onChange = function () {
                 var value = parseInt(this.text);
                 if (isNaN(value)) {
                     value = this.parent.sld.value;
@@ -143,7 +143,7 @@
                 this.text = value.toString();
                 this.parent.sld.value = value;
             }
-            pal.grp.options.border.sld.onChange = pal.grp.options.border.sld.onChanging = function() {
+            pal.grp.options.border.sld.onChange = pal.grp.options.border.sld.onChanging = function () {
                 var value = parseInt(this.value);
                 if (isNaN(value)) {
                     value = parseInt(this.parent.fld.text);
@@ -152,8 +152,11 @@
                 this.parent.fld.text = value.toString();
             }
 
+            //Progressbar
+            pal.grp.progress.bar.visible = false;
+
             //Header
-            pal.grp.header.help.onClick = function() {
+            pal.grp.header.help.onClick = function () {
                 alert(cteData.scriptTitle + "\n" + cropToEdges_localize(cteData.strHelpText), cropToEdges_localize(cteData.strHelpTitle));
             }
 
@@ -168,9 +171,9 @@
     // Progressbar function:
     //
     function updateProgressbar(pal, minValue, currentValue, maxValue) {
-        pal.grp.options.progress.bar.minvalue = minValue;
-        pal.grp.options.progress.bar.maxvalue = maxValue;
-        pal.grp.options.progress.bar.value = currentValue;
+        pal.grp.progress.bar.minvalue = minValue;
+        pal.grp.progress.bar.maxvalue = maxValue;
+        pal.grp.progress.bar.value = currentValue;
         pal.update();
     }
 
@@ -219,11 +222,13 @@
         //analize for x1, x2, y1 and y2
         var compHeight = analizeComp.height;
         var compWidth = analizeComp.width;
- 
+
         var x1 = compWidth; //left
         var x2 = -1; //right
         var y1 = compHeight; //top
         var y2 = -1; //bottom
+
+        ctePal.grp.progress.bar.visible = true;
 
         for (b = 0; b < compHeight; b += samples) {
             for (a = 0; a < compWidth; a += samples) {
@@ -232,16 +237,18 @@
                 addSlider.property(1).expression = expr;
                 var value = addSlider(1).value;
                 //find left edge
-                if ((value > 0) && (a < x1)) {x1 = a;}
+                if ((value > 0) && (a < x1)) { x1 = a; }
                 //find right edge
-                if ((value > 0) && (x2 < a)) {x2 = a;}
+                if ((value > 0) && (x2 < a)) { x2 = a; }
                 //find top edge
-                if ((value > 0) && (b < y1)) {y1 = b;}
+                if ((value > 0) && (b < y1)) { y1 = b; }
                 //find bottom edge
-                if ((value > 0) && (y2 < b)) {y2 = b;}
+                if ((value > 0) && (y2 < b)) { y2 = b; }
             }
-            updateProgressbar(ctePal, 0, b+1, compHeight);
+            updateProgressbar(ctePal, 0, b + 1, compHeight);
         }
+
+        ctePal.grp.progress.bar.visible = false;
 
         analizeComp.remove();
 
@@ -261,26 +268,48 @@
         //crop precomps
         for (var j = 0; j < selectedLayers.length; j++) {
             var layer = selectedLayers[j];
+            var layerPos = layer.property("Transform").property("Position").value;
+            var layerAnchor = layer.property("Transform").property("Anchor Point").value;
+
             var precomp = layer.source;
-            var precompWidth = precomp.width;;
-            var precompHeight = precomp.width;;
+            var precompLayers = precomp.layers;
 
-            //detect edges
-            var targetEdges = cropToEdges_edgeDetect(activeItem, layer, samples, border);
+            if (precompLayers.length > 0) {
+                var precompWidth = precomp.width;
+                var precompHeight = precomp.height;
 
-            //offset layers to accommodate new dimensions
-            var compLayers = precomp.layers;
-            for (var v = 0; v < compLayers.length; v++) {
-                var layerV = compLayers[v];
-                var layerPos = layerV.property("Transform").property("Position").value;
-                layerV.property("Transform").property("Position").setValue([layerPos[0] - targetEdges[0], layerPos[1] - targetEdges[2]]);
+                //move precomp anchor point to [0,0]
+                layer.property("Transform").property("Anchor Point").setValue([0, 0]);
+                layer.property("Transform").property("Position").setValue([layerPos[0] - layerAnchor[0], layerPos[1] - layerAnchor[1]]);
+
+                //detect edges
+                var targetEdges = cropToEdges_edgeDetect(activeItem, layer, samples, border);
+
+                //offset layers to accommodate new dimensions
+                for (var v = 1; v <= precompLayers.length; v++) {
+                    var layerInsideComp = precompLayers[v];
+                    if (layerInsideComp instanceof AVLayer) {
+                        var layerInsideCompPos = layerInsideComp.property("Transform").property("Position").value;
+                        layerInsideComp.property("Transform").property("Position").setValue([layerInsideCompPos[0] - targetEdges[0], layerInsideCompPos[1] - targetEdges[2]]);
+                    }
+                }
+
+                //crop comp to edges
+                var newWidth = precompWidth - (targetEdges[0] + (precompWidth - targetEdges[1]));
+                var newHeight = precompHeight - (targetEdges[2] + (precompHeight - targetEdges[3]));
+                precomp.width = newWidth;
+                precomp.height = newHeight;
+
+                //move precomposition layer to compensate for cropping
+                layer.property("Transform").property("Position").setValue([targetEdges[0], targetEdges[2]]);
+
+                //centar precomposition layer anchor
+                var newAnchor = layer.property("Transform").property("Anchor Point").value;;
+                layer.property("Transform").property("Anchor Point").setValue([newAnchor[0] + newWidth / 2, newAnchor[1] + newHeight / 2]);
+                var newPosition = layer.property("Transform").property("Position").value;;
+                layer.property("Transform").property("Position").setValue([newPosition[0] + (newAnchor[0] + newWidth / 2), newPosition[1] + (newAnchor[0] + newHeight / 2)]);
+
             }
-
-            //crop comp to edges
-            var newWidth = precompWidth - (targetEdges[0] + (precompWidth - targetEdges[1]));
-            var newHeight = precompHeight - (targetEdges[2] + (precompHeight - targetEdges[3]));
-            precomp.width = cropToEdges_factorisation4(newWidth);
-            precomp.height = cropToEdges_factorisation4(newHeight);
         }
     }
 
@@ -293,7 +322,6 @@
             app.beginUndoGroup(cteData.scriptName);
             cropToEdges_main();
             app.endUndoGroup();
-            ctePal.close();  
         } else {
             return;
         }
