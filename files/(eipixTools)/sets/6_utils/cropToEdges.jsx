@@ -1,7 +1,7 @@
 ﻿// cropToEdges.jsx
 // 
 // Name: cropToEdges
-// Version: 0.4
+// Version: 0.6
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,13 +24,14 @@
 
     cteData.scriptNameShort = "CTE";
     cteData.scriptName = "Crop To Edges";
-    cteData.scriptVersion = "0.4";
+    cteData.scriptVersion = "0.6";
     cteData.scriptTitle = cteData.scriptName + " v" + cteData.scriptVersion;
 
     cteData.strMinAE = { en: "This script requires Adobe After Effects CS4 or later." };
     cteData.strActiveCompErr = { en: "Please select a composition." };
     cteData.strNoLayersSelectedErr = { en: "Please select at least one layer." };
     cteData.strSelectedLayersErr = { en: "One or more layers you selected is not a precomposition." };
+    cteData.strLayerIs3DErr = { en: "This script currently does not support 3D layers." };
 
     cteData.strOptions = { en: "Options" };
     cteData.strCrop = { en: "Crop to Edges" };
@@ -199,6 +200,11 @@
                 alert(cropToEdges_localize(cteData.strSelectedLayersErr));
                 return false;
             }
+
+            if (element.threeDLayer) {
+                alert(cropToEdges_localize(cteData.strLayerIs3DErr));
+                return false;
+            }
         }
 
         return true;
@@ -282,15 +288,19 @@
                 layer.property("Transform").property("Anchor Point").setValue([0, 0]);
                 layer.property("Transform").property("Position").setValue([layerPos[0] - layerAnchor[0], layerPos[1] - layerAnchor[1]]);
 
+                var startingOffset = layer.property("Transform").property("Position").value;
+
                 //detect edges
                 var targetEdges = cropToEdges_edgeDetect(activeItem, layer, samples, border);
 
                 //offset layers to accommodate new dimensions
                 for (var v = 1; v <= precompLayers.length; v++) {
                     var layerInsideComp = precompLayers[v];
-                    if (layerInsideComp instanceof AVLayer) {
-                        var layerInsideCompPos = layerInsideComp.property("Transform").property("Position").value;
-                        layerInsideComp.property("Transform").property("Position").setValue([layerInsideCompPos[0] - targetEdges[0], layerInsideCompPos[1] - targetEdges[2]]);
+                    if ((layerInsideComp instanceof ShapeLayer) || (layerInsideComp instanceof TextLayer) || (layerInsideComp instanceof AVLayer)) {
+                        if (!layerInsideComp.hasAudio) {
+                            var layerInsideCompPos = layerInsideComp.property("Transform").property("Position").value;
+                            layerInsideComp.property("Transform").property("Position").setValue([layerInsideCompPos[0] - targetEdges[0], layerInsideCompPos[1] - targetEdges[2]]);
+                        }
                     }
                 }
 
@@ -307,8 +317,7 @@
                 var newAnchor = layer.property("Transform").property("Anchor Point").value;;
                 layer.property("Transform").property("Anchor Point").setValue([newAnchor[0] + newWidth / 2, newAnchor[1] + newHeight / 2]);
                 var newPosition = layer.property("Transform").property("Position").value;;
-                layer.property("Transform").property("Position").setValue([newPosition[0] + (newAnchor[0] + newWidth / 2), newPosition[1] + (newAnchor[0] + newHeight / 2)]);
-
+                layer.property("Transform").property("Position").setValue([newPosition[0] + (newAnchor[0] + newWidth / 2) + startingOffset[0], newPosition[1] + (newAnchor[0] + newHeight / 2) + startingOffset[1]]);
             }
         }
     }
