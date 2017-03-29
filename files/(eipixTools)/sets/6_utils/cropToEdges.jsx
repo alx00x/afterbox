@@ -1,7 +1,7 @@
 ﻿// cropToEdges.jsx
 // 
 // Name: cropToEdges
-// Version: 0.3
+// Version: 0.4
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,7 +24,7 @@
 
     cteData.scriptNameShort = "CTE";
     cteData.scriptName = "Crop To Edges";
-    cteData.scriptVersion = "0.3";
+    cteData.scriptVersion = "0.4";
     cteData.scriptTitle = cteData.scriptName + " v" + cteData.scriptVersion;
 
     cteData.strMinAE = { en: "This script requires Adobe After Effects CS4 or later." };
