@@ -1,7 +1,7 @@
 ﻿// cropToEdges.jsx
 // 
 // Name: cropToEdges
-// Version: 0.6
+// Version: 0.7
 // Author: Aleksandar Kocic
 // 
 // Description: Crops the precomps to the egdes of opaque pixels.
@@ -24,10 +24,11 @@
 
     cteData.scriptNameShort = "CTE";
     cteData.scriptName = "Crop To Edges";
-    cteData.scriptVersion = "0.6";
+    cteData.scriptVersion = "0.7";
     cteData.scriptTitle = cteData.scriptName + " v" + cteData.scriptVersion;
 
     cteData.strMinAE = { en: "This script requires Adobe After Effects CS4 or later." };
+    cteData.strMaxAE = { en: "This script does not work with Adobe After Effects CC2015 or later." };
     cteData.strActiveCompErr = { en: "Please select a composition." };
     cteData.strNoLayersSelectedErr = { en: "Please select at least one layer." };
     cteData.strSelectedLayersErr = { en: "One or more layers you selected is not a precomposition." };
@@ -345,7 +346,8 @@
     //
 
     // Warning
-    if (parseFloat(app.version) < 9.0) {
+    var appVersion = parseFloat(app.version);
+    if ((appVersion < 9.0) || (appVersion > 13.0) ) {
         alert(cropToEdges_localize(cteData.strMinAE));
     } else {
         // Build and show the floating palette
