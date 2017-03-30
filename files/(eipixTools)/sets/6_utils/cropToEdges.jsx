@@ -347,8 +347,10 @@
 
     // Warning
     var appVersion = parseFloat(app.version);
-    if ((appVersion < 9.0) || (appVersion > 13.0) ) {
+    if (appVersion < 9.0) {
         alert(cropToEdges_localize(cteData.strMinAE));
+    } else if (appVersion > 13.0) {
+        alert(cropToEdges_localize(cteData.strMaxAE));
     } else {
         // Build and show the floating palette
         var ctePal = cropToEdges_buildUI(thisObj);
