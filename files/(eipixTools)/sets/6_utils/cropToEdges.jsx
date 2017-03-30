@@ -4,7 +4,7 @@
 // Version: 0.6
 // Author: Aleksandar Kocic
 // 
-// Description: Turns animation to sprite tiled sheets.
+// Description: Crops the precomps to the egdes of opaque pixels.
 // 
 // 
 
