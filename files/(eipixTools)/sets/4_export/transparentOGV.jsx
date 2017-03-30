@@ -31,6 +31,7 @@
     togvData.scriptTitle = togvData.scriptName + " v" + togvData.scriptVersion;
 
     togvData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
+    togvData.strMaxAE = { en: "This script does not work with Adobe After Effects CC2015 or later." };
     togvData.strActiveCompErr = {en: "Please select a composition."};
     togvData.strNoSelectErr = {en: "Select at least one background layer."};
 
@@ -511,8 +512,11 @@
     //
 
     // Warning
-    if (parseFloat(app.version) < 9.0) {
+    var appVersion = parseFloat(app.version);
+    if (appVersion < 9.0) {
         alert(transparentOGV_localize(togvData.strMinAE));
+    } else if (appVersion > 13.0) {
+        alert(transparentOGV_localize(togvData.strMaxAE));
     } else {
         // Build and show the floating palette
         var togvPal = transparentOGV_buildUI(thisObj);

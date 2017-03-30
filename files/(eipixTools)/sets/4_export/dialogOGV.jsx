@@ -1,7 +1,7 @@
 ﻿// dialogOGV.jsx
 // 
 // Name: dialogOGV
-// Version: 1.1
+// Version: 1.2
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -22,10 +22,11 @@
 
     dogvData.scriptNameShort = "DOGV";
     dogvData.scriptName = "Dialog OGV";
-    dogvData.scriptVersion = "1.1";
+    dogvData.scriptVersion = "1.2";
     dogvData.scriptTitle = dogvData.scriptName + " v" + dogvData.scriptVersion;
 
     dogvData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
+    dogvData.strMaxAE = { en: "This script does not work with Adobe After Effects CC2015 or later." };
     dogvData.strActiveCompErr = {en: "Please select a composition."};
 
     dogvData.strExecute = {en: "Execute"};
@@ -538,8 +539,11 @@
     //
 
     // Warning
-    if (parseFloat(app.version) < 9.0) {
+    var appVersion = parseFloat(app.version);
+    if (appVersion < 9.0) {
         alert(dialogOGV_localize(dogvData.strMinAE));
+    } else if (appVersion > 13.0) {
+        alert(dialogOGV_localize(dogvData.strMaxAE));
     } else {
         // Build and show the floating palette
         var dogvPal = dialogOGV_buildUI(thisObj);
