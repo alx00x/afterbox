@@ -1,7 +1,7 @@
 ﻿// shotNumbering.jsx
 // 
 // Name: shotNumbering
-// Version: 1.4
+// Version: 1.5
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -26,25 +26,25 @@
 
     shnData.scriptNameShort = "SHN";
     shnData.scriptName = "Shot Numbering";
-    shnData.scriptVersion = "1.4";
+    shnData.scriptVersion = "1.5";
     shnData.scriptTitle = shnData.scriptName + " v" + shnData.scriptVersion;
 
-    shnData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
-    shnData.strActiveCompErr = {en: "Please select a composition."};
-    shnData.strNoMarkersErr = {en: "Composition needs to have at least two markers."};
-    shnData.strNoMetadataErr = {en: "Could not find metadata file, do you wish to locate it manually?"};
-    shnData.strInstructions = {en: "This script will create a layer called \"Markers\". Use it to mark the beggining of each shot. Numbers are incremented by 10 as naming convention rule."};
-    shnData.strGenerateShotNumbers = {en: "  Display shot numbers"};
-    shnData.strGenerateMetaData = {en: "  Display metadata"};
+    shnData.strMinAE = { en: "This script requires Adobe After Effects CS4 or later." };
+    shnData.strActiveCompErr = { en: "Please select a composition." };
+    shnData.strNoMarkersErr = { en: "Composition needs to have at least two markers." };
+    shnData.strNoMetadataErr = { en: "Could not find metadata file, do you wish to locate it manually?" };
+    shnData.strInstructions = { en: "This script will create a layer called \"Markers\". Use it to mark the beggining of each shot. Numbers are incremented by 10 as naming convention rule." };
+    shnData.strGenerateShotNumbers = { en: "  Display shot numbers" };
+    shnData.strGenerateMetaData = { en: "  Display metadata" };
 
-    shnData.strSettings = {en: "Settings"};
-    shnData.strQuestion = {en: "Do you wish to proceed?"};
-    shnData.strExecute = {en: "Yes"};
-    shnData.strCancel = {en: "No"};
+    shnData.strSettings = { en: "Settings" };
+    shnData.strQuestion = { en: "Do you wish to proceed?" };
+    shnData.strExecute = { en: "Yes" };
+    shnData.strCancel = { en: "No" };
 
-    shnData.strHelp = {en: "?"};
-    shnData.strHelpTitle = {en: "Help"};
-    shnData.strHelpText = {en: "Generates text layer for each marker and numbers them in order."};
+    shnData.strHelp = { en: "?" };
+    shnData.strHelpTitle = { en: "Help" };
+    shnData.strHelpText = { en: "Generates text layer for each marker and numbers them in order." };
 
     // Define global variables
     shnData.projectName = app.project.file.name;
@@ -59,7 +59,7 @@
     shnData.metadataFile;
 
     shnData.metadataExist = false;
-    shnData.metadataRef = new File(shnData.metadataFolder +  "\\" + "metadata.xml");
+    shnData.metadataRef = new File(shnData.metadataFolder + "\\" + "metadata.xml");
     if (shnData.metadataRef.exists == true) {
         shnData.metadataExist = true;
     }
@@ -72,7 +72,7 @@
 
     // Build UI
     function shotNumbering_buildUI(thisObj) {
-        var pal = new Window("dialog", shnData.scriptName, undefined, {resizeable:false});
+        var pal = new Window("dialog", shnData.scriptName, undefined, { resizeable: false });
         if (pal !== null) {
             var res =
                 "group { \
@@ -115,7 +115,7 @@
             pal.layout.layout(true);
             pal.grp.minimumSize = pal.grp.size;
 
-            pal.grp.header.help.onClick = function() {
+            pal.grp.header.help.onClick = function () {
                 alert(shnData.scriptTitle + "\n" + shotNumbering_localize(shnData.strHelpText), shotNumbering_localize(shnData.strHelpTitle));
             }
 
@@ -127,8 +127,8 @@
                 pal.grp.settings.opts.box2.value = false;
             }
 
-            pal.grp.settings.opts.box2.onClick = function() {
-                if (pal.grp.settings.opts.box2.value == true){
+            pal.grp.settings.opts.box2.onClick = function () {
+                if (pal.grp.settings.opts.box2.value == true) {
                     shotNumbering_checkMetadata();
                 }
             }
@@ -141,12 +141,12 @@
     }
 
     function shotNumbering_checkMetadata() {
-        shnData.metadataFile = new File(shnData.metadataFolder +  "\\" + "metadata.xml");
+        shnData.metadataFile = new File(shnData.metadataFolder + "\\" + "metadata.xml");
         if (shnData.metadataFile.exists == false) {
             shnData.metadataCheck = false;
             var locateManually = confirm(shotNumbering_localize(shnData.strNoMetadataErr));
             if (locateManually == true) {
-                shnData.metadataFile = File.openDialog("Find the metadata file","");
+                shnData.metadataFile = File.openDialog("Find the metadata file", "");
                 if (shnData.metadataFile != null) {
                     shnData.metadataCheck = true;
                 }
@@ -176,7 +176,7 @@
             var newMask = newSolid.Masks.addProperty("ADBE Mask Atom");
             newMask.maskMode = MaskMode.SUBTRACT;
             var maskShape = newMask.property("ADBE Mask Shape").value;
-            maskShape.vertices = [[0,activeItemHeight/10],[0,activeItemHeight/10*9],[activeItemWidth,activeItemHeight/10*9],[activeItemWidth,activeItemHeight/10]];
+            maskShape.vertices = [[0, activeItemHeight / 10], [0, activeItemHeight / 10 * 9], [activeItemWidth, activeItemHeight / 10 * 9], [activeItemWidth, activeItemHeight / 10]];
             maskShape.closed = true;
             newMask.property("ADBE Mask Shape").setValue(maskShape);
             newSolid.locked = true;
@@ -203,12 +203,12 @@
             gameNameTextValue.resetCharStyle();
             gameNameTextValue.resetParagraphStyle();
             gameNameTextValue.justification = ParagraphJustification.LEFT_JUSTIFY;
-            gameNameTextValue.fontSize = activeItemHeight/16;
+            gameNameTextValue.fontSize = activeItemHeight / 16;
             gameNameTextValue.fillColor = [1, 1, 1];
             gameNameTextValue.font = "Consolas";
             gameNameText.sourceText.setValue(gameNameTextValue);
-            gameNameText.transform.anchorPoint.setValue([0,0]);
-            gameNameText.position.setValue([5,(activeItemHeight/100*5)+(activeItemHeight/16/3.2)]);
+            gameNameText.transform.anchorPoint.setValue([0, 0]);
+            gameNameText.position.setValue([5, (activeItemHeight / 100 * 5) + (activeItemHeight / 16 / 3.2)]);
             gameNameText.name = "Game Name";
             gameNameText.locked = true;
         }
@@ -222,14 +222,14 @@
             timeCodeTextValue.resetCharStyle();
             timeCodeTextValue.resetParagraphStyle()
             timeCodeTextValue.justification = ParagraphJustification.RIGHT_JUSTIFY;
-            timeCodeTextValue.fontSize = activeItemHeight/16;
+            timeCodeTextValue.fontSize = activeItemHeight / 16;
             timeCodeTextValue.fillColor = [1, 1, 1];
             timeCodeTextValue.font = "Consolas";
             timeCodeText.sourceText.setValue(timeCodeTextValue);
-            timeCodeText.transform.anchorPoint.setValue([0,0]);
-            timeCodeText.position.setValue([activeItemWidth-5,(activeItemHeight/100*5)+(activeItemHeight/16/3.2)]);
+            timeCodeText.transform.anchorPoint.setValue([0, 0]);
+            timeCodeText.position.setValue([activeItemWidth - 5, (activeItemHeight / 100 * 5) + (activeItemHeight / 16 / 3.2)]);
             timeCodeText.name = "Time Code";
-            var timeCodeExp = "timeToTimecode(t = time + thisComp.displayStartTime, timecodeBase = "+ activeItem.frameRate+", isDuration = true)";
+            var timeCodeExp = "timeToTimecode(t = time + thisComp.displayStartTime, timecodeBase = " + activeItem.frameRate + ", isDuration = true)";
             timeCodeText.property("Source Text").expression = timeCodeExp;
             timeCodeText.locked = true;
 
@@ -241,14 +241,14 @@
             frameCodeTextValue.resetCharStyle();
             frameCodeTextValue.resetParagraphStyle()
             frameCodeTextValue.justification = ParagraphJustification.RIGHT_JUSTIFY;
-            frameCodeTextValue.fontSize = activeItemHeight/16;
+            frameCodeTextValue.fontSize = activeItemHeight / 16;
             frameCodeTextValue.fillColor = [1, 1, 1];
             frameCodeTextValue.font = "Consolas";
             frameCodeText.sourceText.setValue(frameCodeTextValue);
-            frameCodeText.transform.anchorPoint.setValue([0,0]);
-            frameCodeText.position.setValue([activeItemWidth-5,(activeItemHeight/100*95)+(activeItemHeight/16/3.2)]);
+            frameCodeText.transform.anchorPoint.setValue([0, 0]);
+            frameCodeText.position.setValue([activeItemWidth - 5, (activeItemHeight / 100 * 95) + (activeItemHeight / 16 / 3.2)]);
             frameCodeText.name = "Frame Code";
-            var frameCodeExp = "time * "+ activeItem.frameRate;
+            var frameCodeExp = "time * " + activeItem.frameRate;
             frameCodeText.property("Source Text").expression = frameCodeExp;
             frameCodeText.locked = true;
         }
@@ -266,12 +266,12 @@
             shotNumberTextValue.resetCharStyle();
             shotNumberTextValue.resetParagraphStyle()
             shotNumberTextValue.justification = ParagraphJustification.LEFT_JUSTIFY;
-            shotNumberTextValue.fontSize = activeItemHeight/16;
+            shotNumberTextValue.fontSize = activeItemHeight / 16;
             shotNumberTextValue.fillColor = [1, 1, 1];
             shotNumberTextValue.font = "Consolas";
             shotNumberText.sourceText.setValue(shotNumberTextValue);
-            shotNumberText.transform.anchorPoint.setValue([0,0]);
-            shotNumberText.position.setValue([5,(activeItemHeight/100*95)+(activeItemHeight/16/3.2)]);
+            shotNumberText.transform.anchorPoint.setValue([0, 0]);
+            shotNumberText.position.setValue([5, (activeItemHeight / 100 * 95) + (activeItemHeight / 16 / 3.2)]);
             shotNumberText.name = "Shot Number";
             var shotNumberTextExp = "m = thisComp.layer('Markers').marker;\rn = 0;\rif (m.numKeys > 0) {\r    ind = m.nearestKey(time).index;\r    if (m.nearestKey(time).time > time) {\r        ind--;\r    }\r    ind = ind<1 ? 1 : ind;\r    n = m.key(ind).index;\r}\rshot = 'sh???';\rif (n < 10) {\r    shot = 'sh0' + n + '0';\r} else {\r    shot = 'sh' + n + '0';\r}\r";
             shotNumberText.property("Source Text").expression = shotNumberTextExp;
@@ -285,7 +285,8 @@
     // Execute
     function shotNumbering_doExecute() {
         app.beginUndoGroup(shnData.scriptName);
-        shotNumbering_main()
+        shotNumbering_checkMetadata();
+        shotNumbering_main();
         app.endUndoGroup();
         shnPal.close();
     }
