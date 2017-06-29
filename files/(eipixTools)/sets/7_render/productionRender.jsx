@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 1.4
+// Version: 1.6
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "1.4";
+    prrData.scriptVersion = "1.6";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strErrNotTopComp = { en: "Note: Composition you are rendering is not top composition in hierarchy." };
@@ -677,7 +677,7 @@
         batContent += "if exist log-0.log.mbtree (del log-0.log.mbtree)\r\n";
 
         batContent += "title Rendering: " + renderFrames + " frames\r\n";
-        batContent += "start \"\" /b " + "/low" + " /wait " +
+        batContent += "start \"\" /b " + "/normal" + " /wait " +
             addQuotes(aerenderEXE.fsName) + " -project " + addQuotes(prrData.projectFile.fsName) + " -rqindex " + renderQueueItemIndex + " -sound ON" + mpString + contOnMissingString + reuseInstance + "\r\n";
         batContent += "echo Rendering Finished\r\n";
 
@@ -697,9 +697,14 @@
             addQuotes(fileOutPath + ".mp4") + "\r\n";
 
         batContent += "echo.\r\n";
-        batContent += "echo [Converting] Lossless Video\r\n";
+        batContent += "echo [Converting] Lossless Video OLD (will be deprecated)\r\n";
         batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r "
             + prrData.frameRate + " -c:v libx264 -preset veryslow -pix_fmt yuv420p -qp 0 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
+
+        batContent += "echo.\r\n";
+        batContent += "echo [Converting] Lossless Video\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r "
+            + prrData.frameRate + " -c:v libx264 -pix_fmt yuv420p -qp 0 -preset slow " + addQuotes(fileOutPath + "_lossless.m4v") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Preview Video\r\n";
