@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 1.6
+// Version: 1.7
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "1.6";
+    prrData.scriptVersion = "1.7";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strErrNotTopComp = { en: "Note: Composition you are rendering is not top composition in hierarchy." };
@@ -689,7 +689,7 @@
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] PC Video\r\n";
-        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libtheora -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
+        batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -r " + prrData.frameRate + " -c:v libtheora -pix_fmt yuv420p -qscale:v 8 -an " + addQuotes(fileOutPath + ".ogv") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] iOS Video\r\n";
