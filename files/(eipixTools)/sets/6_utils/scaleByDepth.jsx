@@ -1,7 +1,7 @@
 ﻿// scaleByDepth.jsx
 // 
 // Name: scaleByDepth
-// Version: 1.3
+// Version: 1.4
 // Author: Aleksandar Kocic
 // 
 // Description:
@@ -20,23 +20,23 @@
 
     sbzData.scriptNameShort = "SBZ";
     sbzData.scriptName = "Scale By Depth";
-    sbzData.scriptVersion = "1.3";
+    sbzData.scriptVersion = "1.4";
     sbzData.scriptTitle = sbzData.scriptName + " v" + sbzData.scriptVersion;
-    sbzData.strMinAE = {en: "This script sets up selected layers for scaling by depth."};
-    sbzData.strErrNoSelected = {en: "Please select layers you wish to setup for scaling by depth."};
-    sbzData.strErrWrongSelected = {en: "Only select instances of AV layers."};
-    sbzData.strActiveCompErr = {en: "No active composition."};
-    sbzData.strSuccess = {en: "Setup successful."};
-    sbzData.strHelp = {en: "?"};
-    sbzData.strHelpTitle = {en: "Help"};
-    sbzData.strHelpText = {en: "This script crops selected precomps to pixel edges."};
+    sbzData.strMinAE = { en: "This script sets up selected layers for scaling by depth." };
+    sbzData.strErrNoSelected = { en: "Please select layers you wish to setup for scaling by depth." };
+    sbzData.strErrWrongSelected = { en: "Only select instances of AV layers." };
+    sbzData.strActiveCompErr = { en: "No active composition." };
+    sbzData.strSuccess = { en: "Setup successful." };
+    sbzData.strHelp = { en: "?" };
+    sbzData.strHelpTitle = { en: "Help" };
+    sbzData.strHelpText = { en: "This script crops selected precomps to pixel edges." };
 
     // Define project variables
     sbzData.activeItem = app.project.activeItem;
     sbzData.activeItemDuration = app.project.activeItem.duration;
     sbzData.activeItemFrames = app.project.activeItem.duration * app.project.activeItem.frameRate;
     sbzData.activeItemOneFrame = 1 / app.project.activeItem.frameRate;
-    sbzData.activeItemFps= app.project.activeItem.frameRate;
+    sbzData.activeItemFps = app.project.activeItem.frameRate;
 
     // Localize
     function scaleByDepth_localize(strVar) {
@@ -44,7 +44,7 @@
     }
 
     // Converts numeric degrees to radians
-    Math.radians = function(deg) {
+    Math.radians = function (deg) {
         return deg * (Math.PI / 180);
     }
 
@@ -80,7 +80,7 @@
             //create camera
             var centerX = activeItemWidth / 2;
             var centerY = activeItemHeight / 2;
-            var zoomValue = activeItemWidth/(2*Math.tan(Math.radians(54.4322/2)));
+            var zoomValue = activeItemWidth / (2 * Math.tan(Math.radians(54.4322 / 2)));
             var scaleCam = activeItem.layers.addCamera("scaleCam_DO_NOT_TOUCH", [centerX, centerY]);
             scaleCam.property("ADBE Camera Options Group").property("ADBE Camera Zoom").setValue(zoomValue);
             scaleCam.property("ADBE Camera Options Group").property("ADBE Camera Focus Distance").setValue(zoomValue);
@@ -133,14 +133,19 @@
             var addSlider4 = animCamCTRL.property("ADBE Effect Parade").addProperty("ADBE Slider Control");
             addSlider4.name = "Wiggle Y Frequency";
 
+            var addSlider5 = animCamCTRL.property("ADBE Effect Parade").addProperty("ADBE Slider Control");
+            addSlider5.name = "Seed Number";
+            addSlider5.property("Slider").expressionEnabled = true;
+            addSlider5.property("Slider").expression = "Math.round(value)";
+
             //add wiggle expressions to animation cam position
             animCam.transform.position.dimensionsSeparated = true;
 
-            var expr1 = "amp = thisComp.layer('animCamCTRL').effect('Wiggle X Amplitude')('Slider');\nfreq = thisComp.layer('animCamCTRL').effect('Wiggle X Frequency')('Slider');\nif (freq.numKeys > 0){\n\taccum = 0;\n\tv0 = freq.valueAtTime(0);\n\tt0 = 0;\n\ti = 1;\n\twhile (i <= freq.numKeys){\n\t\tt = freq.key(i).time;\n\t\tif (t < time){\n\t\t\taccum += (v0 + freq.key(i).value)*(t - t0)/2;\n\t\t\tv0 = freq.key(i).value;\n\t\t\tt0 = t;\n\t\t\tif (i == freq.numKeys){\n\t\t\t\taccum += (time - t0)*v0;\n\t\t\t}\n\t\t}else{\n\t\t\taccum += (freq + v0)*(time - t0)/2;\n\t\t\tbreak;\n\t\t}\n\t\ti++;\n\t}\n}else{\n\taccum = freq*time;\n}\nwiggle(1,amp,1,.5,accum);\n";
+            var expr1 = "seedRandom(thisComp.layer('animCamCTRL').effect('Seed Number')('Slider'));\namp = thisComp.layer('animCamCTRL').effect('Wiggle X Amplitude')('Slider');\nfreq = thisComp.layer('animCamCTRL').effect('Wiggle X Frequency')('Slider');\nif (freq.numKeys > 0){\n\taccum = 0;\n\tv0 = freq.valueAtTime(0);\n\tt0 = 0;\n\ti = 1;\n\twhile (i <= freq.numKeys){\n\t\tt = freq.key(i).time;\n\t\tif (t < time){\n\t\t\taccum += (v0 + freq.key(i).value)*(t - t0)/2;\n\t\t\tv0 = freq.key(i).value;\n\t\t\tt0 = t;\n\t\t\tif (i == freq.numKeys){\n\t\t\t\taccum += (time - t0)*v0;\n\t\t\t}\n\t\t}else{\n\t\t\taccum += (freq + v0)*(time - t0)/2;\n\t\t\tbreak;\n\t\t}\n\t\ti++;\n\t}\n}else{\n\taccum = freq*time;\n}\nwiggle(1,amp,1,.5,accum);\n";
             animCam.property("ADBE Transform Group").property("ADBE Position_0").expressionEnabled = true;
             animCam.property("ADBE Transform Group").property("ADBE Position_0").expression = expr1;
 
-            var expr2 = "amp = thisComp.layer('animCamCTRL').effect('Wiggle Y Amplitude')('Slider');\nfreq = thisComp.layer('animCamCTRL').effect('Wiggle Y Frequency')('Slider');\nif (freq.numKeys > 0){\n\taccum = 0;\n\tv0 = freq.valueAtTime(0);\n\tt0 = 0;\n\ti = 1;\n\twhile (i <= freq.numKeys){\n\t\tt = freq.key(i).time;\n\t\tif (t < time){\n\t\t\taccum += (v0 + freq.key(i).value)*(t - t0)/2;\n\t\t\tv0 = freq.key(i).value;\n\t\t\tt0 = t;\n\t\t\tif (i == freq.numKeys){\n\t\t\t\taccum += (time - t0)*v0;\n\t\t\t}\n\t\t}else{\n\t\t\taccum += (freq + v0)*(time - t0)/2;\n\t\t\tbreak;\n\t\t}\n\t\ti++;\n\t}\n}else{\n\taccum = freq*time;\n}\nwiggle(1,amp,1,.5,accum);\n";
+            var expr2 = "seedRandom(thisComp.layer('animCamCTRL').effect('Seed Number')('Slider'));\namp = thisComp.layer('animCamCTRL').effect('Wiggle Y Amplitude')('Slider');\nfreq = thisComp.layer('animCamCTRL').effect('Wiggle Y Frequency')('Slider');\nif (freq.numKeys > 0){\n\taccum = 0;\n\tv0 = freq.valueAtTime(0);\n\tt0 = 0;\n\ti = 1;\n\twhile (i <= freq.numKeys){\n\t\tt = freq.key(i).time;\n\t\tif (t < time){\n\t\t\taccum += (v0 + freq.key(i).value)*(t - t0)/2;\n\t\t\tv0 = freq.key(i).value;\n\t\t\tt0 = t;\n\t\t\tif (i == freq.numKeys){\n\t\t\t\taccum += (time - t0)*v0;\n\t\t\t}\n\t\t}else{\n\t\t\taccum += (freq + v0)*(time - t0)/2;\n\t\t\tbreak;\n\t\t}\n\t\ti++;\n\t}\n}else{\n\taccum = freq*time;\n}\nwiggle(1,amp,1,.5,accum);\n";
             animCam.property("ADBE Transform Group").property("ADBE Position_1").expressionEnabled = true;
             animCam.property("ADBE Transform Group").property("ADBE Position_1").expression = expr2;
         }
