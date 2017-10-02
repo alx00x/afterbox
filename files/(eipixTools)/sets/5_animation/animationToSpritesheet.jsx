@@ -1,7 +1,7 @@
 ﻿// animationToSpritesheet.jsx
 // 
 // Name: animationToSpritesheet
-// Version: 1.9
+// Version: 1.10
 // Author: Aleksandar Kocic
 // 
 // Description: Turns animation to sprite tiled sheets.
@@ -24,44 +24,44 @@
 
     a2sData.scriptNameShort = "ATS";
     a2sData.scriptName = "Animation To Spritesheet";
-    a2sData.scriptVersion = "1.9";
+    a2sData.scriptVersion = "1.10";
     a2sData.scriptTitle = a2sData.scriptName + " v" + a2sData.scriptVersion;
 
-    a2sData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
+    a2sData.strMinAE = { en: "This script requires Adobe After Effects CS4 or later." };
     a2sData.strMaxAE = { en: "This script does not work with Adobe After Effects CC2015 or later." };
-    a2sData.strActiveCompErr = {en: "Please select a composition."};
-    a2sData.strExecute = {en: "Execute"};
-    a2sData.strCancel = {en: "Cancel"};
+    a2sData.strActiveCompErr = { en: "Please select a composition." };
+    a2sData.strExecute = { en: "Execute" };
+    a2sData.strCancel = { en: "Cancel" };
 
-    a2sData.strExportTo = {en: "Export To"};
-    a2sData.strBrowse = {en: "Browse"};
-    a2sData.strBrowseText = {en: "Save Spritesheet to:"};
+    a2sData.strExportTo = { en: "Export To" };
+    a2sData.strBrowse = { en: "Browse" };
+    a2sData.strBrowseText = { en: "Save Spritesheet to:" };
 
-    a2sData.strOptions = {en: "Options"};
-    a2sData.strColumns = {en: "Columns"};
-    a2sData.strRows = {en: "Rows"};
-    a2sData.strRowsInfo = {en: "(this value is calculated automaticaly)"};
+    a2sData.strOptions = { en: "Options" };
+    a2sData.strColumns = { en: "Columns" };
+    a2sData.strRows = { en: "Rows" };
+    a2sData.strRowsInfo = { en: "(this value is calculated automaticaly)" };
 
-    a2sData.strWarning = {en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Setting smaller than 5 sample size is not recommended"};
-    a2sData.strPNGWarning = {en: "Warning: Could not find \"PNG Sequence\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now."};
-    a2sData.strSpreadsheetErr = {en: "You need to specify output first."};
-    a2sData.strOutputErr = {en: "Output is not valid."};
-    a2sData.strColumnsErr = {en: "Cannot pack sprites at requested number of rows and columns. Try again."};
-    a2sData.strTooLongErr = {en: "Your composition is too long. Cannot run the script."};
-    a2sData.strFramerateErr = {en: "Your composition framerate is not 25fps. Do you wish to continue?"};
+    a2sData.strWarning = { en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Setting smaller than 5 sample size is not recommended" };
+    a2sData.strPNGWarning = { en: "Warning: Could not find \"PNG Sequence\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now." };
+    a2sData.strSpreadsheetErr = { en: "You need to specify output first." };
+    a2sData.strOutputErr = { en: "Output is not valid." };
+    a2sData.strColumnsErr = { en: "Cannot pack sprites at requested number of rows and columns. Try again." };
+    a2sData.strTooLongErr = { en: "Your composition is too long. Cannot run the script." };
+    a2sData.strFramerateErr = { en: "Your composition framerate is not 25fps. Do you wish to continue?" };
 
-    a2sData.strCrop = {en: "Crop to Edges"};
-    a2sData.strSamples = {en: "Sample size"};
-    a2sData.strFrameSkip = {en: "Skip frames"};
+    a2sData.strCrop = { en: "Crop to Edges" };
+    a2sData.strSamples = { en: "Sample size" };
+    a2sData.strFrameSkip = { en: "Skip frames" };
     a2sData.strFrameSkipOpts = [0, 1, 2, 5];
 
-    a2sData.strSamplesHelpTip = {en: "Lower the value, slower the execution."};
-    a2sData.strFrameSkipHelpTip = {en: "Lower the value, slower the execution."};
+    a2sData.strSamplesHelpTip = { en: "Lower the value, slower the execution." };
+    a2sData.strFrameSkipHelpTip = { en: "Lower the value, slower the execution." };
 
-    a2sData.strHelp = {en: "?"};
-    a2sData.strHelpTitle = {en: "Help"};
-    a2sData.strErr = {en: "Something went wrong."};
-    a2sData.strHelpText = {en: "This script turns animation to sprite tiled sheets."};
+    a2sData.strHelp = { en: "?" };
+    a2sData.strHelpTitle = { en: "Help" };
+    a2sData.strErr = { en: "Something went wrong." };
+    a2sData.strHelpText = { en: "This script turns animation to sprite tiled sheets." };
 
     // Define project variables
     a2sData.activeItem = app.project.activeItem;
@@ -123,7 +123,7 @@
 
     // Build UI
     function animationToSpritesheet_buildUI(thisObj) {
-        var pal = new Window("dialog", a2sData.scriptName, undefined, {resizeable:true});
+        var pal = new Window("dialog", a2sData.scriptName, undefined, { resizeable: true });
         if (pal !== null) {
             var res =
                 "group { \
@@ -195,11 +195,11 @@
             pal.layout.layout(true);
             pal.grp.minimumSize = pal.grp.size;
             pal.layout.resize();
-            pal.onResizing = pal.onResize = function() {
+            pal.onResizing = pal.onResize = function () {
                 this.layout.resize();
             }
 
-            pal.grp.spritesheet.select.btn.onClick = function() {
+            pal.grp.spritesheet.select.btn.onClick = function () {
                 animationToSpritesheet_doBrowse();
             }
 
@@ -215,7 +215,7 @@
             pal.grp.options.skp.list.selection = 0;
 
             //Samples slider change
-            pal.grp.options.sam.fld.onChange = function() {
+            pal.grp.options.sam.fld.onChange = function () {
                 var value = parseInt(this.text);
                 if (isNaN(value)) {
                     value = this.parent.sld.value;
@@ -227,7 +227,7 @@
                 this.text = value.toString();
                 this.parent.sld.value = value;
             }
-            pal.grp.options.sam.sld.onChange = pal.grp.options.sam.sld.onChanging = function() {
+            pal.grp.options.sam.sld.onChange = pal.grp.options.sam.sld.onChanging = function () {
                 var value = parseInt(this.value);
                 if (isNaN(value)) {
                     value = parseInt(this.parent.fld.text);
@@ -247,7 +247,7 @@
             pal.grp.options.sam.sld.enabled = false;
             //var warningShow = true;
 
-            pal.grp.options.crp.box1.onClick = function() {
+            pal.grp.options.crp.box1.onClick = function () {
                 if (pal.grp.options.crp.box1.value == true) {
                     pal.grp.options.skp.text.enabled = true;
                     pal.grp.options.skp.list.enabled = true;
@@ -280,7 +280,7 @@
             pal.grp.options.hor.info.enabled = false;
 
             //columns slider change
-            pal.grp.options.ver.fld.onChange = function() {
+            pal.grp.options.ver.fld.onChange = function () {
                 var value = parseInt(this.text);
                 if (isNaN(value)) {
                     value = this.parent.sld.value;
@@ -301,7 +301,7 @@
                 }
                 pal.grp.options.hor.fld.text = numOfRows;
             }
-            pal.grp.options.ver.sld.onChange = pal.grp.options.ver.sld.onChanging = function() {
+            pal.grp.options.ver.sld.onChange = pal.grp.options.ver.sld.onChanging = function () {
                 var value = parseInt(this.value);
                 if (isNaN(value)) {
                     value = parseInt(this.parent.fld.text);
@@ -319,7 +319,7 @@
                 pal.grp.options.hor.fld.text = numOfRows;
             }
 
-            pal.grp.header.help.onClick = function() {
+            pal.grp.header.help.onClick = function () {
                 alert(a2sData.scriptTitle + "\n" + animationToSpritesheet_localize(a2sData.strHelpText), animationToSpritesheet_localize(a2sData.strHelpTitle));
             }
 
@@ -351,7 +351,7 @@
 
     // Browse for location
     function animationToSpritesheet_doBrowse() {
-        var spreadSheetFile = a2sData.projectFolder.saveDlg(animationToSpritesheet_localize(a2sData.strBrowseText),"PNG:*.png");
+        var spreadSheetFile = a2sData.projectFolder.saveDlg(animationToSpritesheet_localize(a2sData.strBrowseText), "PNG:*.png");
         if (spreadSheetFile != null) {
             a2sPal.grp.spritesheet.select.fld.text = spreadSheetFile.fsName.toString();
         }
@@ -385,7 +385,7 @@
         //analize for x1, x2, y1 and y2
         var compHeight = analizeComp.height;
         var compWidth = analizeComp.width;
- 
+
         var x1 = compWidth; //left
         var x2 = -1; //right
         var y1 = compHeight; //top
@@ -398,16 +398,16 @@
                 addSlider.property(1).expression = expr;
                 var value = addSlider(1).value;
                 //find left edge
-                if ((value > 0) && (a < x1)) {x1 = a;}
+                if ((value > 0) && (a < x1)) { x1 = a; }
                 //find right edge
-                if ((value > 0) && (x2 < a)) {x2 = a;}
+                if ((value > 0) && (x2 < a)) { x2 = a; }
                 //find top edge
-                if ((value > 0) && (b < y1)) {y1 = b;}
+                if ((value > 0) && (b < y1)) { y1 = b; }
                 //find bottom edge
-                if ((value > 0) && (y2 < b)) {y2 = b;}
+                if ((value > 0) && (y2 < b)) { y2 = b; }
             }
             updateProgresstext(a2sPal, b + " / " + compHeight);
-            updateProgressbar(a2sPal, 0, b+1, compHeight);
+            updateProgressbar(a2sPal, 0, b + 1, compHeight);
         }
 
         analizeComp.remove();
@@ -473,8 +473,8 @@
         var mainCompDuration = 1 / mainCompFramerate;
         var mainComp = mainFolderItem.items.addComp(mainCompName, mainCompWidth, mainCompHeight, 1, mainCompDuration, mainCompFramerate);
         mainComp.layers.add(spriteComp);
-        mainComp.layers[1].transform.anchorPoint.setValue([0,0]);
-        mainComp.layers[1].transform.position.setValue([0,0]);
+        mainComp.layers[1].transform.anchorPoint.setValue([0, 0]);
+        mainComp.layers[1].transform.position.setValue([0, 0]);
 
         //duplicate sprite comp to a number of frames and offset in time and space
         var positionX = spriteComp.width;
@@ -482,7 +482,7 @@
         var counter = 1;
         for (i = 1; i < frames; i++) {
             mainComp.layers[1].duplicate();
-            mainComp.layers[1].transform.position.setValue([positionX,positionY]);
+            mainComp.layers[1].transform.position.setValue([positionX, positionY]);
             mainComp.layers[1].startTime = 0 - (activeFrameDuration * i)
 
             counter = counter + 1;
@@ -539,7 +539,7 @@
                     app.beginUndoGroup(a2sData.scriptName);
                     animationToSpritesheet_main();
                     app.endUndoGroup();
-                    a2sPal.close();                    
+                    a2sPal.close();
                 }
             } else {
                 alert(animationToSpritesheet_localize(a2sData.strOutputErr));
@@ -561,7 +561,7 @@
     var appVersion = parseFloat(app.version);
     if (appVersion < 9.0) {
         alert(animationToSpritesheet_localize(a2sData.strMinAE));
-    } else if (appVersion > 13.0) {
+    } else if (appVersion > 13.2) {
         alert(animationToSpritesheet_localize(a2sData.strMaxAE));
     } else {
         // Build and show the floating palette

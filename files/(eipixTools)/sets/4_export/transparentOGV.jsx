@@ -1,7 +1,7 @@
 ﻿// transparentOGV.jsx
 // 
 // Name: transparentOGV
-// Version: 2.3
+// Version: 2.4
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -27,40 +27,40 @@
 
     togvData.scriptNameShort = "TOGV";
     togvData.scriptName = "Transparent OGV";
-    togvData.scriptVersion = "2.3";
+    togvData.scriptVersion = "2.4";
     togvData.scriptTitle = togvData.scriptName + " v" + togvData.scriptVersion;
 
-    togvData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
+    togvData.strMinAE = { en: "This script requires Adobe After Effects CS4 or later." };
     togvData.strMaxAE = { en: "This script does not work with Adobe After Effects CC2015 or later." };
-    togvData.strActiveCompErr = {en: "Please select a composition."};
-    togvData.strNoSelectErr = {en: "Select at least one background layer."};
+    togvData.strActiveCompErr = { en: "Please select a composition." };
+    togvData.strNoSelectErr = { en: "Select at least one background layer." };
 
-    togvData.strExecute = {en: "Execute"};
-    togvData.strCancel = {en: "Cancel"};
+    togvData.strExecute = { en: "Execute" };
+    togvData.strCancel = { en: "Cancel" };
 
-    togvData.strExportTo = {en: "Export To"};
-    togvData.strBrowse = {en: "Browse"};
-    togvData.strBrowseText = {en: "Save OGV and PNG to:"};
+    togvData.strExportTo = { en: "Export To" };
+    togvData.strBrowse = { en: "Browse" };
+    togvData.strBrowseText = { en: "Save OGV and PNG to:" };
 
-    togvData.strOptions = {en: "Options"};
+    togvData.strOptions = { en: "Options" };
 
-    togvData.strWarning = {en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Setting smaller than 5 sample size is not recommended"};
-    togvData.strPNGWarning = {en: "Warning: Could not find \"" + togvData.outputTemplateName + "\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now."};
-    togvData.strSpreadsheetErr = {en: "You need to specify output first."};
-    togvData.strOutputErr = {en: "Output is not valid."};
+    togvData.strWarning = { en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Setting smaller than 5 sample size is not recommended" };
+    togvData.strPNGWarning = { en: "Warning: Could not find \"" + togvData.outputTemplateName + "\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now." };
+    togvData.strSpreadsheetErr = { en: "You need to specify output first." };
+    togvData.strOutputErr = { en: "Output is not valid." };
 
-    togvData.strCrop = {en: "Crop to Edges"};
-    togvData.strSamples = {en: "Samples"};
-    togvData.strFrameSkip = {en: "Skip frames"};
+    togvData.strCrop = { en: "Crop to Edges" };
+    togvData.strSamples = { en: "Samples" };
+    togvData.strFrameSkip = { en: "Skip frames" };
     togvData.strFrameSkipOpts = [0, 1, 2, 5];
 
-    togvData.strSamplesHelpTip = {en: "Lower the value, slower the execution."};
-    togvData.strFrameSkipHelpTip = {en: "Lower the value, slower the execution."};
+    togvData.strSamplesHelpTip = { en: "Lower the value, slower the execution." };
+    togvData.strFrameSkipHelpTip = { en: "Lower the value, slower the execution." };
 
-    togvData.strHelp = {en: "?"};
-    togvData.strHelpTitle = {en: "Help"};
-    togvData.strErr = {en: "Something went wrong."};
-    togvData.strHelpText = {en: "This script prepares a composition and adds render items for engine use. Script checks if dimensions are dividable by 16 and offers an option to reduce unnecessarily space around the object."};
+    togvData.strHelp = { en: "?" };
+    togvData.strHelpTitle = { en: "Help" };
+    togvData.strErr = { en: "Something went wrong." };
+    togvData.strHelpText = { en: "This script prepares a composition and adds render items for engine use. Script checks if dimensions are dividable by 16 and offers an option to reduce unnecessarily space around the object." };
 
     // Define project variables
     togvData.outputQuality = "Best Settings";
@@ -78,7 +78,7 @@
 
     // Build UI
     function transparentOGV_buildUI(thisObj) {
-        var pal = new Window("palette", togvData.scriptName, undefined, {resizeable:true});
+        var pal = new Window("palette", togvData.scriptName, undefined, { resizeable: true });
         if (pal !== null) {
             var res =
                 "group { \
@@ -134,11 +134,11 @@
             pal.layout.layout(true);
             pal.grp.minimumSize = pal.grp.size;
             pal.layout.resize();
-            pal.onResizing = pal.onResize = function() {
+            pal.onResizing = pal.onResize = function () {
                 this.layout.resize();
             }
 
-            pal.grp.output.select.btn.onClick = function() {
+            pal.grp.output.select.btn.onClick = function () {
                 transparentOGV_doBrowse();
             }
 
@@ -154,7 +154,7 @@
             pal.grp.options.skp.list.selection = 0;
 
             //Samples slider change
-            pal.grp.options.sam.fld.onChange = function() {
+            pal.grp.options.sam.fld.onChange = function () {
                 var value = parseInt(this.text);
                 if (isNaN(value)) {
                     value = this.parent.sld.value;
@@ -166,7 +166,7 @@
                 this.text = value.toString();
                 this.parent.sld.value = value;
             }
-            pal.grp.options.sam.sld.onChange = pal.grp.options.sam.sld.onChanging = function() {
+            pal.grp.options.sam.sld.onChange = pal.grp.options.sam.sld.onChanging = function () {
                 var value = parseInt(this.value);
                 if (isNaN(value)) {
                     value = parseInt(this.parent.fld.text);
@@ -186,7 +186,7 @@
             pal.grp.options.sam.sld.enabled = false;
             //var warningShow = true;
 
-            pal.grp.options.crp.box1.onClick = function() {
+            pal.grp.options.crp.box1.onClick = function () {
                 if (pal.grp.options.crp.box1.value == true) {
                     pal.grp.options.skp.text.enabled = true;
                     pal.grp.options.skp.list.enabled = true;
@@ -210,7 +210,7 @@
                 }
             }
 
-            pal.grp.header.help.onClick = function() {
+            pal.grp.header.help.onClick = function () {
                 alert(togvData.scriptTitle + "\n" + transparentOGV_localize(togvData.strHelpText), transparentOGV_localize(togvData.strHelpTitle));
             }
 
@@ -286,7 +286,7 @@
         //analize for x1, x2, y1 and y2
         var compHeight = analizeComp.height;
         var compWidth = analizeComp.width;
- 
+
         var x1 = compWidth; //left
         var x2 = -1; //right
         var y1 = compHeight; //top
@@ -299,16 +299,16 @@
                 addSlider.property(1).expression = expr;
                 var value = addSlider(1).value;
                 //find left edge
-                if ((value > 0) && (a < x1)) {x1 = a;}
+                if ((value > 0) && (a < x1)) { x1 = a; }
                 //find right edge
-                if ((value > 0) && (x2 < a)) {x2 = a;}
+                if ((value > 0) && (x2 < a)) { x2 = a; }
                 //find top edge
-                if ((value > 0) && (b < y1)) {y1 = b;}
+                if ((value > 0) && (b < y1)) { y1 = b; }
                 //find bottom edge
-                if ((value > 0) && (y2 < b)) {y2 = b;}
+                if ((value > 0) && (y2 < b)) { y2 = b; }
             }
             updateProgresstext(togvPal, b + " / " + compHeight);
-            updateProgressbar(togvPal, 0, b+1, compHeight);
+            updateProgressbar(togvPal, 0, b + 1, compHeight);
         }
 
         analizeComp.remove();
@@ -340,7 +340,7 @@
     }
 
     // main
-    function transparentOGV_main() {      
+    function transparentOGV_main() {
         //get general info
         var outPath = togvData.outputPath;
         var frames = togvData.activeItemFrames;
@@ -443,10 +443,10 @@
             newComp.layers.add(mainCompAlpha);
             var L1 = newComp.layers[2];
             var L2 = newComp.layers[1];
-            L1.property("ADBE Transform Group").property("ADBE Position").setValue([offsetLeft,offsetHight]);
-            L2.property("ADBE Transform Group").property("ADBE Position").setValue([offsetRight,offsetHight]);
-            L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
-            var newCompBG = newComp.layers.addSolid([0,0,0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
+            L1.property("ADBE Transform Group").property("ADBE Position").setValue([offsetLeft, offsetHight]);
+            L2.property("ADBE Transform Group").property("ADBE Position").setValue([offsetRight, offsetHight]);
+            L2.property("Effects").addProperty("Fill").property("Color").setValue([1, 1, 1, 1]);
+            var newCompBG = newComp.layers.addSolid([0, 0, 0], "compBG", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
             newCompBG.moveToEnd();
             //add avi to render queue
             var renderQueueComp = app.project.renderQueue.items.add(newComp);
@@ -493,7 +493,7 @@
                     }
                     transparentOGV_main();
                     app.endUndoGroup();
-                    togvPal.close();    
+                    togvPal.close();
                 }
             } else {
                 alert(transparentOGV_localize(togvData.strOutputErr));
@@ -515,7 +515,7 @@
     var appVersion = parseFloat(app.version);
     if (appVersion < 9.0) {
         alert(transparentOGV_localize(togvData.strMinAE));
-    } else if (appVersion > 13.0) {
+    } else if (appVersion > 13.2) {
         alert(transparentOGV_localize(togvData.strMaxAE));
     } else {
         // Build and show the floating palette

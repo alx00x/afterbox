@@ -1,7 +1,7 @@
 ﻿// dialogOGV.jsx
 // 
 // Name: dialogOGV
-// Version: 1.2
+// Version: 1.3
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -22,45 +22,45 @@
 
     dogvData.scriptNameShort = "DOGV";
     dogvData.scriptName = "Dialog OGV";
-    dogvData.scriptVersion = "1.2";
+    dogvData.scriptVersion = "1.3";
     dogvData.scriptTitle = dogvData.scriptName + " v" + dogvData.scriptVersion;
 
-    dogvData.strMinAE = {en: "This script requires Adobe After Effects CS4 or later."};
+    dogvData.strMinAE = { en: "This script requires Adobe After Effects CS4 or later." };
     dogvData.strMaxAE = { en: "This script does not work with Adobe After Effects CC2015 or later." };
-    dogvData.strActiveCompErr = {en: "Please select a composition."};
+    dogvData.strActiveCompErr = { en: "Please select a composition." };
 
-    dogvData.strExecute = {en: "Execute"};
-    dogvData.strCancel = {en: "Cancel"};
+    dogvData.strExecute = { en: "Execute" };
+    dogvData.strCancel = { en: "Cancel" };
 
-    dogvData.strSelect = {en: "Select"};
-    dogvData.strSelectText = {en: "Import sequences into project panel, select them and press the button:"};
-    dogvData.strExportTo = {en: "Export To"};
-    dogvData.strBrowse = {en: "Browse"};
-    dogvData.strBrowseText = {en: "Save OGV and PNG to:"};
+    dogvData.strSelect = { en: "Select" };
+    dogvData.strSelectText = { en: "Import sequences into project panel, select them and press the button:" };
+    dogvData.strExportTo = { en: "Export To" };
+    dogvData.strBrowse = { en: "Browse" };
+    dogvData.strBrowseText = { en: "Save OGV and PNG to:" };
 
-    dogvData.strOptions = {en: "Options"};
+    dogvData.strOptions = { en: "Options" };
 
-    dogvData.strWarning = {en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Setting smaller than 5 sample size is not recommended"};
-    dogvData.strPNGWarning = {en: "Warning: Could not find \"" + dogvData.outputTemplateName + "\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now."};
-    dogvData.strSpreadsheetErr = {en: "You need to specify output first."};
-    dogvData.strOutputErr = {en: "Output is not valid."};
+    dogvData.strWarning = { en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Setting smaller than 5 sample size is not recommended" };
+    dogvData.strPNGWarning = { en: "Warning: Could not find \"" + dogvData.outputTemplateName + "\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under eipixTools panel. Exporting as PSD for now." };
+    dogvData.strSpreadsheetErr = { en: "You need to specify output first." };
+    dogvData.strOutputErr = { en: "Output is not valid." };
 
-    dogvData.strCrop = {en: "Crop to Edges"};
-    dogvData.strSamples = {en: "Samples"};
-    dogvData.strFrameSkip = {en: "Skip frames"};
+    dogvData.strCrop = { en: "Crop to Edges" };
+    dogvData.strSamples = { en: "Samples" };
+    dogvData.strFrameSkip = { en: "Skip frames" };
     dogvData.strFrameSkipOpts = [0, 1, 2, 5, 10, 25];
 
-    dogvData.strSamplesHelpTip = {en: "Lower the value, slower the execution."};
-    dogvData.strFrameSkipHelpTip = {en: "Lower the value, slower the execution."};
+    dogvData.strSamplesHelpTip = { en: "Lower the value, slower the execution." };
+    dogvData.strFrameSkipHelpTip = { en: "Lower the value, slower the execution." };
 
-    dogvData.strInputSelectErr = {en: "No selected sequences."};
-    dogvData.strErrNotCorrectExt = {en: "Following item is not a PNG sequence:"};
-    dogvData.strErrNotCorrectFPS = {en: "Following item is not interpreted as 25fps sequence:"};
+    dogvData.strInputSelectErr = { en: "No selected sequences." };
+    dogvData.strErrNotCorrectExt = { en: "Following item is not a PNG sequence:" };
+    dogvData.strErrNotCorrectFPS = { en: "Following item is not interpreted as 25fps sequence:" };
 
-    dogvData.strHelp = {en: "?"};
-    dogvData.strHelpTitle = {en: "Help"};
-    dogvData.strErr = {en: "Something went wrong."};
-    dogvData.strHelpText = {en: "This script prepares a composition and adds render items for engine use. Script checks if dimensions are dividable by 16 and offers an option to reduce unnecessarily space around the object."};
+    dogvData.strHelp = { en: "?" };
+    dogvData.strHelpTitle = { en: "Help" };
+    dogvData.strErr = { en: "Something went wrong." };
+    dogvData.strHelpText = { en: "This script prepares a composition and adds render items for engine use. Script checks if dimensions are dividable by 16 and offers an option to reduce unnecessarily space around the object." };
 
     // Define project variables
     dogvData.outputQuality = "Best Settings";
@@ -77,7 +77,7 @@
 
     // Build UI
     function dialogOGV_buildUI(thisObj) {
-        var pal = new Window("palette", dogvData.scriptName, undefined, {resizeable:false});
+        var pal = new Window("palette", dogvData.scriptName, undefined, { resizeable: false });
         if (pal !== null) {
             var res =
                 "group { \
@@ -145,16 +145,16 @@
             pal.layout.layout(true);
             pal.grp.minimumSize = pal.grp.size;
             pal.layout.resize();
-            pal.onResizing = pal.onResize = function() {
+            pal.onResizing = pal.onResize = function () {
                 this.layout.resize();
             }
 
             pal.grp.input.lst.enabled = true;
-            pal.grp.input.sel.btn.onClick = function() {
+            pal.grp.input.sel.btn.onClick = function () {
                 collectFilesAndReduce_doSelectSequences();
             }
 
-            pal.grp.output.select.btn.onClick = function() {
+            pal.grp.output.select.btn.onClick = function () {
                 dialogOGV_doBrowse();
             }
 
@@ -170,7 +170,7 @@
             pal.grp.options.skp.list.selection = 3;
 
             //Samples slider change
-            pal.grp.options.sam.fld.onChange = function() {
+            pal.grp.options.sam.fld.onChange = function () {
                 var value = parseInt(this.text);
                 if (isNaN(value)) {
                     value = this.parent.sld.value;
@@ -182,7 +182,7 @@
                 this.text = value.toString();
                 this.parent.sld.value = value;
             }
-            pal.grp.options.sam.sld.onChange = pal.grp.options.sam.sld.onChanging = function() {
+            pal.grp.options.sam.sld.onChange = pal.grp.options.sam.sld.onChanging = function () {
                 var value = parseInt(this.value);
                 if (isNaN(value)) {
                     value = parseInt(this.parent.fld.text);
@@ -202,7 +202,7 @@
             pal.grp.options.sam.sld.enabled = false;
             //var warningShow = true;
 
-            pal.grp.options.crp.box1.onClick = function() {
+            pal.grp.options.crp.box1.onClick = function () {
                 if (pal.grp.options.crp.box1.value == true) {
                     pal.grp.options.skp.text.enabled = true;
                     pal.grp.options.skp.list.enabled = true;
@@ -226,7 +226,7 @@
                 }
             }
 
-            pal.grp.header.help.onClick = function() {
+            pal.grp.header.help.onClick = function () {
                 alert(dogvData.scriptTitle + "\n" + dialogOGV_localize(dogvData.strHelpText), dialogOGV_localize(dogvData.strHelpTitle));
             }
 
@@ -283,7 +283,7 @@
                 }
                 if (currentItem.frameRate != 25) {
                     alert(dialogOGV_localize(dogvData.strErrNotCorrectFPS) + "\n" + currentItem.name, "Warning");
-                }    
+                }
                 dogvData.sequenceItems.push(currentItem);
             }
         }
@@ -330,7 +330,7 @@
         //analize for x1, x2, y1 and y2
         var compHeight = analizeComp.height;
         var compWidth = analizeComp.width;
- 
+
         var x1 = compWidth; //left
         var x2 = -1; //right
         var y1 = compHeight; //top
@@ -343,16 +343,16 @@
                 addSlider.property(1).expression = expr;
                 var value = addSlider(1).value;
                 //find left edge
-                if ((value > 0) && (a < x1)) {x1 = a;}
+                if ((value > 0) && (a < x1)) { x1 = a; }
                 //find right edge
-                if ((value > 0) && (x2 < a)) {x2 = a;}
+                if ((value > 0) && (x2 < a)) { x2 = a; }
                 //find top edge
-                if ((value > 0) && (b < y1)) {y1 = b;}
+                if ((value > 0) && (b < y1)) { y1 = b; }
                 //find bottom edge
-                if ((value > 0) && (y2 < b)) {y2 = b;}
+                if ((value > 0) && (y2 < b)) { y2 = b; }
             }
             updateProgresstext(dogvPal, b + " / " + compHeight);
-            updateProgressbar(dogvPal, 0, b+1, compHeight);
+            updateProgressbar(dogvPal, 0, b + 1, compHeight);
         }
 
         analizeComp.remove();
@@ -484,10 +484,10 @@
             newComp.layers.add(mainCompAlpha);
             var L1 = newComp.layers[2];
             var L2 = newComp.layers[1];
-            L1.property("ADBE Transform Group").property("ADBE Position").setValue([offsetLeft,offsetHight]);
-            L2.property("ADBE Transform Group").property("ADBE Position").setValue([offsetRight,offsetHight]);
-            L2.property("Effects").addProperty("Fill").property("Color").setValue([1,1,1,1]);
-            var newCompBG = newComp.layers.addSolid([0,0,0], "background_layer", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
+            L1.property("ADBE Transform Group").property("ADBE Position").setValue([offsetLeft, offsetHight]);
+            L2.property("ADBE Transform Group").property("ADBE Position").setValue([offsetRight, offsetHight]);
+            L2.property("Effects").addProperty("Fill").property("Color").setValue([1, 1, 1, 1]);
+            var newCompBG = newComp.layers.addSolid([0, 0, 0], "background_layer", newComp.width, newComp.height, newComp.pixelAspect, newComp.duration);
             newCompBG.moveToEnd();
             //add avi to render queue
             var renderQueueComp = app.project.renderQueue.items.add(newComp);
@@ -542,7 +542,7 @@
     var appVersion = parseFloat(app.version);
     if (appVersion < 9.0) {
         alert(dialogOGV_localize(dogvData.strMinAE));
-    } else if (appVersion > 13.0) {
+    } else if (appVersion > 13.2) {
         alert(dialogOGV_localize(dogvData.strMaxAE));
     } else {
         // Build and show the floating palette
