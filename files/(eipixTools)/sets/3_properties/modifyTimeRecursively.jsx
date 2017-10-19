@@ -1,7 +1,7 @@
 ﻿// modifyTimeRecursively.jsx
 // 
 // Name: modifyTimeRecursively
-// Version: 1.0
+// Version: 1.1
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -16,7 +16,7 @@
     var mtrData = new Object(); // Store globals in an object
     mtrData.scriptNameShort = "MTR";
     mtrData.scriptName = "Modify Time Recursively";
-    mtrData.scriptVersion = "1.0";
+    mtrData.scriptVersion = "1.1";
     mtrData.scriptTitle = mtrData.scriptName + " v" + mtrData.scriptVersion;
 
     mtrData.timeUnit;
@@ -140,10 +140,11 @@
             } else if (curLayer.source instanceof CompItem) {
                 theComp.layer(i).startTime = curLayerStartTime;
                 theComp.layer(i).inPoint = curLayerInPoint;
-                if  (curLayerStartTime == 0) {
+                if (curLayerInPoint <= 0) {
                     addStart_main(curLayerSource, timeFrames, true);
                 } else {
-                    addStart_main(curLayerSource, timeFrames, false);
+                    // addStart_main(curLayerSource, timeFrames, false);
+                    theComp.layer(i).startTime = curLayerStartTime + numOfSec;
                 }
                 theComp.layer(i).outPoint = curLayerOutPoint + numOfSec;
             } else {
