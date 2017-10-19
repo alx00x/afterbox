@@ -1,7 +1,7 @@
 ﻿// modifyTimeRecursively.jsx
 // 
 // Name: modifyTimeRecursively
-// Version: 1.2
+// Version: 1.5
 // Author: Aleksandar Kocic
 // 
 // Description:     
@@ -16,7 +16,7 @@
     var mtrData = new Object(); // Store globals in an object
     mtrData.scriptNameShort = "MTR";
     mtrData.scriptName = "Modify Time Recursively";
-    mtrData.scriptVersion = "1.2";
+    mtrData.scriptVersion = "1.5";
     mtrData.scriptTitle = mtrData.scriptName + " v" + mtrData.scriptVersion;
 
     mtrData.timeUnit;
@@ -106,6 +106,99 @@
         return pal;
     }
 
+    // Help Functions:
+    //
+
+    // Description:
+    // This function is written by redefinery
+    // http://www.redefinery.com
+    function rd_Scooter_shiftKeyToNewTime(prop, keyToCopy, offset, keyToRemove) {
+        // Remember the key's settings before creating the new setting, just in case creating the new key affects keyToCopy's settings
+        var inInterp = prop.keyInInterpolationType(keyToCopy);
+        var outInterp = prop.keyOutInterpolationType(keyToCopy);
+        var keyToCopyValue = prop.keyValue(keyToCopy);
+
+        if ((inInterp === KeyframeInterpolationType.BEZIER) && (outInterp === KeyframeInterpolationType.BEZIER)) {
+            var tempAutoBezier = prop.keyTemporalAutoBezier(keyToCopy);
+            var tempContBezier = prop.keyTemporalContinuous(keyToCopy);
+        }
+        if (outInterp !== KeyframeInterpolationType.HOLD) {
+            var inTempEase = prop.keyInTemporalEase(keyToCopy);
+            var outTempEase = prop.keyOutTemporalEase(keyToCopy);
+        }
+        if ((prop.propertyValueType === PropertyValueType.TwoD_SPATIAL) || (prop.propertyValueType === PropertyValueType.ThreeD_SPATIAL)) {
+            var spatAutoBezier = prop.keySpatialAutoBezier(keyToCopy);
+            var spatContBezier = prop.keySpatialContinuous(keyToCopy);
+            var inSpatTangent = prop.keyInSpatialTangent(keyToCopy);
+            var outSpatTangent = prop.keyOutSpatialTangent(keyToCopy);
+            var roving = prop.keyRoving(keyToCopy);
+        }
+
+        // Create the new keyframe
+        var newTime = prop.keyTime(keyToCopy) + offset;
+        var newKeyIndex = prop.addKey(newTime);
+        prop.setValueAtKey(newKeyIndex, keyToCopyValue);
+
+        if (outInterp !== KeyframeInterpolationType.HOLD) {
+            prop.setTemporalEaseAtKey(newKeyIndex, inTempEase, outTempEase);
+        }
+
+        // Copy over the keyframe settings
+        prop.setInterpolationTypeAtKey(newKeyIndex, inInterp, outInterp);
+
+        if ((inInterp === KeyframeInterpolationType.BEZIER) && (outInterp === KeyframeInterpolationType.BEZIER) && tempContBezier) {
+            prop.setTemporalContinuousAtKey(newKeyIndex, tempContBezier);
+            prop.setTemporalAutoBezierAtKey(newKeyIndex, tempAutoBezier);		// Implies Continuous, so do after it
+        }
+
+        if ((prop.propertyValueType === PropertyValueType.TwoD_SPATIAL) || (prop.propertyValueType === PropertyValueType.ThreeD_SPATIAL)) {
+            prop.setSpatialContinuousAtKey(newKeyIndex, spatContBezier);
+            prop.setSpatialAutoBezierAtKey(newKeyIndex, spatAutoBezier);		// Implies Continuous, so do after it
+
+            prop.setSpatialTangentsAtKey(newKeyIndex, inSpatTangent, outSpatTangent);
+
+            prop.setRovingAtKey(newKeyIndex, roving);
+        }
+
+        // Remove the old keyframe
+        prop.removeKey(keyToRemove);
+    }
+
+    // Description:
+    // This function is written by redefinery
+    // http://www.redefinery.com
+    function rd_Scooter_scootAllPropGroupKeys(propGroup, offset) {
+        var prop, newTime, newValue, keyIndex;
+
+        // Iterate over the specified property group's properties
+        for (var i = 1; i <= propGroup.numProperties; i++) {
+            var keyTimes = new Array();
+
+            prop = propGroup.property(i);
+            if (prop.propertyType === PropertyType.PROPERTY)			// Found a property
+            {
+                if (!prop.isTimeVarying)							// Skip properties that aren't keyframed
+                    continue;
+
+                // Loop through the property's keyframes in the direction such that new
+                // keyframes will not affect the indices of existing keyframes
+                if (offset > 0) {
+                    for (var j = prop.numKeys; j >= 1; j--)
+                        rd_Scooter_shiftKeyToNewTime(prop, j, offset, j);
+                }
+                else {
+                    for (var j = 1; j <= prop.numKeys; j++)
+                        rd_Scooter_shiftKeyToNewTime(prop, j, offset, j + 1);
+                }
+            }
+            else if (prop.propertyType === PropertyType.INDEXED_GROUP)	// Found an indexed group, so check its nested properties
+                rd_Scooter_scootAllPropGroupKeys(prop, offset);
+            else if (prop.propertyType === PropertyType.NAMED_GROUP)	// Found a named group, so check its nested properties
+                rd_Scooter_scootAllPropGroupKeys(prop, offset);
+        }
+    }
+	
+
     // Main Functions:
     //
     function addStart_main(theComp, timeFrames, extendLeft) {
@@ -142,6 +235,10 @@
                 theComp.layer(i).startTime = curLayerStartTime;
                 theComp.layer(i).inPoint = curLayerInPoint;
                 if (curLayerInPoint <= 0) {
+                    // shift keyframes
+                    rd_Scooter_scootAllPropGroupKeys(curLayer, numOfSec);
+                    
+                    // continue recursivly
                     addStart_main(curLayerSource, timeFrames, true);
                 } else {
                     // addStart_main(curLayerSource, timeFrames, false);
