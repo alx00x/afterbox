@@ -1,7 +1,7 @@
 ﻿// productionRender.jsx
 //
 // Name: productionRender
-// Version: 1.9
+// Version: 1.10
 // Author: Aleksandar Kocic
 //
 // Description:
@@ -27,7 +27,7 @@
 
     prrData.scriptNameShort = "PR";
     prrData.scriptName = "Production Render";
-    prrData.scriptVersion = "1.9";
+    prrData.scriptVersion = "1.10";
     prrData.scriptTitle = prrData.scriptName + " v" + prrData.scriptVersion;
 
     prrData.strErrNotTopComp = { en: "Note: Composition you are rendering is not top composition in hierarchy." };
@@ -704,7 +704,7 @@
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Lossless Video\r\n";
         batContent += "\"%ffmpeg%\" -y -start_number " + startFrame + " -framerate " + prrData.frameRate + " -i " + addQuotes(sequenceFramePath) + " -i " + addQuotes(fileOutPath + ".wav") + " -r "
-            + prrData.frameRate + " -c:v libx264 -pix_fmt yuv420p -preset slow -tune animation -crf 0 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
+            + prrData.frameRate + " -c:v libx264 -pix_fmt yuv420p -preset slow -tune animation -x264opts keyint=1 -crf 0 -c:a aac -strict -2 -b:a 128k " + addQuotes(fileOutPath + "_lossless.mp4") + "\r\n";
 
         batContent += "echo.\r\n";
         batContent += "echo [Converting] Preview Video\r\n";
