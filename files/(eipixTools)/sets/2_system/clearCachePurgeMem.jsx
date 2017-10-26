@@ -32,7 +32,7 @@
     var PurgeMemData = new Object(); // Store globals in an object
     PurgeMem.scriptNameShort = "CCPM";
     PurgeMem.scriptName = "Clear Cache Purge Memory";
-    PurgeMem.scriptVersion = "1.4";
+    PurgeMem.scriptVersion = "1.5";
     PurgeMem.scriptTitle = PurgeMem.scriptName + " v" + PurgeMem.scriptVersion;
     PurgeMem.strExecute = {en: "Clear Cache"};
 
@@ -66,6 +66,21 @@
                     alignment:['fill','top'], \
                     title: StaticText { text:'" + PurgeMem.scriptNameShort + " v" + PurgeMem.scriptVersion + "', alignment:['fill','center'] }, \
                     help: Button { text:'" + PurgeMem_localize(PurgeMem.strHelp) + "', maximumSize:[30,20], alignment:['right','center'] }, \
+                }, \
+                sepr: Group { \
+                    orientation:'row', alignment:['fill','top'], \
+                    rule: Panel { height: 2, alignment:['fill','center'] }, \
+                }, \
+                inst: Group { \
+                    orientation:'row', alignment:['left','fill'], \
+                    instgrp: Group { \
+                        orientation: 'column', alignment:['left','center'], \
+                        instructions: StaticText { text:'Cleans up AE cache and ram memory.', alignment:['left','fill']}, \
+                    }, \
+                }, \
+                sepr: Group { \
+                    orientation:'row', alignment:['fill','top'], \
+                    rule: Panel { height: 2, alignment:['fill','center'] }, \
                 }, \
                 cmds: Group { \
                     alignment:['fill','bottom'], \
