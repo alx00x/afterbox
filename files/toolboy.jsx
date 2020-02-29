@@ -21,7 +21,7 @@
     // Global variables
     var toolboyData = new Object();
     toolboyData.scriptName = "Toolboy";
-    toolboyData.version = "4.2";
+    toolboyData.version = "5.0";
     toolboyData.thisScriptsFolder = new Folder((new File($.fileName)).path);
     toolboyData.etcPath = toolboyData.thisScriptsFolder.fsName + "\\(toolboy)\\etc\\";
     toolboyData.helpersPath = toolboyData.thisScriptsFolder.fsName + "\\(toolboy)\\helpers\\";
