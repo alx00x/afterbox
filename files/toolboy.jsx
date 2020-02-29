@@ -227,8 +227,7 @@
                 }
                 var repoCommits = Object.size(getAllCommitsJSON);
                 count = repoCommits;
-                
-                perpage_last_sha = getAllCommitsJSON[Object.size(getAllCommitsJSON)].sha;
+                perpage_last_sha = getAllCommitsJSON[repoCommits - 1].sha;
                 
                 if (count > 1) {
                     repoCommitCount = repoCommitCount + repoCommits;
@@ -260,7 +259,7 @@
             system.callSystem("cmd.exe /c mkdir \"" + tempFolder.fsName + "\"");
         }
 
-        var downloadUpdateCommand = "(toolboy)/update/curl.exe -L -k -s " + toolboyData.repoFullDomain + "/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/repository/" + toolboyData.repoBranch + "/archive.zip" + " -o (toolboy)/update/deploy.zip";
+        var downloadUpdateCommand = "(toolboy)/update/curl.exe -L -k -s " + toolboyData.repoURL + "/zipball/deploy -o (eipixTools)/update/deploy.zip";;
         var downloadUpdateResponse = system.callSystem(downloadUpdateCommand);
 
         var unzipUpdateCommand = "\"" + toolboyData.updatePath + "unzip.vbs\" " + "\"" + toolboyData.updatePath + "deploy.zip" + "\"" + " " + "\"" + tempFolder.fsName + "\"";
@@ -812,8 +811,7 @@
                 if (isUpdateNeeded(repoURL) == true) {
                     var confirmPrompt = confirm(toolboyData.scriptName + ":\n" + toolboyData.strConfirmUpdate);
                     if (confirmPrompt == true) {
-                        alert("Update is needed.")
-                        // updateFromGitHub();
+                        updateFromGitHub();
                     }
                 }
             } else {
