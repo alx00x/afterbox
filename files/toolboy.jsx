@@ -259,7 +259,7 @@
             system.callSystem("cmd.exe /c mkdir \"" + tempFolder.fsName + "\"");
         }
 
-        var downloadUpdateCommand = "(toolboy)/update/curl.exe -L -k -s " + toolboyData.repoURL + "/zipball/deploy -o (eipixTools)/update/deploy.zip";;
+        var downloadUpdateCommand = "(toolboy)/update/curl.exe -L -k -s " + toolboyData.repoURL + "/zipball/deploy -o (toolboy)/update/deploy.zip";
         var downloadUpdateResponse = system.callSystem(downloadUpdateCommand);
 
         var unzipUpdateCommand = "\"" + toolboyData.updatePath + "unzip.vbs\" " + "\"" + toolboyData.updatePath + "deploy.zip" + "\"" + " " + "\"" + tempFolder.fsName + "\"";
