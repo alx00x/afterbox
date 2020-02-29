@@ -215,7 +215,7 @@
             //get commit count on branch
             var count = 0;
             var perpage_last_sha = repoSha;
-            var repoCommitCount = 0;
+            var repoCommitCount = 1;
             while (count != 1) {
                 var getAllCommitsCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"" + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/commits?per_page=100&sha=" + perpage_last_sha + "\"";
                 var getAllCommitsResponse = system.callSystem(getAllCommitsCommand);
@@ -230,7 +230,7 @@
                 perpage_last_sha = getAllCommitsJSON[repoCommits - 1].sha;
                 
                 if (count > 1) {
-                    repoCommitCount = repoCommitCount + repoCommits;
+                    repoCommitCount = repoCommitCount + repoCommits - 1;
                 }
             }
 
