@@ -1,15 +1,12 @@
 import os
 import sys
+import time
 import shutil
 import winreg
 import logging
 import pathlib
 import subprocess
 from PySide2 import QtCore, QtGui, QtWidgets
-
-
-self = sys.modules[__name__]
-self._path = os.path.dirname(__file__)
 
 
 def resource(relative_path):
@@ -39,6 +36,7 @@ class Handler(logging.Handler):
         msg = self.format(record)
         print(msg)
         self.widget.appendPlainText(msg)
+        self.widget.verticalScrollBar().setValue(self.widget.verticalScrollBar().maximum())
         QtCore.QCoreApplication.processEvents()
 
 # ------------------------------------------------------------------------------
@@ -123,8 +121,7 @@ class Window(QtWidgets.QDialog):
 
         # Master Stack ---------------------------------------------------------
 
-        master_stack = QtWidgets.QFrame(self)
-        master_stack_layout = QtWidgets.QStackedLayout(master_stack)
+        master_stack = QtWidgets.QStackedWidget(self)
 
         # Main Frame -----------------------------------------------------------
 
@@ -151,8 +148,12 @@ class Window(QtWidgets.QDialog):
 
         # Logger Frame ---------------------------------------------------------
 
-        logger_frame = QtWidgets.QWidget(self)
+        logger_frame = QtWidgets.QFrame(self)
         logger_frame_layout = QtWidgets.QVBoxLayout(logger_frame)
+
+        status_label = QtWidgets.QLabel(self)
+        status_label.setFixedHeight(5)
+        status_label.setStyleSheet("background: #CCCCCC")
 
         logger_widget = QtWidgets.QPlainTextEdit(self)
         logger_widget_policy = QtWidgets.QSizePolicy(
@@ -160,6 +161,7 @@ class Window(QtWidgets.QDialog):
         logger_widget_policy.setVerticalStretch(1)
         logger_widget.setSizePolicy(logger_widget_policy)
 
+        logger_frame_layout.addWidget(status_label)
         logger_frame_layout.addWidget(logger_widget)
 
         # Footer ---------------------------------------------------------------
@@ -185,8 +187,8 @@ class Window(QtWidgets.QDialog):
         # ----------------------------------------------------------------------
 
         # Master Stack
-        master_stack_layout.addWidget(main_frame)
-        master_stack_layout.addWidget(logger_frame)
+        master_stack.addWidget(main_frame)
+        master_stack.addWidget(logger_frame)
 
         # Master Layout
         master_layout.addWidget(master_stack)
@@ -198,13 +200,16 @@ class Window(QtWidgets.QDialog):
         # ----------------------------------------------------------------------
         # Data
         self.data = {
+            "stack": {
+                "master": master_stack,
+            },
             "label": {
                 "version": version_label,
+                "status": status_label,
             },
             "widget": {
                 "logger": logger_widget,
                 "chooser": chooser_list,
-                "logger": logger_widget,
             },
             "button": {
                 "install": button_install,
@@ -252,18 +257,72 @@ class Window(QtWidgets.QDialog):
         self.logger.info("Initialization complete.")
 
     def on_install_clicked(self):
+        stack = self.data["stack"]["master"]
+        stack.setCurrentIndex(1)
+
+        QtCore.QCoreApplication.processEvents()
+        self.logger.info("...")
+        time.sleep(.5)
+
         chooser = self.data["widget"]["chooser"]
         install_path = chooser.itemData(chooser.currentIndex())
 
-        self.logger.info("Installing at '%s'", install_path)
+        install_path = os.path.join(install_path, "Scripts", "ScriptUI Panels")
+        if not os.path.isdir(install_path):
+            self.logger.error("Path does not exist: %s", install_path)
+            return
 
-        files_directory = resource("files")
-        files = list(pathlib.Path(files_directory).rglob("*.*"))
+        self.data["button"]["install"].setEnabled(False)
+        install = self._install(install_path)
 
-        for f in files:
-            self.logger.info(f)
+        if install:
+            self.data["label"]["status"].setStyleSheet("background: #009CFF;")
+            self.logger.info("Installation successful!")
+        else:
+            self.data["label"]["status"].setStyleSheet("background: #FF0000;")
+            self.logger.error("Installation failed.")
+
+    def _install(self, destination):
+        self.logger.info("Installing at '%s'", destination)
+
+        files = list(pathlib.Path(resource("files")).rglob("*.*"))
+        files_destination_root = destination + "/(toolboy)"
+        script_destination = destination + "/toolboy.jsx"
+
+        perm_script = resource("res/permissions.vbs")
+        try:
+
+            if os.path.isdir(files_destination_root):
+                self.logger.info("Removing folder: %s", files_destination_root)
+                shutil.rmtree(files_destination_root)
+
+            if os.path.isfile(script_destination):
+                self.logger.info("Removing file: %s", script_destination)
+                os.remove(script_destination)
+
+            for each in files:
+                _, f = each.as_posix().split("/files/")
+                dest = pathlib.Path(destination, f)
+
+                if not os.path.exists(os.path.dirname(dest)):
+                    self.logger.info("Creating direcotry: %s", os.path.dirname(dest))
+                    os.makedirs(os.path.dirname(dest))
+
+                self.logger.info("Copying file: %s", each.name)
+                shutil.copyfile(each, dest)
+
+            self.logger.info("Setting permissions...")
+            no_window = 0x08000000
+            subprocess.call("cscript \"" + perm_script + "\"" + " " +
+                            "\"" + files_destination_root + "\"", creationflags=no_window)
+        except Exception as err:
+            self.logger.error(err)
+            return False
+
+        return True
 
     def on_exit_clicked(self):
+        self.logger.info("Exiting..")
         self.close()
 
 
