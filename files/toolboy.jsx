@@ -190,7 +190,7 @@
         toolboyData.repoProject = splitURL[4];
 
         //get latest commit sha
-        var latestCommitCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/git/refs/heads/" + toolboyData.repoBranch;
+        var latestCommitCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/commits/" + toolboyData.repoBranch;
 
         var latestCommitResponse = system.callSystem(latestCommitCommand);
         try {
@@ -203,14 +203,14 @@
         var localSha = toolboyData.localHash;
 
         //check if able to pull data from github repo
-        if (latestCommitJSON.object == undefined) {
+        if (latestCommitJSON.sha == undefined) {
             alert(toolboyData.errCouldNotUpdate);
             return false;
         } else {
 
             //update global variables
-            var repoSha = latestCommitJSON.object.sha;
-            var latestCommitDate = latestCommitJSON.created_at;
+            var repoSha = latestCommitJSON.sha;
+            var latestCommitDate = latestCommitJSON.commit.author.date;
 
             //get commit count on branch
             var count = 0;
