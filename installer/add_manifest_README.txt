@@ -5,11 +5,11 @@ make manifest file: filename.exe.manifest
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 <assemblyIdentity
-    name="eipixTools"
+    name="toolboy"
     processorArchitecture="x86"
     version="3.2.0.0"
     type="win32"/>
-<description>Eipix Tools for After Effects v3.2</description>
+<description>Toolboy for After Effects v3.2</description>
    <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
       <security>
       <requestedPrivileges>

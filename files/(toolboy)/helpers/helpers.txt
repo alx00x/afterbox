@@ -1,0 +1,1 @@
+This folder will autoupdate. Use it to distribute additional files (like etc folder but since etc does not autoupdate, this will help in certain situations).
