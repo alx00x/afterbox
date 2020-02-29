@@ -3,6 +3,7 @@ import sys
 import shutil
 import winreg
 import logging
+import pathlib
 import subprocess
 from PySide2 import QtCore, QtGui, QtWidgets
 
@@ -11,15 +12,15 @@ self = sys.modules[__name__]
 self._path = os.path.dirname(__file__)
 
 
-def resource(*path):
-    path = os.path.join(self._path, "res", *path)
-    return path.replace("\\", "/")
+def resource(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 
 VERSION = "5.0"
 WINDOW_TITLE = "Install"
 WINDOW_OBJECT = "toolboy_window"
-WINDOW_ICON = resource("icon.png")
 
 # ------------------------------------------------------------------------------
 # Logging
@@ -81,7 +82,8 @@ class Window(QtWidgets.QDialog):
         self.setObjectName(WINDOW_OBJECT)
         self.setAcceptDrops(False)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(WINDOW_ICON), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(resource("res/icon.png")),
+                       QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
 
         self.data = dict()
@@ -130,7 +132,7 @@ class Window(QtWidgets.QDialog):
         main_frame_layout = QtWidgets.QVBoxLayout(main_frame)
 
         banner = QtWidgets.QLabel(self)
-        banner.setPixmap(QtGui.QPixmap(resource("header.png")))
+        banner.setPixmap(QtGui.QPixmap(resource("res/header.png")))
 
         chooser_layout = QtWidgets.QVBoxLayout()
         chooser_label = QtWidgets.QLabel(self)
@@ -254,6 +256,12 @@ class Window(QtWidgets.QDialog):
         install_path = chooser.itemData(chooser.currentIndex())
 
         self.logger.info("Installing at '%s'", install_path)
+
+        files_directory = resource("files")
+        files = list(pathlib.Path(files_directory).rglob("*.*"))
+
+        for f in files:
+            self.logger.info(f)
 
     def on_exit_clicked(self):
         self.close()

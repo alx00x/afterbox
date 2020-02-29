@@ -1,0 +1,51 @@
+# -*- mode: python ; coding: utf-8 -*-
+
+block_cipher = None
+
+
+a = Analysis(['toolboy_install.py'],
+             pathex=['D:\\repo\\toolboy-ae'],
+             binaries=[],
+             datas=[
+                 ('res/*.*', 'res'),
+                 ('files/*.jsx', 'files'),
+                 ('files/(toolboy)/etc/*.*', 'files/(toolboy)/etc'),
+                 ('files/(toolboy)/helpers/*.*', 'files/(toolboy)/helpers'),
+                 ('files/(toolboy)/images/*.*', 'files/(toolboy)/images'),
+                 ('files/(toolboy)/startup/*.*', 'files/(toolboy)/startup'),
+                 ('files/(toolboy)/update/*.*', 'files/(toolboy)/update'),
+                 ('files/(toolboy)/sets/1_effects/*.*', 'files/(toolboy)/sets/1_effects'),
+                 ('files/(toolboy)/sets/2_system/*.*', 'files/(toolboy)/sets/2_system'),
+                 ('files/(toolboy)/sets/3_properties/*.*', 'files/(toolboy)/sets/3_properties'),
+                 ('files/(toolboy)/sets/4_export/*.*', 'files/(toolboy)/sets/4_export'),
+                 ('files/(toolboy)/sets/5_animation/*.*', 'files/(toolboy)/sets/5_animation'),
+                 ('files/(toolboy)/sets/6_utils/*.*', 'files/(toolboy)/sets/6_utils'),
+                 ('files/(toolboy)/sets/7_render/*.*', 'files/(toolboy)/sets/7_render'),
+                 ('files/(toolboy)/sets/8_settings/*.*', 'files/(toolboy)/sets/8_settings'),
+             ],
+             hiddenimports=[],
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher,
+             noarchive=False)
+pyz = PYZ(a.pure, a.zipped_data,
+             cipher=block_cipher)
+exe = EXE(pyz,
+          a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
+          [],
+          name='toolboy_install',
+          debug=False,
+          bootloader_ignore_signals=False,
+          strip=False,
+          upx=True,
+          upx_exclude=[],
+          runtime_tmpdir=None,
+          console=True,
+          icon='res\\icon.ico',
+          manifest='manifest.xml')
