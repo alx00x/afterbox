@@ -1,4 +1,4 @@
-﻿#include "(toolboy)/update/json.js";
+﻿#include "(toolboy)/update/json2.js";
 // toolboy.jsx
 //
 // Name: Toolboy for After Effects
@@ -34,7 +34,7 @@
     toolboyData.scriptsFolderAlert = "Scripts folder was not found at the expected location.";
 
     toolboyData.errConnection = "Could not establish connection to repository. Please, check your internet connection.";
-    toolboyData.errCouldNotUpdate = "Failed to perform update.";
+    toolboyData.errCouldNotUpdate = "Could not perform the update. Please try later...";
     toolboyData.errUpdate = "Update failed.";
     toolboyData.strConfirmUpdate = "There is an update available. Do you wish to download it?";
     toolboyData.strCurrentHash = "Your current version hash is:\n";
@@ -83,6 +83,7 @@
     toolboyData.repoFullDomain;
     toolboyData.repoOwner;
     toolboyData.repoProject;
+    toolboyData.repoSha;
     toolboyData.repoBranch = "deploy";
 
     toolboyData.repoURL = "https://github.com/koaleksa/toolboy-ae";
@@ -182,6 +183,7 @@
     // isUpdateNeeded()
     // Function for checking if scripts are up to date
     function isUpdateNeeded(url) {
+        var localSha = toolboyData.localHash;
         var splitURL = url.split("/");
 
         toolboyData.repoDomain = splitURL[2];
@@ -190,8 +192,7 @@
         toolboyData.repoProject = splitURL[4];
 
         //get latest commit sha
-        var latestCommitCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/commits/" + toolboyData.repoBranch;
-
+        var latestCommitCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/git/ref/heads/" + toolboyData.repoBranch;
         var latestCommitResponse = system.callSystem(latestCommitCommand);
         try {
             var latestCommitJSON = JSON.parse(latestCommitResponse);;
@@ -199,44 +200,15 @@
             alert(toolboyData.errCouldNotUpdate + "\n\n" + err.toString());
             return false;
         }
-        
-        var localSha = toolboyData.localHash;
 
         //check if able to pull data from github repo
-        if (latestCommitJSON.sha == undefined) {
+        if (latestCommitJSON.message != undefined) {
             alert(toolboyData.errCouldNotUpdate);
             return false;
         } else {
-
             //update global variables
-            var repoSha = latestCommitJSON.sha;
-            var latestCommitDate = latestCommitJSON.commit.author.date;
-
-            //get commit count on branch
-            var count = 0;
-            var perpage_last_sha = repoSha;
-            var repoCommitCount = 1;
-            while (count != 1) {
-                var getAllCommitsCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"" + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/commits?per_page=100&sha=" + perpage_last_sha + "\"";
-                var getAllCommitsResponse = system.callSystem(getAllCommitsCommand);
-                try {
-                    var getAllCommitsJSON = JSON.parse(getAllCommitsResponse);
-                } catch(err) {
-                    alert(toolboyData.errCouldNotUpdate + "\n\n" + err.toString());
-                    return false;
-                }
-                var repoCommits = Object.size(getAllCommitsJSON);
-                count = repoCommits;
-                perpage_last_sha = getAllCommitsJSON[repoCommits - 1].sha;
-                
-                if (count > 1) {
-                    repoCommitCount = repoCommitCount + repoCommits - 1;
-                }
-            }
-
-            toolboyData.commitCount = repoCommitCount;
-            toolboyData.commitHash = repoSha;
-            toolboyData.commitDate = latestCommitDate;
+            var repoSha = latestCommitJSON.object.sha;
+            toolboyData.repoSha = repoSha
 
             //compare
             if (localSha != repoSha) {
@@ -245,6 +217,55 @@
                 return false;
             }
         }
+    }
+
+    // getUpdateData()
+    // Function for getting update data
+    function getUpdateData() {
+        var repoSha = toolboyData.repoSha;
+
+        //get latest commit date
+        var latestCommitCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/commits/" + repoSha;
+        var latestCommitResponse = system.callSystem(latestCommitCommand);
+        try {
+            var latestCommitJSON = JSON.parse(latestCommitResponse);;
+        } catch (err) {
+            alert(toolboyData.errCouldNotUpdate + "\n\n" + err.toString());
+            return false;
+        }
+        //check if able to pull data from github repo
+        if (latestCommitJSON.message != undefined) {
+            alert(toolboyData.errCouldNotUpdate);
+            return false;
+        }
+        var latestCommitDate = latestCommitJSON.commit.author.date;
+
+        //get commit count on branch
+        var count = 0;
+        var perpage_last_sha = repoSha;
+        var repoCommitCount = 1;
+        while (count != 1) {
+            var getAllCommitsCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"" + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/commits?per_page=100&sha=" + perpage_last_sha + "\"";
+            var getAllCommitsResponse = system.callSystem(getAllCommitsCommand);
+            try {
+                var getAllCommitsJSON = JSON.parse(getAllCommitsResponse);
+            } catch (err) {
+                alert(toolboyData.errCouldNotUpdate + "\n\n" + err.toString());
+                return false;
+            }
+            var repoCommits = Object.size(getAllCommitsJSON);
+            count = repoCommits;
+            perpage_last_sha = getAllCommitsJSON[repoCommits - 1].sha;
+
+            if (count > 1) {
+                repoCommitCount = repoCommitCount + repoCommits - 1;
+            }
+        }
+
+        toolboyData.commitDate = latestCommitDate;
+        toolboyData.commitCount = repoCommitCount;
+        toolboyData.commitHash = repoSha;
+        return true;
     }
 
 
@@ -811,7 +832,10 @@
                 if (isUpdateNeeded(repoURL) == true) {
                     var confirmPrompt = confirm(toolboyData.scriptName + ":\n" + toolboyData.strConfirmUpdate);
                     if (confirmPrompt == true) {
-                        updateFromGitHub();
+                        if (getUpdateData() == true) {
+                            alert("Updateing...");
+                            // updateFromGitHub();
+                        }
                     }
                 }
             } else {
