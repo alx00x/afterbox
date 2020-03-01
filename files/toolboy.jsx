@@ -833,8 +833,7 @@
                     var confirmPrompt = confirm(toolboyData.scriptName + ":\n" + toolboyData.strConfirmUpdate);
                     if (confirmPrompt == true) {
                         if (getUpdateData() == true) {
-                            alert("Updateing...");
-                            // updateFromGitHub();
+                            updateFromGitHub();
                         }
                     }
                 }
