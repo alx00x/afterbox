@@ -76,7 +76,7 @@
     bgrData.workAreaDuration = bgrData.activeItem.workAreaDuration;
 
     // Images
-    bgrData.imgFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(toolboy)/images");
+    bgrData.imgFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(afterbox)/images");
     bgrData.headerImage = new File(bgrData.imgFolder.fsName + "/backgroundRender_header.png");
 
     // Prototype startsWith

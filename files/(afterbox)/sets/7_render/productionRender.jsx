@@ -29,16 +29,16 @@
         return;
     }
 
-    // required toolboy check
-    var requiredToolboyVersion = 4.1;
-    if (app.settings.haveSetting("Toolboy", "Version")) {
-        var currentToolboyVersion = parseFloat(app.settings.getSetting("Toolboy", "Version"));
+    // required afterbox check
+    var requiredAfterBoxVersion = 4.1;
+    if (app.settings.haveSetting("AfterBox", "Version")) {
+        var currentAfterBoxVersion = parseFloat(app.settings.getSetting("AfterBox", "Version"));
     } else {
-        var currentToolboyVersion = 0.0;
+        var currentAfterBoxVersion = 0.0;
     }
 
-    if (currentToolboyVersion < requiredToolboyVersion) {
-        alert("This script requires toolboy version " + requiredToolboyVersion + " or later. Please update to use this!");
+    if (currentAfterBoxVersion < requiredAfterBoxVersion) {
+        alert("This script requires afterbox version " + requiredAfterBoxVersion + " or later. Please update to use this!");
         return;
     }
 
@@ -56,9 +56,9 @@
     prrData.strMinAE = { en: "This script requires Adobe After Effects CC2014 or later." };
     prrData.strActiveCompErr = { en: "Please select a composition." };
     prrData.strModulesErr = { en: "Export modules not found. Do you wish to install them?" };
-    prrData.strFFmppegErr = { en: "Dependency ffmpeg not found. Install new version of toolboy." };
-    prrData.strFFmppeg2TheoraErr = { en: "Dependency ffmpeg2theora not found. Install new version of toolboy!" };
-    prrData.strCurlErr = { en: "Dependency curl not found. Install new version of toolboy!" };
+    prrData.strFFmppegErr = { en: "Dependency ffmpeg not found. Install new version of afterbox." };
+    prrData.strFFmppeg2TheoraErr = { en: "Dependency ffmpeg2theora not found. Install new version of afterbox!" };
+    prrData.strCurlErr = { en: "Dependency curl not found. Install new version of afterbox!" };
 
     prrData.strSaveActionMsg = { en: "Project needs to be saved now. Are you ready to render?" };
     prrData.strInstructions = { en: "Rendering with the following settings:" };
@@ -192,15 +192,15 @@
     prrData.outputPath = app.project.file.parent.toString();
 
     // ffmpeg
-    prrData.etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(toolboy)/etc");
+    prrData.etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(afterbox)/etc");
     prrData.ffmpegPath = new File(prrData.etcFolder.fsName + "/ffmpeg.exe");
     prrData.ffmpeg2theoraPath = new File(prrData.etcFolder.fsName + "/ffmpeg2theora.exe");
 
     // curl
-    prrData.curl = new File(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(toolboy)/update/curl.exe");
+    prrData.curl = new File(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(afterbox)/update/curl.exe");
 
     // Images
-    prrData.imgFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(toolboy)/images");
+    prrData.imgFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(afterbox)/images");
     prrData.headerImage = new File(prrData.imgFolder.fsName + "/productionRender_header.png");
     prrData.redStatusImage = new File(prrData.imgFolder.fsName + "/productionRender_red.png");
     prrData.yellowStatusImage = new File(prrData.imgFolder.fsName + "/productionRender_yellow.png");
@@ -1179,7 +1179,7 @@
 
     // Run import output modules script (importRenderTemplates.jsx)
     function importRenderTemplates() {
-        var setsFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(toolboy)/sets");
+        var setsFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(afterbox)/sets");
         var jsxFiles = getFilesRecursively(setsFolder.fsName, "jsx", []);
         for (var i = 0; i < jsxFiles.length; i++) {
             var currentScript = new File(jsxFiles[i]);

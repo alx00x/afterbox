@@ -11,7 +11,7 @@
 
 
 (function importOutputSettings(thisObj) {
-    var etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(toolboy)/etc");
+    var etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(afterbox)/etc");
     var templatePath = new File(etcFolder.fsName + "/outputTemplates.aet");
 
     function importFunction() {
@@ -64,7 +64,7 @@
             }
 
             if ((outputNameArray.indexOf("WAV") == -1) || (outputNameArray.indexOf("PNG Seq Colors") == -1)) {
-                alert("WORNING:\r\rIt seems that you dont have the latest version of toolboy! Some scripts may not work properly.");
+                alert("WORNING:\r\rIt seems that you dont have the latest version of afterbox! Some scripts may not work properly.");
             }
 
             // See if any templates were added.

@@ -17,16 +17,16 @@
         return;
     }
 
-    // required toolboy check
-    var requiredToolboyVersion = 4.1;
-    if (app.settings.haveSetting("Toolboy", "Version")) {
-        var currentToolboyVersion = parseFloat(app.settings.getSetting("Toolboy", "Version"));
+    // required afterbox check
+    var requiredAfterBoxVersion = 4.1;
+    if (app.settings.haveSetting("AfterBox", "Version")) {
+        var currentAfterBoxVersion = parseFloat(app.settings.getSetting("AfterBox", "Version"));
     } else {
-        var currentToolboyVersion = 0.0;
+        var currentAfterBoxVersion = 0.0;
     }
 
-    if (currentToolboyVersion < requiredToolboyVersion) {
-        alert("This script requires toolboy version " + requiredToolboyVersion + " or later. Please update to use this script!");
+    if (currentAfterBoxVersion < requiredAfterBoxVersion) {
+        alert("This script requires afterbox version " + requiredAfterBoxVersion + " or later. Please update to use this script!");
         return;
     }
 
@@ -87,7 +87,7 @@
     pvrData.workAreaDuration = pvrData.activeItem.workAreaDuration;
 
     // Images
-    pvrData.imgFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(toolboy)/images");
+    pvrData.imgFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(afterbox)/images");
     pvrData.headerImage = new File(pvrData.imgFolder.fsName + "/previewRender_header.png");
 
     // Localize
