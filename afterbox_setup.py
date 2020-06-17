@@ -20,7 +20,7 @@ colors = {
     "blue": "#009CFF",
 }
 
-VERSION = "5.0"
+VERSION = "5.1"
 WINDOW_TITLE = "Install"
 WINDOW_OBJECT = "afterbox_window"
 
