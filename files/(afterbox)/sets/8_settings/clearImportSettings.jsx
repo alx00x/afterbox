@@ -1,6 +1,6 @@
 ﻿// clearImportSettings.jsx
 //
-// Name: clearToolboySettings
+// Name: clearAfterBoxSettings
 // Version: 1.0
 // Author: Aleksandar Kocic
 //

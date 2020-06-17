@@ -1,7 +1,7 @@
-﻿#include "(toolboy)/update/json2.js";
-// toolboy.jsx
+﻿#include "(afterbox)/update/json2.js";
+// afterbox.jsx
 //
-// Name: Toolboy for After Effects
+// Name: AfterBox for After Effects
 // Version: 5.0
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
@@ -9,7 +9,7 @@
 // Description:
 // This is a heavely modified script originally created by Jeff Almasol.
 // It provides a button launcher for scripts located in:
-// \Support Files\Scripts\ScriptUI Panels\(toolboy)\sets\
+// \Support Files\Scripts\ScriptUI Panels\(afterbox)\sets\
 //
 // Button icons must be 30x30 PNG image or smaller.
 //
@@ -17,86 +17,86 @@
 // or later.
 
 
-(function toolboy(thisObj) {
+(function afterbox(thisObj) {
     // Global variables
-    var toolboyData = new Object();
-    toolboyData.scriptName = "Toolboy";
-    toolboyData.version = "5.0";
-    toolboyData.thisScriptsFolder = new Folder((new File($.fileName)).path);
-    toolboyData.etcPath = toolboyData.thisScriptsFolder.fsName + "\\(toolboy)\\etc\\";
-    toolboyData.helpersPath = toolboyData.thisScriptsFolder.fsName + "\\(toolboy)\\helpers\\";
-    toolboyData.imagesPath = toolboyData.thisScriptsFolder.fsName + "\\(toolboy)\\images\\";
-    toolboyData.scriptsPath = toolboyData.thisScriptsFolder.fsName + "\\(toolboy)\\sets\\";
-    toolboyData.startupPath = toolboyData.thisScriptsFolder.fsName + "\\(toolboy)\\startup\\";
-    toolboyData.updatePath = toolboyData.thisScriptsFolder.fsName + "\\(toolboy)\\update\\";
-    toolboyData.tempPath = toolboyData.thisScriptsFolder.fsName + "\\(toolboy)\\temp\\";
+    var afterboxData = new Object();
+    afterboxData.scriptName = "AfterBox";
+    afterboxData.version = "5.0";
+    afterboxData.thisScriptsFolder = new Folder((new File($.fileName)).path);
+    afterboxData.etcPath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\etc\\";
+    afterboxData.helpersPath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\helpers\\";
+    afterboxData.imagesPath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\images\\";
+    afterboxData.scriptsPath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\sets\\";
+    afterboxData.startupPath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\startup\\";
+    afterboxData.updatePath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\update\\";
+    afterboxData.tempPath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\temp\\";
 
-    toolboyData.scriptsFolderAlert = "Scripts folder was not found at the expected location.";
+    afterboxData.scriptsFolderAlert = "Scripts folder was not found at the expected location.";
 
-    toolboyData.errConnection = "Could not establish connection to repository. Please, check your internet connection.";
-    toolboyData.errCouldNotUpdate = "Could not perform the update. Please try later...";
-    toolboyData.errUpdate = "Update failed.";
-    toolboyData.strConfirmUpdate = "There is an update available. Do you wish to download it?";
-    toolboyData.strCurrentHash = "Your current version hash is:\n";
+    afterboxData.errConnection = "Could not establish connection to repository. Please, check your internet connection.";
+    afterboxData.errCouldNotUpdate = "Could not perform the update. Please try later...";
+    afterboxData.errUpdate = "Update failed.";
+    afterboxData.strConfirmUpdate = "There is an update available. Do you wish to download it?";
+    afterboxData.strCurrentHash = "Your current version hash is:\n";
 
-    toolboyData.strOptions = "Options";
-    toolboyData.strCheckForUpdates = "Check For Updates";
-    toolboyData.strRepoURL = "Repo URL";
-    toolboyData.strIgnoreList = "Ignore list";
-    toolboyData.strChoose = "Choose";
+    afterboxData.strOptions = "Options";
+    afterboxData.strCheckForUpdates = "Check For Updates";
+    afterboxData.strRepoURL = "Repo URL";
+    afterboxData.strIgnoreList = "Ignore list";
+    afterboxData.strChoose = "Choose";
 
-    toolboyData.strInfo = "Info";
-    toolboyData.strVersion = "Version";
-    toolboyData.strUpdate = "Update";
-    toolboyData.strHash = "Hash";
-    toolboyData.strDate = "Date";
+    afterboxData.strInfo = "Info";
+    afterboxData.strVersion = "Version";
+    afterboxData.strUpdate = "Update";
+    afterboxData.strHash = "Hash";
+    afterboxData.strDate = "Date";
 
-    toolboyData.strBtnSave = "Save";
-    toolboyData.strBtnCancel = "Cancel";
+    afterboxData.strBtnSave = "Save";
+    afterboxData.strBtnCancel = "Cancel";
 
-    toolboyData.ChooseTitle = "Select to Ignore";
-    toolboyData.strBtnOk = "Ok";
+    afterboxData.ChooseTitle = "Select to Ignore";
+    afterboxData.strBtnOk = "Ok";
 
-    toolboyData.strSettings = "...";
-    toolboyData.strSettingsTip = "Settings";
-    toolboyData.strHelp = "?";
-    toolboyData.strHelpTip = "Help";
-    toolboyData.settingsTitle = toolboyData.scriptName + " Settings";
-    toolboyData.strHelpText = toolboyData.scriptName + " " + toolboyData.version + "\n" +
+    afterboxData.strSettings = "...";
+    afterboxData.strSettingsTip = "Settings";
+    afterboxData.strHelp = "?";
+    afterboxData.strHelpTip = "Help";
+    afterboxData.settingsTitle = afterboxData.scriptName + " Settings";
+    afterboxData.strHelpText = afterboxData.scriptName + " " + afterboxData.version + "\n" +
         "This script provides a button launcher for scripts located in:\n" +
-        toolboyData.scriptsPath + "\n" +
+        afterboxData.scriptsPath + "\n" +
         "\n";
-    toolboyData.strErrCantLaunchScript = "Could not launch %s because it no longer exists on disk."
-    toolboyData.strErrMinAE90 = "This script requires Adobe After Effects CS4 or later.";
-    toolboyData.strErrAccessDenied = "Unable to write files on disc.\n" +
+    afterboxData.strErrCantLaunchScript = "Could not launch %s because it no longer exists on disk."
+    afterboxData.strErrMinAE90 = "This script requires Adobe After Effects CS4 or later.";
+    afterboxData.strErrAccessDenied = "Unable to write files on disc.\n" +
         "Go to Edit > Preferences > General and make sure\n" +
         "\"Allow Scripts to Write Files and Access Network\" is checked.\n" +
         "\n";
-    toolboyData.strErrNoSettings = "Repo URL is not defined. Update Aborted.";
-    toolboyData.btnSize = 36;
+    afterboxData.strErrNoSettings = "Repo URL is not defined. Update Aborted.";
+    afterboxData.btnSize = 36;
 
     // init
-    toolboyData.scripts;
-    toolboyData.startupScripts;
+    afterboxData.scripts;
+    afterboxData.startupScripts;
 
-    toolboyData.repoDomain;
-    toolboyData.repoFullDomain;
-    toolboyData.repoOwner;
-    toolboyData.repoProject;
-    toolboyData.repoSha;
-    toolboyData.repoBranch = "deploy";
+    afterboxData.repoDomain;
+    afterboxData.repoFullDomain;
+    afterboxData.repoOwner;
+    afterboxData.repoProject;
+    afterboxData.repoSha;
+    afterboxData.repoBranch = "deploy";
 
-    toolboyData.repoURL = "https://github.com/koaleksa/toolboy-ae";
+    afterboxData.repoURL = "https://github.com/koaleksa/afterbox";
 
-    toolboyData.localCount;
-    toolboyData.localHash;
-    toolboyData.localDate;
-    toolboyData.commitCount;
-    toolboyData.commitHash;
-    toolboyData.commitDate;
+    afterboxData.localCount;
+    afterboxData.localHash;
+    afterboxData.localDate;
+    afterboxData.commitCount;
+    afterboxData.commitHash;
+    afterboxData.commitDate;
 
-    toolboyData.update;
-    toolboyData.ignoreList;
+    afterboxData.update;
+    afterboxData.ignoreList;
 
     Object.size = function (obj) {
         var size = 0, key;
@@ -168,14 +168,14 @@
     // Function to get current update hash
     function getLocalVersion() {
         //get local version
-        if (app.settings.haveSetting("Toolboy", "Commit Count")) {
-            toolboyData.localCount = app.settings.getSetting("Toolboy", "Commit Count");
+        if (app.settings.haveSetting("AfterBox", "Commit Count")) {
+            afterboxData.localCount = app.settings.getSetting("AfterBox", "Commit Count");
         }
-        if (app.settings.haveSetting("Toolboy", "Commit Hash")) {
-            toolboyData.localHash = app.settings.getSetting("Toolboy", "Commit Hash");
+        if (app.settings.haveSetting("AfterBox", "Commit Hash")) {
+            afterboxData.localHash = app.settings.getSetting("AfterBox", "Commit Hash");
         }
-        if (app.settings.haveSetting("Toolboy", "Commit Date")) {
-            toolboyData.localDate = app.settings.getSetting("Toolboy", "Commit Date");
+        if (app.settings.haveSetting("AfterBox", "Commit Date")) {
+            afterboxData.localDate = app.settings.getSetting("AfterBox", "Commit Date");
         }
     }
 
@@ -183,32 +183,32 @@
     // isUpdateNeeded()
     // Function for checking if scripts are up to date
     function isUpdateNeeded(url) {
-        var localSha = toolboyData.localHash;
+        var localSha = afterboxData.localHash;
         var splitURL = url.split("/");
 
-        toolboyData.repoDomain = splitURL[2];
-        toolboyData.repoFullDomain = splitURL[0] + "//" + splitURL[2];
-        toolboyData.repoOwner = splitURL[3];
-        toolboyData.repoProject = splitURL[4];
+        afterboxData.repoDomain = splitURL[2];
+        afterboxData.repoFullDomain = splitURL[0] + "//" + splitURL[2];
+        afterboxData.repoOwner = splitURL[3];
+        afterboxData.repoProject = splitURL[4];
 
         //get latest commit sha
-        var latestCommitCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/git/ref/heads/" + toolboyData.repoBranch;
+        var latestCommitCommand = "\"" + afterboxData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"https://api." + afterboxData.repoDomain + "/repos/" + afterboxData.repoOwner + "/" + afterboxData.repoProject + "/git/ref/heads/" + afterboxData.repoBranch;
         var latestCommitResponse = system.callSystem(latestCommitCommand);
         try {
             var latestCommitJSON = JSON.parse(latestCommitResponse);;
         } catch(err) {
-            alert(toolboyData.errCouldNotUpdate + "\n\n" + err.toString());
+            alert(afterboxData.errCouldNotUpdate + "\n\n" + err.toString());
             return false;
         }
 
         //check if able to pull data from github repo
         if (latestCommitJSON.message != undefined) {
-            alert(toolboyData.errCouldNotUpdate);
+            alert(afterboxData.errCouldNotUpdate);
             return false;
         } else {
             //update global variables
             var repoSha = latestCommitJSON.object.sha;
-            toolboyData.repoSha = repoSha
+            afterboxData.repoSha = repoSha
 
             //compare
             if (localSha != repoSha) {
@@ -222,20 +222,20 @@
     // getUpdateData()
     // Function for getting update data
     function getUpdateData() {
-        var repoSha = toolboyData.repoSha;
+        var repoSha = afterboxData.repoSha;
 
         //get latest commit date
-        var latestCommitCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/commits/" + repoSha;
+        var latestCommitCommand = "\"" + afterboxData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"https://api." + afterboxData.repoDomain + "/repos/" + afterboxData.repoOwner + "/" + afterboxData.repoProject + "/commits/" + repoSha;
         var latestCommitResponse = system.callSystem(latestCommitCommand);
         try {
             var latestCommitJSON = JSON.parse(latestCommitResponse);;
         } catch (err) {
-            alert(toolboyData.errCouldNotUpdate + "\n\n" + err.toString());
+            alert(afterboxData.errCouldNotUpdate + "\n\n" + err.toString());
             return false;
         }
         //check if able to pull data from github repo
         if (latestCommitJSON.message != undefined) {
-            alert(toolboyData.errCouldNotUpdate);
+            alert(afterboxData.errCouldNotUpdate);
             return false;
         }
         var latestCommitDate = latestCommitJSON.commit.author.date;
@@ -245,12 +245,12 @@
         var perpage_last_sha = repoSha;
         var repoCommitCount = 1;
         while (count != 1) {
-            var getAllCommitsCommand = "\"" + toolboyData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"" + "\"https://api." + toolboyData.repoDomain + "/repos/" + toolboyData.repoOwner + "/" + toolboyData.repoProject + "/commits?per_page=100&sha=" + perpage_last_sha + "\"";
+            var getAllCommitsCommand = "\"" + afterboxData.updatePath + "curl.exe" + "\"" + " -s -k -X GET " + "\"" + "\"https://api." + afterboxData.repoDomain + "/repos/" + afterboxData.repoOwner + "/" + afterboxData.repoProject + "/commits?per_page=100&sha=" + perpage_last_sha + "\"";
             var getAllCommitsResponse = system.callSystem(getAllCommitsCommand);
             try {
                 var getAllCommitsJSON = JSON.parse(getAllCommitsResponse);
             } catch (err) {
-                alert(toolboyData.errCouldNotUpdate + "\n\n" + err.toString());
+                alert(afterboxData.errCouldNotUpdate + "\n\n" + err.toString());
                 return false;
             }
             var repoCommits = Object.size(getAllCommitsJSON);
@@ -262,17 +262,17 @@
             }
         }
 
-        toolboyData.commitDate = latestCommitDate;
-        toolboyData.commitCount = repoCommitCount;
-        toolboyData.commitHash = repoSha;
+        afterboxData.commitDate = latestCommitDate;
+        afterboxData.commitCount = repoCommitCount;
+        afterboxData.commitHash = repoSha;
         return true;
     }
 
 
     // updateFromGitHub()
-    // Clean the toolboy folder and update
+    // Clean the afterbox folder and update
     function updateFromGitHub() {
-        var tempFolder = new Folder(toolboyData.tempPath);
+        var tempFolder = new Folder(afterboxData.tempPath);
         if (tempFolder.exists == true) {
             system.callSystem("cmd.exe /c rmdir /s /q \"" + tempFolder.fsName + "\"");
             system.callSystem("cmd.exe /c mkdir \"" + tempFolder.fsName + "\"");
@@ -280,24 +280,24 @@
             system.callSystem("cmd.exe /c mkdir \"" + tempFolder.fsName + "\"");
         }
 
-        var downloadUpdateCommand = "(toolboy)/update/curl.exe -L -k -s " + toolboyData.repoURL + "/zipball/deploy -o (toolboy)/update/deploy.zip";
+        var downloadUpdateCommand = "(afterbox)/update/curl.exe -L -k -s " + afterboxData.repoURL + "/zipball/deploy -o (afterbox)/update/deploy.zip";
         var downloadUpdateResponse = system.callSystem(downloadUpdateCommand);
 
-        var unzipUpdateCommand = "\"" + toolboyData.updatePath + "unzip.vbs\" " + "\"" + toolboyData.updatePath + "deploy.zip" + "\"" + " " + "\"" + tempFolder.fsName + "\"";
+        var unzipUpdateCommand = "\"" + afterboxData.updatePath + "unzip.vbs\" " + "\"" + afterboxData.updatePath + "deploy.zip" + "\"" + " " + "\"" + tempFolder.fsName + "\"";
         var unzipUpdateResponse = system.callSystem("cmd.exe /c \"" + unzipUpdateCommand + "\"");
 
-        var deleteZipCommand = "del " + "\"" + toolboyData.updatePath + "deploy.zip" + "\"";
+        var deleteZipCommand = "del " + "\"" + afterboxData.updatePath + "deploy.zip" + "\"";
         var deleteZipResponse = system.callSystem("cmd.exe /c \"" + deleteZipCommand + "\"");
 
         //get extracted folder
         var extractedArray = tempFolder.getFiles();
         var extractedFolderPath = extractedArray[0].fsName;
 
-        //delete from (toolboy)
-        var currentSetsFolder = new Folder(toolboyData.scriptsPath);
-        var currentHelpersFolder = new Folder(toolboyData.helpersPath);
-        var currentImagesFolder = new Folder(toolboyData.imagesPath);
-        var currentStartupFolder = new Folder(toolboyData.startupPath);
+        //delete from (afterbox)
+        var currentSetsFolder = new Folder(afterboxData.scriptsPath);
+        var currentHelpersFolder = new Folder(afterboxData.helpersPath);
+        var currentImagesFolder = new Folder(afterboxData.imagesPath);
+        var currentStartupFolder = new Folder(afterboxData.startupPath);
 
         if (currentSetsFolder.exists == true) {
             system.callSystem("cmd.exe /c rmdir /s /q \"" + currentSetsFolder.fsName + "\"");
@@ -312,36 +312,36 @@
             system.callSystem("cmd.exe /c rmdir /s /q \"" + currentStartupFolder.fsName + "\"");
         }
 
-        //replace in (toolboy)
-        var tempSetsFolder = new Folder(extractedFolderPath + "\\files\\(toolboy)\\sets");
-        var tempHelpersFolder = new Folder(extractedFolderPath + "\\files\\(toolboy)\\helpers");
-        var tempImagesFolder = new Folder(extractedFolderPath + "\\files\\(toolboy)\\images");
-        var tempStartupFolder = new Folder(extractedFolderPath + "\\files\\(toolboy)\\startup");
+        //replace in (afterbox)
+        var tempSetsFolder = new Folder(extractedFolderPath + "\\files\\(afterbox)\\sets");
+        var tempHelpersFolder = new Folder(extractedFolderPath + "\\files\\(afterbox)\\helpers");
+        var tempImagesFolder = new Folder(extractedFolderPath + "\\files\\(afterbox)\\images");
+        var tempStartupFolder = new Folder(extractedFolderPath + "\\files\\(afterbox)\\startup");
 
         if (tempSetsFolder.exists == true) {
-            system.callSystem("robocopy -e \"" + tempSetsFolder.fsName + "\" \"" + toolboyData.scriptsPath.substring(0, toolboyData.scriptsPath.length - 1) + "\"");
+            system.callSystem("robocopy -e \"" + tempSetsFolder.fsName + "\" \"" + afterboxData.scriptsPath.substring(0, afterboxData.scriptsPath.length - 1) + "\"");
         }
         if (tempHelpersFolder.exists == true) {
-            system.callSystem("robocopy -e \"" + tempHelpersFolder.fsName + "\" \"" + toolboyData.helpersPath.substring(0, toolboyData.helpersPath.length - 1) + "\"");
+            system.callSystem("robocopy -e \"" + tempHelpersFolder.fsName + "\" \"" + afterboxData.helpersPath.substring(0, afterboxData.helpersPath.length - 1) + "\"");
         }
         if (tempImagesFolder.exists == true) {
-            system.callSystem("robocopy -e \"" + tempImagesFolder.fsName + "\" \"" + toolboyData.imagesPath.substring(0, toolboyData.imagesPath.length - 1) + "\"");
+            system.callSystem("robocopy -e \"" + tempImagesFolder.fsName + "\" \"" + afterboxData.imagesPath.substring(0, afterboxData.imagesPath.length - 1) + "\"");
         }
         if (tempStartupFolder.exists == true) {
-            system.callSystem("robocopy -e \"" + tempStartupFolder.fsName + "\" \"" + toolboyData.startupPath.substring(0, toolboyData.startupPath.length - 1) + "\"");
+            system.callSystem("robocopy -e \"" + tempStartupFolder.fsName + "\" \"" + afterboxData.startupPath.substring(0, afterboxData.startupPath.length - 1) + "\"");
         }
 
         //delete temp folder
         system.callSystem("cmd.exe /c rmdir /s /q \"" + tempFolder.fsName + "\"");
 
         //update preferences
-        app.settings.saveSetting("Toolboy", "Version", toolboyData.version);
-        app.settings.saveSetting("Toolboy", "Commit Count", toolboyData.commitCount);
-        app.settings.saveSetting("Toolboy", "Commit Hash", toolboyData.commitHash);
-        app.settings.saveSetting("Toolboy", "Commit Date", toolboyData.commitDate);
+        app.settings.saveSetting("AfterBox", "Version", afterboxData.version);
+        app.settings.saveSetting("AfterBox", "Commit Count", afterboxData.commitCount);
+        app.settings.saveSetting("AfterBox", "Commit Hash", afterboxData.commitHash);
+        app.settings.saveSetting("AfterBox", "Commit Date", afterboxData.commitDate);
 
         //alert message
-        alert("Update successful!\n\nYou are now on version: v" + toolboyData.version + "." + toolboyData.commitCount + "\n\n" + "Commit: " + toolboyData.commitHash + "\nDate: " + toolboyData.commitDate.slice(0, 10) + " " + toolboyData.commitDate.slice(11, 16));
+        alert("Update successful!\n\nYou are now on version: v" + afterboxData.version + "." + afterboxData.commitCount + "\n\n" + "Commit: " + afterboxData.commitHash + "\nDate: " + afterboxData.commitDate.slice(0, 10) + " " + afterboxData.commitDate.slice(11, 16));
     }
 
 
@@ -371,7 +371,7 @@
     function getScriptsInFolder(folder) {
         var loadFiles = [];
         var allScripts = scanSubFolders(folder, /\.(jsx)$/i)[0];
-        var ignoreFilesList = app.settings.getSetting("Toolboy", "Ignore List");
+        var ignoreFilesList = app.settings.getSetting("AfterBox", "Ignore List");
         var ignoreFiles = ignoreFilesList.split(',');
         for (var i = 0; i < allScripts.length; i++) {
             var scriptFile = allScripts[i];
@@ -388,67 +388,67 @@
     }
 
 
-    // toolboy_buildUI()
+    // afterbox_buildUI()
     // Function for creating the user interface
-    function toolboy_buildUI(thisObj) {
-        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", toolboyData.scriptName, [200, 200, 600, 200], {
+    function afterbox_buildUI(thisObj) {
+        var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", afterboxData.scriptName, [200, 200, 600, 200], {
             resizeable: true
         });
         if (pal != null) {
-            pal.bounds.width = (toolboyData.btnSize + 5) * 10 + 5;
-            pal.bounds.height = (toolboyData.btnSize + 5) * 1 + 5;
+            pal.bounds.width = (afterboxData.btnSize + 5) * 10 + 5;
+            pal.bounds.height = (afterboxData.btnSize + 5) * 1 + 5;
             pal.scriptBtns = null;
-            toolboy_rebuildButtons(pal);
-            pal.onResize = toolboy_doResizePanel;
-            pal.onResizing = toolboy_doResizePanel;
+            afterbox_rebuildButtons(pal);
+            pal.onResize = afterbox_doResizePanel;
+            pal.onResizing = afterbox_doResizePanel;
         }
         return pal;
     }
 
     // Build Settings UI
-    function toolboy_buildSettingsUI(thisObj) {
-        var pal = new Window("dialog", toolboyData.settingsTitle, undefined, { resizeable: true });
+    function afterbox_buildSettingsUI(thisObj) {
+        var pal = new Window("dialog", afterboxData.settingsTitle, undefined, { resizeable: true });
         if (pal !== null) {
             var res =
                 "group { \
                     orientation:'column', alignment:['fill','fill'], \
                     vers: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + toolboyData.strInfo + "', alignment:['fill','top'] \
+                        text: '" + afterboxData.strInfo + "', alignment:['fill','top'] \
                         et: Group { \
                             alignment:['fill','top'], \
-                            txt1: StaticText { text:'" + toolboyData.strVersion + ":', preferredSize:[80,20] }, \
+                            txt1: StaticText { text:'" + afterboxData.strVersion + ":', preferredSize:[80,20] }, \
                             txt2: StaticText { text:'', preferredSize:[300,20] }, \
                         }, \
                         dte: Group { \
                             alignment:['fill','top'], \
-                            txt1: StaticText { text:'" + toolboyData.strDate + ":', preferredSize:[80,20] }, \
+                            txt1: StaticText { text:'" + afterboxData.strDate + ":', preferredSize:[80,20] }, \
                             txt2: StaticText { text:'', preferredSize:[300,20] }, \
                         }, \
                         sha: Group { \
                             alignment:['fill','top'], \
-                            txt1: StaticText { text:'" + toolboyData.strHash + ":', preferredSize:[80,20] }, \
-                            txt2: StaticText { text:'" + toolboyData.localHash + "', preferredSize:[300,20] }, \
+                            txt1: StaticText { text:'" + afterboxData.strHash + ":', preferredSize:[80,20] }, \
+                            txt2: StaticText { text:'" + afterboxData.localHash + "', preferredSize:[300,20] }, \
                         }, \
                     }, \
                     opts: Panel { \
                         alignment:['fill','top'], \
-                        text: '" + toolboyData.strOptions + "', alignment:['fill','top'] \
+                        text: '" + afterboxData.strOptions + "', alignment:['fill','top'] \
                         dnu: Group { \
                             alignment:['fill','top'], \
                             txt: StaticText { text:'', preferredSize:[80,20] }, \
-                            box: Checkbox { text:'" + toolboyData.strCheckForUpdates + "', alignment:['fill','top'] }, \
+                            box: Checkbox { text:'" + afterboxData.strCheckForUpdates + "', alignment:['fill','top'] }, \
                         }, \
                         rpo: Group { \
                             alignment:['fill','top'], \
-                            txt: StaticText { text:'" + toolboyData.strRepoURL + "', preferredSize:[80,20] }, \
+                            txt: StaticText { text:'" + afterboxData.strRepoURL + "', preferredSize:[80,20] }, \
                             fld: EditText { alignment:['fill','center'], preferredSize:[300,20] },  \
                         }, \
                         ign: Group { \
                             alignment:['fill','top'], \
-                            txt: StaticText { text:'" + toolboyData.strIgnoreList + "', preferredSize:[80,20] }, \
+                            txt: StaticText { text:'" + afterboxData.strIgnoreList + "', preferredSize:[80,20] }, \
                             fld: EditText { alignment:['fill','center'], preferredSize:[240,20] },  \
-                            btn: Button { text:'" + toolboyData.strChoose + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                            btn: Button { text:'" + afterboxData.strChoose + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                         }, \
                     }, \
                     sepr: Group { \
@@ -457,8 +457,8 @@
                     }, \
                     cmds: Group { \
                         alignment:['fill','top'], \
-                        saveBtn: Button { text:'" + toolboyData.strBtnSave + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
-                        cancelBtn: Button { text:'" + toolboyData.strBtnCancel + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        saveBtn: Button { text:'" + afterboxData.strBtnSave + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        cancelBtn: Button { text:'" + afterboxData.strBtnCancel + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                     }, \
                 }, \
             }";
@@ -468,55 +468,55 @@
             pal.grp.minimumSize = pal.grp.size;
 
             var displayCount;
-            if (toolboyData.commitCount == undefined) {
-                displayCount = toolboyData.localCount;
+            if (afterboxData.commitCount == undefined) {
+                displayCount = afterboxData.localCount;
             } else {
-                displayCount = toolboyData.commitCount;
+                displayCount = afterboxData.commitCount;
             }
-            pal.grp.vers.et.txt2.text = "v" + toolboyData.version + "." + displayCount;
+            pal.grp.vers.et.txt2.text = "v" + afterboxData.version + "." + displayCount;
 
-            pal.grp.vers.dte.txt2.text = toolboyData.localDate.slice(0, 10) + " " + toolboyData.localDate.slice(11, 16);
+            pal.grp.vers.dte.txt2.text = afterboxData.localDate.slice(0, 10) + " " + afterboxData.localDate.slice(11, 16);
 
-            if (app.settings.haveSetting("Toolboy", "Update")) {
-                var updateSetting = (app.settings.getSetting("Toolboy", "Update") === "false") ? false : true;
+            if (app.settings.haveSetting("AfterBox", "Update")) {
+                var updateSetting = (app.settings.getSetting("AfterBox", "Update") === "false") ? false : true;
                 pal.grp.opts.dnu.box.value = updateSetting;
             }
 
-            if (app.settings.haveSetting("Toolboy", "Repo URL")) {
-                var repoSetting = app.settings.getSetting("Toolboy", "Repo URL");
+            if (app.settings.haveSetting("AfterBox", "Repo URL")) {
+                var repoSetting = app.settings.getSetting("AfterBox", "Repo URL");
                 pal.grp.opts.rpo.fld.text = repoSetting;
             }
 
-            if (app.settings.haveSetting("Toolboy", "Ignore List")) {
-                var ignoreSetting = app.settings.getSetting("Toolboy", "Ignore List");
+            if (app.settings.haveSetting("AfterBox", "Ignore List")) {
+                var ignoreSetting = app.settings.getSetting("AfterBox", "Ignore List");
                 pal.grp.opts.ign.fld.text = ignoreSetting;
             }
 
-            pal.grp.opts.ign.btn.onClick = toolboy_doChooseUI;
-            pal.grp.cmds.saveBtn.onClick = toolboy_doConfigureSave;
-            pal.grp.cmds.cancelBtn.onClick = toolboy_doConfigureCancel;
+            pal.grp.opts.ign.btn.onClick = afterbox_doChooseUI;
+            pal.grp.cmds.saveBtn.onClick = afterbox_doConfigureSave;
+            pal.grp.cmds.cancelBtn.onClick = afterbox_doConfigureCancel;
         }
         return pal;
     }
 
     // Settings UI
-    var toolboy_settingsPal;
-    function toolboy_doSettingsUI() {
-        toolboy_settingsPal = toolboy_buildSettingsUI(thisObj);
-        if (toolboy_settingsPal !== null) {
-            if (toolboy_settingsPal instanceof Window) {
+    var afterbox_settingsPal;
+    function afterbox_doSettingsUI() {
+        afterbox_settingsPal = afterbox_buildSettingsUI(thisObj);
+        if (afterbox_settingsPal !== null) {
+            if (afterbox_settingsPal instanceof Window) {
                 // Show the palette
-                toolboy_settingsPal.center();
-                toolboy_settingsPal.show();
+                afterbox_settingsPal.center();
+                afterbox_settingsPal.show();
             } else {
-                toolboy_settingsPal.layout.layout(true);
+                afterbox_settingsPal.layout.layout(true);
             }
         }
     }
 
     // Build Choose UI
-    function toolboy_buildChooseUI(thisObj) {
-        var pal = new Window("dialog", toolboyData.ChooseTitle, undefined, { resizeable: false });
+    function afterbox_buildChooseUI(thisObj) {
+        var pal = new Window("dialog", afterboxData.ChooseTitle, undefined, { resizeable: false });
         if (pal !== null) {
             var res =
                 "group { \
@@ -531,7 +531,7 @@
                     }, \
                     cmds: Group { \
                         alignment:['fill','top'], \
-                        okBtn: Button { text:'" + toolboyData.strBtnOk + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
+                        okBtn: Button { text:'" + afterboxData.strBtnOk + "', alignment:['center','bottom'], preferredSize:[-1,20] }, \
                     }, \
                 }, \
             }";
@@ -540,9 +540,9 @@
             pal.layout.layout(true);
             pal.grp.minimumSize = pal.grp.size;
 
-            for (var i = 0; i < toolboyData.scripts.length; i++) {
-                var insertScript = toolboyData.scripts[i].toString().split(/(\\|\/)/g).pop();
-                var insertScriptPath = toolboyData.scripts[i].toString();
+            for (var i = 0; i < afterboxData.scripts.length; i++) {
+                var insertScript = afterboxData.scripts[i].toString().split(/(\\|\/)/g).pop();
+                var insertScriptPath = afterboxData.scripts[i].toString();
                 var scriptIcon = new File((insertScriptPath.substring(0, insertScriptPath.length - 3)) + "png");
                 var selectionItems = pal.grp.list.lst.add("item", insertScript);
                 if (scriptIcon.exists) {
@@ -550,30 +550,30 @@
                 }
             }
 
-            pal.grp.cmds.okBtn.onClick = toolboy_doChoose;
+            pal.grp.cmds.okBtn.onClick = afterbox_doChoose;
         }
         return pal;
     }
 
     // Choose UI
-    var toolboy_choosePal;
-    function toolboy_doChooseUI() {
-        toolboy_choosePal = toolboy_buildChooseUI(thisObj);
-        if (toolboy_choosePal !== null) {
-            if (toolboy_choosePal instanceof Window) {
+    var afterbox_choosePal;
+    function afterbox_doChooseUI() {
+        afterbox_choosePal = afterbox_buildChooseUI(thisObj);
+        if (afterbox_choosePal !== null) {
+            if (afterbox_choosePal instanceof Window) {
                 // Show the palette
-                toolboy_choosePal.center();
-                toolboy_choosePal.show();
+                afterbox_choosePal.center();
+                afterbox_choosePal.show();
             } else {
-                toolboy_choosePal.layout.layout(true);
+                afterbox_choosePal.layout.layout(true);
             }
         }
     }
 
     // Choose files to ignore
-    function toolboy_doChoose() {
+    function afterbox_doChoose() {
         //gather choosen
-        var selectionList = toolboy_choosePal.grp.list.lst.selection;
+        var selectionList = afterbox_choosePal.grp.list.lst.selection;
         var ignoreListSelection = [];
 
         //push into array
@@ -584,7 +584,7 @@
             }
 
             //insert choosen into field
-            var ignoreBoxText = toolboy_settingsPal.grp.opts.ign.fld.text;
+            var ignoreBoxText = afterbox_settingsPal.grp.opts.ign.fld.text;
             if (ignoreBoxText != "") {
                 var ignoredScripts = ignoreBoxText.split(',');
             } else {
@@ -594,50 +594,50 @@
             for (var i = 0; i < ignoreListSelection.length; i++) {
                 ignoredScripts.push(ignoreListSelection[i]);
             }
-            toolboy_settingsPal.grp.opts.ign.fld.text = ignoredScripts;
+            afterbox_settingsPal.grp.opts.ign.fld.text = ignoredScripts;
         }
 
         //close
-        toolboy_choosePal.close();
+        afterbox_choosePal.close();
     }
 
     // Save settings
-    function toolboy_doConfigureSave() {
+    function afterbox_doConfigureSave() {
         //save update setting
-        var updateSetting = toolboy_settingsPal.grp.opts.dnu.box.value.toString();
-        app.settings.saveSetting("Toolboy", "Update", updateSetting);
+        var updateSetting = afterbox_settingsPal.grp.opts.dnu.box.value.toString();
+        app.settings.saveSetting("AfterBox", "Update", updateSetting);
 
         //save repo setting
-        var repoSetting = toolboy_settingsPal.grp.opts.rpo.fld.text;
-        app.settings.saveSetting("Toolboy", "Repo URL", repoSetting);
+        var repoSetting = afterbox_settingsPal.grp.opts.rpo.fld.text;
+        app.settings.saveSetting("AfterBox", "Repo URL", repoSetting);
 
         //save ignorelist setting
-        var ignorelistSetting = toolboy_settingsPal.grp.opts.ign.fld.text;
-        app.settings.saveSetting("Toolboy", "Ignore List", ignorelistSetting);
+        var ignorelistSetting = afterbox_settingsPal.grp.opts.ign.fld.text;
+        app.settings.saveSetting("AfterBox", "Ignore List", ignorelistSetting);
 
         //close config
-        toolboy_settingsPal.close();
+        afterbox_settingsPal.close();
     }
 
     // Configure Cancel
-    function toolboy_doConfigureCancel() {
-        toolboy_settingsPal.close();
+    function afterbox_doConfigureCancel() {
+        afterbox_settingsPal.close();
     }
 
 
-    // toolboy_filterJSXFiles()
+    // afterbox_filterJSXFiles()
     // Function for filtering .jsx files that are not the current file. Used with the Folder.getFiles() function.
-    function toolboy_filterJSXFiles(file) {
+    function afterbox_filterJSXFiles(file) {
         return ((file.name.match(/.jsx(bin)?$/) != null) && (file.name != (new File($.fileName)).name));
     }
 
 
-    // toolboy_rebuildButtons()
+    // afterbox_rebuildButtons()
     // Function for creating/recreating the button layout
-    function toolboy_rebuildButtons(palObj) {
+    function afterbox_rebuildButtons(palObj) {
         var topEdge = 4;
         var leftEdge = 4;
-        var btnSize = toolboyData.btnSize;
+        var btnSize = afterboxData.btnSize;
         var btnIconFile, defBtnIconFile;
 
         // Remove the existing buttons (all of them)
@@ -648,8 +648,8 @@
         }
 
         // Add buttons for scripts
-        //alert("Folder.current = "+toolboyData.thisScriptsFolder.toString());
-        defBtnIconFile = new File(toolboyData.thisScriptsFolder.fsName + "/toolboy_jsx-icon.png");
+        //alert("Folder.current = "+afterboxData.thisScriptsFolder.toString());
+        defBtnIconFile = new File(afterboxData.thisScriptsFolder.fsName + "/afterbox_jsx-icon.png");
         if (!defBtnIconFile.exists) {
             defBtnIconFile = null;
         }
@@ -660,9 +660,9 @@
         // Place controls in a group container to get the panel background love
         palObj.btnGroup = palObj.add("group", [0, 0, palObj.bounds.width, palObj.bounds.height]);
 
-        for (var i = 0; i < toolboyData.scripts.length; i++) {
+        for (var i = 0; i < afterboxData.scripts.length; i++) {
             // If there's a corresponding .png file, use it as an iconbutton instead of a regular text button
-            btnIconFile = new File(File(toolboyData.scripts[i]).fsName.replace(/.jsx(bin)?$/, ".png"));
+            btnIconFile = new File(File(afterboxData.scripts[i]).fsName.replace(/.jsx(bin)?$/, ".png"));
             if (btnIconFile.exists) {
                 palObj.scriptBtns[i] = palObj.btnGroup.add("iconbutton", [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize], btnIconFile, {
                     style: "toolbutton"
@@ -672,10 +672,10 @@
                     style: "toolbutton"
                 });
             } else {
-                palObj.scriptBtns[i] = palObj.btnGroup.add("button", [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize], toolboyData.scripts[i].name.replace(/.jsx$/, "").replace(/%20/g, " "));
+                palObj.scriptBtns[i] = palObj.btnGroup.add("button", [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize], afterboxData.scripts[i].name.replace(/.jsx$/, "").replace(/%20/g, " "));
             }
-            palObj.scriptBtns[i].scriptFile = toolboyData.scripts[i].fsName; // Store file name with button (sneaky that JavaScript is)
-            palObj.scriptBtns[i].helpTip = File(toolboyData.scripts[i]).name.replace(/.jsx(bin)?$/, "").replace(/%20/g, " ");
+            palObj.scriptBtns[i].scriptFile = afterboxData.scripts[i].fsName; // Store file name with button (sneaky that JavaScript is)
+            palObj.scriptBtns[i].helpTip = File(afterboxData.scripts[i]).name.replace(/.jsx(bin)?$/, "").replace(/%20/g, " ");
             palObj.scriptBtns[i].onClick = function () {
                 var scriptFile = new File(this.scriptFile);
                 if (scriptFile.exists) {
@@ -692,39 +692,39 @@
 
                     //aftereffects.executeScript(scriptContent);
                 } else {
-                    alert(toolboyData.strErrCantLaunchScript.replace(/%s/, this.scriptFile), toolboyData.scriptName);
+                    alert(afterboxData.strErrCantLaunchScript.replace(/%s/, this.scriptFile), afterboxData.scriptName);
                 }
             }
             leftEdge += (btnSize + 5);
         }
 
         // Add the settings and help buttons
-        var settingsBtnIconFile = new File(toolboyData.thisScriptsFolder.fsName + "/(toolboy)/images/toolboy_settings.png");
+        var settingsBtnIconFile = new File(afterboxData.thisScriptsFolder.fsName + "/(afterbox)/images/settings.png");
         if (settingsBtnIconFile.exists) {
             palObj.settingsBtn = palObj.btnGroup.add("iconbutton", [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize / 2], settingsBtnIconFile, {
                 style: "toolbutton"
             });
         } else {
-            palObj.settingsBtn = palObj.btnGroup.add("button", [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize / 2], toolboyData.strSettings);
+            palObj.settingsBtn = palObj.btnGroup.add("button", [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize / 2], afterboxData.strSettings);
         }
-        palObj.settingsBtn.helpTip = toolboyData.strSettingsTip;
+        palObj.settingsBtn.helpTip = afterboxData.strSettingsTip;
         palObj.settingsBtn.onClick = function () {
             // Get the scripts in the selected scripts folder
-            //prompt(toolboyData.strCurrentHash, toolboyData.commitHash);
-            toolboy_doSettingsUI();
+            //prompt(afterboxData.strCurrentHash, afterboxData.commitHash);
+            afterbox_doSettingsUI();
         }
 
-        var helpBtnIconFile = new File(toolboyData.thisScriptsFolder.fsName + "/(toolboy)/images/toolboy_help.png");
+        var helpBtnIconFile = new File(afterboxData.thisScriptsFolder.fsName + "/(afterbox)/images/help.png");
         if (helpBtnIconFile.exists) {
             palObj.helpBtn = palObj.btnGroup.add("iconbutton", [leftEdge, topEdge + btnSize / 2, leftEdge + btnSize, topEdge + btnSize], helpBtnIconFile, {
                 style: "toolbutton"
             });
         } else {
-            palObj.helpBtn = palObj.btnGroup.add("button", [leftEdge, topEdge + btnSize / 2, leftEdge + btnSize, topEdge + btnSize], toolboyData.strHelp);
+            palObj.helpBtn = palObj.btnGroup.add("button", [leftEdge, topEdge + btnSize / 2, leftEdge + btnSize, topEdge + btnSize], afterboxData.strHelp);
         }
-        palObj.helpBtn.helpTip = toolboyData.strHelpTip;
+        palObj.helpBtn.helpTip = afterboxData.strHelpTip;
         palObj.helpBtn.onClick = function () {
-            // alert(toolboyData.strHelpText, toolboyData.strHelpTip);
+            // alert(afterboxData.strHelpText, afterboxData.strHelpTip);
 
             var os = system.osName;
             if (!os.length) {
@@ -732,7 +732,7 @@
             }
             app_os = (os.indexOf("Win") != -1) ? "Win" : "Mac"
 
-            var url = "https://github.com/koaleksa/eipix-tools/wiki";
+            var url = "https://github.com/koaleksa/afterbox/wiki";
 
             if (app_os == "Win") {
                 system.callSystem("explorer " + url);
@@ -743,21 +743,21 @@
     }
 
 
-    // toolboy_doResizePanel()
+    // afterbox_doResizePanel()
     // Callback function for laying out the buttons in the panel
-    function toolboy_doResizePanel() {
-        var btnSize = toolboyData.btnSize;
+    function afterbox_doResizePanel() {
+        var btnSize = afterboxData.btnSize;
         var btnOffset = btnSize + 5;
-        var maxRightEdge = toolboyPal.size.width - btnSize;
+        var maxRightEdge = afterboxPal.size.width - btnSize;
         var leftEdge = 5;
         var topEdge = 5;
 
         // Reset the background group container's bounds
-        toolboyPal.btnGroup.bounds = [0, 0, toolboyPal.size.width, toolboyPal.size.height];
+        afterboxPal.btnGroup.bounds = [0, 0, afterboxPal.size.width, afterboxPal.size.height];
 
         // Reset each button's layer bounds
-        for (var i = 0; i < toolboyData.scripts.length; i++) {
-            toolboyPal.scriptBtns[i].bounds = [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize];
+        for (var i = 0; i < afterboxData.scripts.length; i++) {
+            afterboxPal.scriptBtns[i].bounds = [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize];
 
             leftEdge += btnOffset;
 
@@ -769,68 +769,68 @@
         }
 
         // The settings and help buttons go into the next "slot"
-        toolboyPal.settingsBtn.bounds = [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize / 2];
-        toolboyPal.helpBtn.bounds = [leftEdge, topEdge + btnSize / 2, leftEdge + btnSize, topEdge + btnSize];
+        afterboxPal.settingsBtn.bounds = [leftEdge, topEdge, leftEdge + btnSize, topEdge + btnSize / 2];
+        afterboxPal.helpBtn.bounds = [leftEdge, topEdge + btnSize / 2, leftEdge + btnSize, topEdge + btnSize];
     }
 
 
     // Init Configuration
     //
-    function toolboy_initSettings() {
-        if (!(app.settings.haveSetting("Toolboy", "Version"))) {
-            app.settings.saveSetting("Toolboy", "Version", "0.0");
+    function afterbox_initSettings() {
+        if (!(app.settings.haveSetting("AfterBox", "Version"))) {
+            app.settings.saveSetting("AfterBox", "Version", "0.0");
         }
-        if (!(app.settings.haveSetting("Toolboy", "Commit Count"))) {
-            app.settings.saveSetting("Toolboy", "Commit Count", "");
+        if (!(app.settings.haveSetting("AfterBox", "Commit Count"))) {
+            app.settings.saveSetting("AfterBox", "Commit Count", "");
         }
-        if (!(app.settings.haveSetting("Toolboy", "Commit Hash"))) {
-            app.settings.saveSetting("Toolboy", "Commit Hash", "");
+        if (!(app.settings.haveSetting("AfterBox", "Commit Hash"))) {
+            app.settings.saveSetting("AfterBox", "Commit Hash", "");
         }
-        if (!(app.settings.haveSetting("Toolboy", "Commit Date"))) {
-            app.settings.saveSetting("Toolboy", "Commit Date", "");
+        if (!(app.settings.haveSetting("AfterBox", "Commit Date"))) {
+            app.settings.saveSetting("AfterBox", "Commit Date", "");
         }
-        if (!(app.settings.haveSetting("Toolboy", "Update"))) {
-            app.settings.saveSetting("Toolboy", "Update", "true");
+        if (!(app.settings.haveSetting("AfterBox", "Update"))) {
+            app.settings.saveSetting("AfterBox", "Update", "true");
         }
-        if (!(app.settings.haveSetting("Toolboy", "Repo URL"))) {
-            app.settings.saveSetting("Toolboy", "Repo URL", "");
+        if (!(app.settings.haveSetting("AfterBox", "Repo URL"))) {
+            app.settings.saveSetting("AfterBox", "Repo URL", "");
         }
-        if (!(app.settings.haveSetting("Toolboy", "Ignore List"))) {
-            app.settings.saveSetting("Toolboy", "Ignore List", "");
+        if (!(app.settings.haveSetting("AfterBox", "Ignore List"))) {
+            app.settings.saveSetting("AfterBox", "Ignore List", "");
         }
     }
 
     // main:
     //
     if (parseFloat(app.version) < 9) {
-        alert(toolboyData.strErrMinAE90, toolboyData.scriptName);
+        alert(afterboxData.strErrMinAE90, afterboxData.scriptName);
         return;
     } else if (isNetworkAccessAllowed() == false) {
-        alert(toolboyData.strErrAccessDenied);
+        alert(afterboxData.strErrAccessDenied);
         return;
     } else {
         // set settings
-        toolboy_initSettings();
+        afterbox_initSettings();
 
         // Get local hash
         getLocalVersion();
 
         // Update check
-        var updateEnabled = (app.settings.getSetting("Toolboy", "Update") === "false") ? false : true;
+        var updateEnabled = (app.settings.getSetting("AfterBox", "Update") === "false") ? false : true;
 
-        if (parseFloat(app.settings.getSetting("Toolboy", "Version")) < parseFloat(toolboyData.version)) {
-            var repoURL = toolboyData.repoURL;
-            app.settings.saveSetting("Toolboy", "Repo URL", toolboyData.repoURL);
-            app.settings.saveSetting("Toolboy", "Version", toolboyData.version);
+        if (parseFloat(app.settings.getSetting("AfterBox", "Version")) < parseFloat(afterboxData.version)) {
+            var repoURL = afterboxData.repoURL;
+            app.settings.saveSetting("AfterBox", "Repo URL", afterboxData.repoURL);
+            app.settings.saveSetting("AfterBox", "Version", afterboxData.version);
         } else {
-            var repoURL = app.settings.getSetting("Toolboy", "Repo URL");
+            var repoURL = app.settings.getSetting("AfterBox", "Repo URL");
         }
 
         var repoDoman = repoURL.split("/")[2];
         if (updateEnabled == true) {
             if (netCheck(repoDoman) == true) {
                 if (isUpdateNeeded(repoURL) == true) {
-                    var confirmPrompt = confirm(toolboyData.scriptName + ":\n" + toolboyData.strConfirmUpdate);
+                    var confirmPrompt = confirm(afterboxData.scriptName + ":\n" + afterboxData.strConfirmUpdate);
                     if (confirmPrompt == true) {
                         if (getUpdateData() == true) {
                             updateFromGitHub();
@@ -838,40 +838,40 @@
                     }
                 }
             } else {
-                alert(toolboyData.errConnection);
+                alert(afterboxData.errConnection);
             }
         }
 
         // Get ignore list
-        var ignoreListSetting = app.settings.getSetting("Toolboy", "Ignore List");
-        toolboyData.ignoreList = [ignoreListSetting];
+        var ignoreListSetting = app.settings.getSetting("AfterBox", "Ignore List");
+        afterboxData.ignoreList = [ignoreListSetting];
 
         // Gather regular scripts
-        var setsFolder = new Folder(toolboyData.scriptsPath);
-        toolboyData.scripts = getScriptsInFolder(setsFolder);
+        var setsFolder = new Folder(afterboxData.scriptsPath);
+        afterboxData.scripts = getScriptsInFolder(setsFolder);
 
         // Gather startup scripts
-        var startupFolder = new Folder(toolboyData.startupPath);
-        toolboyData.startupScripts = getScriptsInFolder(startupFolder);
+        var startupFolder = new Folder(afterboxData.startupPath);
+        afterboxData.startupScripts = getScriptsInFolder(startupFolder);
 
         // Execute startup scripts
-        for (var z = 0; z < toolboyData.startupScripts.length; z++) {
-            var startupScriptFile = new File(toolboyData.startupScripts[z]);
+        for (var z = 0; z < afterboxData.startupScripts.length; z++) {
+            var startupScriptFile = new File(afterboxData.startupScripts[z]);
             if (startupScriptFile.exists) {
                 $.evalFile(startupScriptFile);
             }
         }
 
         // Show the UI
-        var toolboyPal = toolboy_buildUI(thisObj);
-        if (toolboyPal != null) {
-            if (toolboyPal instanceof Window) {
+        var afterboxPal = afterbox_buildUI(thisObj);
+        if (afterboxPal != null) {
+            if (afterboxPal instanceof Window) {
                 // Center the palette
-                toolboyPal.center();
+                afterboxPal.center();
                 // Show the UI
-                toolboyPal.show();
+                afterboxPal.show();
             } else {
-                toolboy_doResizePanel();
+                afterbox_doResizePanel();
             }
         }
     }

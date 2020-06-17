@@ -1,15 +1,15 @@
-﻿// clearToolboySettings.jsx
+﻿// clearAfterBoxSettings.jsx
 //
-// Name: clearToolboySettings
+// Name: clearAfterBoxSettings
 // Version: 1.0
 // Author: Aleksandar Kocic
 //
 
 
-(function clearToolboySettings(thisObj) {
+(function clearAfterBoxSettings(thisObj) {
 
     function clearFunction() {
-        var sectionName = "Toolboy";
+        var sectionName = "AfterBox";
         var keyArray = ["Commit Date", "Commit Hash", "Ignore List", "Repo URL", "Update"];
         for (var i = 0; i < keyArray.length; i++) {
             if (app.settings.haveSetting(sectionName, keyArray[i]) == true) {
@@ -20,10 +20,10 @@
     }
 
     // Run script
-    if (confirm("This will clear your Toolboy settings. Do you wish to continue?")) {
+    if (confirm("This will clear your AfterBox settings. Do you wish to continue?")) {
         try {
             clearFunction();
-            alert("Settings cleared successfully!\r\rYou should restart your Toolboy panel now.");
+            alert("Settings cleared successfully!\r\rYou should restart your AfterBox panel now.");
         } catch (e) {
             alert(e);
         }

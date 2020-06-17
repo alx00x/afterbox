@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 <assemblyIdentity
-    name="toolboy"
+    name="afterbox"
     processorArchitecture="x86"
     version="5.0.0.0"
     type="win32"/>
-<description>Toolboy for After Effects v5.0</description>
+<description>AfterBox for After Effects v5.0</description>
    <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
       <security>
       <requestedPrivileges>

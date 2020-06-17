@@ -1,4 +1,4 @@
 @echo off
 
 call .venv\Scripts\activate.bat
-pyinstaller toolboy_install.spec
+pyinstaller afterbox_setup.spec

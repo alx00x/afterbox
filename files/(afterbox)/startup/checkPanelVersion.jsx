@@ -17,7 +17,7 @@
     cpvData.scriptVersion = "1.0";
     cpvData.scriptTitle = cpvData.scriptName + " v" + cpvData.scriptVersion;
 
-    cpvData.strUpdateToolboy = { en: "You are using an older version of toolboy panel. Please update as soon as possible!" }
+    cpvData.strUpdateAfterBox = { en: "You are using an older version of afterbox panel. Please update as soon as possible!" }
 
     // Localize
     function checkPanelVersion_localize(strVar) {
@@ -36,17 +36,17 @@
     // Main Functions
     //
     function checkPanelVersion_main() {
-        // get toolboy version from prefs file
+        // get afterbox version from prefs file
         var currentVersion;
-        if (app.settings.haveSetting("Toolboy", "Version")) {
-            var currentVersion = parseFloat(app.settings.getSetting("Toolboy", "Version"));
+        if (app.settings.haveSetting("AfterBox", "Version")) {
+            var currentVersion = parseFloat(app.settings.getSetting("AfterBox", "Version"));
         } else {
             var currentVersion = 0.0;
         }
 
         // get version from panelVersion.txt
         var latestVersion;
-        var startupFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(toolboy)/startup");
+        var startupFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(afterbox)/startup");
         var panelVersionFile = new File(startupFolder.fsName + "/panelVersion.txt");
         if (panelVersionFile.exists == true) {
             // read file
@@ -67,7 +67,7 @@
 
         // compare
         if (currentVersion < latestVersion) {
-            alert(checkPanelVersion_localize(cpvData.strUpdateToolboy));
+            alert(checkPanelVersion_localize(cpvData.strUpdateAfterBox));
         }
     }
 

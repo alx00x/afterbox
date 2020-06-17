@@ -15,9 +15,14 @@ def resource(relative_path):
     return os.path.join(base_path, relative_path)
 
 
+colors = {
+    "red": "#FF3A3A",
+    "blue": "#009CFF",
+}
+
 VERSION = "5.0"
 WINDOW_TITLE = "Install"
-WINDOW_OBJECT = "toolboy_window"
+WINDOW_OBJECT = "afterbox_window"
 
 # ------------------------------------------------------------------------------
 # Logging
@@ -133,7 +138,7 @@ class Window(QtWidgets.QDialog):
 
         chooser_layout = QtWidgets.QVBoxLayout()
         chooser_label = QtWidgets.QLabel(self)
-        chooser_label.setText("Choose your After Effects version:")
+        chooser_label.setText("Choose version:")
 
         chooser_list = QtWidgets.QComboBox(self)
 
@@ -175,11 +180,16 @@ class Window(QtWidgets.QDialog):
 
         button_install = QtWidgets.QPushButton(self)
         button_install.setText("Install")
+        button_uninstall = QtWidgets.QPushButton(self)
+        button_uninstall.setText("Uninstall")
+        button_uninstall.hide()
+
         button_exit = QtWidgets.QPushButton(self)
         button_exit.setText("Exit")
 
         footer_layout.addWidget(version_label)
         footer_layout.addItem(QHSpacer())
+        footer_layout.addWidget(button_uninstall)
         footer_layout.addWidget(button_install)
         footer_layout.addWidget(button_exit)
         footer_layout.setContentsMargins(10, 10, 10, 10)
@@ -212,16 +222,22 @@ class Window(QtWidgets.QDialog):
                 "chooser": chooser_list,
             },
             "button": {
+                "uninstall": button_uninstall,
                 "install": button_install,
                 "exit": button_exit,
             },
         }
 
         # Signals
+        self.data["button"]["uninstall"].clicked.connect(
+            self.on_uninstall_clicked)
         self.data["button"]["install"].clicked.connect(
             self.on_install_clicked)
         self.data["button"]["exit"].clicked.connect(
             self.on_exit_clicked)
+
+        self.data["widget"]["chooser"].currentIndexChanged.connect(
+            self.on_version_changed)
 
     def initialize(self):
         self.logger.info("Finding installed After Effects versions...")
@@ -256,6 +272,20 @@ class Window(QtWidgets.QDialog):
 
         self.logger.info("Initialization complete.")
 
+    def on_version_changed(self, index):
+        chooser = self.data["widget"]["chooser"]
+        install_path = chooser.itemData(index)
+        panels_path = os.path.join(install_path, "Scripts", "ScriptUI Panels")
+
+        jsx_path = os.path.join(panels_path, "afterbox.jsx")
+        script_folder = os.path.join(panels_path, "(afterbox)")
+        if os.path.isfile(jsx_path) or os.path.isdir(script_folder):
+            self.data["button"]["uninstall"].show()
+            self.data["button"]["install"].setText("Reinstall")
+        else:
+            self.data["button"]["uninstall"].hide()
+            self.data["button"]["install"].setText("Install")
+
     def on_install_clicked(self):
         stack = self.data["stack"]["master"]
         stack.setCurrentIndex(1)
@@ -266,28 +296,29 @@ class Window(QtWidgets.QDialog):
 
         chooser = self.data["widget"]["chooser"]
         install_path = chooser.itemData(chooser.currentIndex())
-
-        install_path = os.path.join(install_path, "Scripts", "ScriptUI Panels")
-        if not os.path.isdir(install_path):
-            self.logger.error("Path does not exist: %s", install_path)
+        panels_path = os.path.join(install_path, "Scripts", "ScriptUI Panels")
+        if not os.path.isdir(panels_path):
+            self.logger.error("Path does not exist: %s", panels_path)
             return
 
         self.data["button"]["install"].setEnabled(False)
-        install = self._install(install_path)
+        self.data["button"]["uninstall"].setEnabled(False)
+        install = self._install(panels_path)
 
         if install:
-            self.data["label"]["status"].setStyleSheet("background: #009CFF;")
+            self.data["label"]["status"].setStyleSheet("background: {};".format(colors["blue"]))
             self.logger.info("Installation successful!")
+            self.data["button"]["exit"].setText("Close")
         else:
-            self.data["label"]["status"].setStyleSheet("background: #FF0000;")
+            self.data["label"]["status"].setStyleSheet("background: {};".format(colors["red"]))
             self.logger.error("Installation failed.")
 
     def _install(self, destination):
         self.logger.info("Installing at '%s'", destination)
 
         files = list(pathlib.Path(resource("files")).rglob("*.*"))
-        files_destination_root = destination + "/(toolboy)"
-        script_destination = destination + "/toolboy.jsx"
+        files_destination_root = destination + "/(afterbox)"
+        script_destination = destination + "/afterbox.jsx"
 
         perm_script = resource("res/permissions.vbs")
         try:
@@ -305,7 +336,7 @@ class Window(QtWidgets.QDialog):
                 dest = pathlib.Path(destination, f)
 
                 if not os.path.exists(os.path.dirname(dest)):
-                    self.logger.info("Creating direcotry: %s", os.path.dirname(dest))
+                    self.logger.info("Creating directory: %s", os.path.dirname(dest))
                     os.makedirs(os.path.dirname(dest))
 
                 self.logger.info("Copying file: %s", each.name)
@@ -318,6 +349,57 @@ class Window(QtWidgets.QDialog):
         except Exception as err:
             self.logger.error(err)
             return False
+
+        return True
+
+    def on_uninstall_clicked(self):
+        stack = self.data["stack"]["master"]
+        stack.setCurrentIndex(1)
+
+        QtCore.QCoreApplication.processEvents()
+        self.logger.info("...")
+        time.sleep(.5)
+
+        chooser = self.data["widget"]["chooser"]
+        install_path = chooser.itemData(chooser.currentIndex())
+
+        install_path = os.path.join(install_path, "Scripts", "ScriptUI Panels")
+        if not os.path.isdir(install_path):
+            self.logger.error("Path does not exist: %s", install_path)
+            return
+
+        self.data["button"]["install"].setEnabled(False)
+        self.data["button"]["uninstall"].setEnabled(False)
+        uninstall = self._uninstall(install_path)
+
+        if uninstall:
+            self.data["label"]["status"].setStyleSheet("background: {};".format(colors["blue"]))
+            self.logger.info("Removed successfully!")
+            self.data["button"]["exit"].setText("Close")
+        else:
+            self.data["label"]["status"].setStyleSheet("background: {};".format(colors["red"]))
+            self.logger.error("Failed to remove.")
+
+    def _uninstall(self, destination):
+
+        jsx_path = os.path.join(destination, "afterbox.jsx")
+        script_folder = os.path.join(destination, "(afterbox)")
+
+        if os.path.isfile(jsx_path):
+            try:
+                self.logger.info("Removing file: %s", jsx_path)
+                os.remove(jsx_path)
+            except Exception as err:
+                self.logger.error(err)
+                return False
+
+        if os.path.isdir(script_folder):
+            try:
+                self.logger.info("Removing directory: %s", script_folder)
+                shutil.rmtree(script_folder)
+            except Exception as err:
+                self.logger.error(err)
+                return False
 
         return True
 

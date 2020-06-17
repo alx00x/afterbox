@@ -1,0 +1,51 @@
+# -*- mode: python ; coding: utf-8 -*-
+
+block_cipher = None
+
+
+a = Analysis(['afterbox_setup.py'],
+             pathex=['D:\\repo\\afterbox'],
+             binaries=[],
+             datas=[
+                 ('res/*.*', 'res'),
+                 ('files/*.jsx', 'files'),
+                 ('files/(afterbox)/etc/*.*', 'files/(afterbox)/etc'),
+                 ('files/(afterbox)/helpers/*.*', 'files/(afterbox)/helpers'),
+                 ('files/(afterbox)/images/*.*', 'files/(afterbox)/images'),
+                 ('files/(afterbox)/startup/*.*', 'files/(afterbox)/startup'),
+                 ('files/(afterbox)/update/*.*', 'files/(afterbox)/update'),
+                 ('files/(afterbox)/sets/1_effects/*.*', 'files/(afterbox)/sets/1_effects'),
+                 ('files/(afterbox)/sets/2_system/*.*', 'files/(afterbox)/sets/2_system'),
+                 ('files/(afterbox)/sets/3_properties/*.*', 'files/(afterbox)/sets/3_properties'),
+                 ('files/(afterbox)/sets/4_export/*.*', 'files/(afterbox)/sets/4_export'),
+                 ('files/(afterbox)/sets/5_animation/*.*', 'files/(afterbox)/sets/5_animation'),
+                 ('files/(afterbox)/sets/6_utils/*.*', 'files/(afterbox)/sets/6_utils'),
+                 ('files/(afterbox)/sets/7_render/*.*', 'files/(afterbox)/sets/7_render'),
+                 ('files/(afterbox)/sets/8_settings/*.*', 'files/(afterbox)/sets/8_settings'),
+             ],
+             hiddenimports=[],
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher,
+             noarchive=False)
+pyz = PYZ(a.pure, a.zipped_data,
+             cipher=block_cipher)
+exe = EXE(pyz,
+          a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
+          [],
+          name='afterbox_setup',
+          debug=False,
+          bootloader_ignore_signals=False,
+          strip=False,
+          upx=True,
+          upx_exclude=[],
+          runtime_tmpdir=None,
+          console=False,
+          icon='res\\icon.ico',
+          manifest='manifest.xml')

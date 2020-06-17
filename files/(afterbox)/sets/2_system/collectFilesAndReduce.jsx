@@ -559,7 +559,7 @@
         // Zip collect folder
         if (cfarPal.grp.inst.opts.box2.value == true) {
             var zipFile = folderProject + projectNameNoExt + "_folder.zip";
-            var zipScript = new File(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(toolboy)/etc/zipscript.vbs");
+            var zipScript = new File(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(afterbox)/etc/zipscript.vbs");
             var cmdLineToExecute = "\"" + zipScript.fsName + "\"" + " " + "\"" + folderCollectPath + "\"" + " " + "\"" + zipFile + "\"";
             system.callSystem("cmd.exe /c \"" + cmdLineToExecute + "\"");
         }
@@ -573,7 +573,7 @@
         var elemArray = collectElementInstances();
         if (elemArray.length > 0) {
             // Start procmon
-            var etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(toolboy)/etc");
+            var etcFolder = new Folder(Folder.appPackage.fullName + "/Scripts/ScriptUI Panels/(afterbox)/etc");
             var desktopPath = new Folder("~/Desktop");
 
             var afterfxPML = new File(desktopPath.fsName + "/afterfx.pml");

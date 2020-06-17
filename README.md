@@ -1,3 +1,3 @@
-# Toolboy for After Effects
+# AfterBox for After Effects
 
 Work in progress
