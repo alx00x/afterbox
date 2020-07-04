@@ -20,9 +20,9 @@ colors = {
     "blue": "#009CFF",
 }
 
-VERSION = "5.2"
-WINDOW_TITLE = "Install"
-WINDOW_OBJECT = "afterbox_window"
+__VERSION__ = "5.3"
+__WINDOW_TITLE__ = "Install"
+__WINDOW_OBJECT__ = "afterbox_window"
 
 # ------------------------------------------------------------------------------
 # Logging
@@ -81,8 +81,8 @@ class Window(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(Window, self).__init__(parent)
 
-        self.setWindowTitle(WINDOW_TITLE)
-        self.setObjectName(WINDOW_OBJECT)
+        self.setWindowTitle(__WINDOW_TITLE__)
+        self.setObjectName(__WINDOW_OBJECT__)
         self.setAcceptDrops(False)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(resource("res/icon.png")),
@@ -175,7 +175,7 @@ class Window(QtWidgets.QDialog):
         footer_layout = QtWidgets.QHBoxLayout(footer_frame)
 
         version_label = QtWidgets.QLabel(self)
-        version_label.setText("v" + VERSION)
+        version_label.setText("v" + __VERSION__)
         version_label.setStyleSheet("color: rgba(0, 0, 0, 50%)")
 
         button_install = QtWidgets.QPushButton(self)

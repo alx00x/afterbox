@@ -2,7 +2,6 @@
 // AfterBox.jsx
 //
 // Name: AfterBox for After Effects
-// Version: 5.2
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
 //
@@ -21,7 +20,7 @@
     // Global variables
     var afterboxData = new Object();
     afterboxData.scriptName = "AfterBox";
-    afterboxData.version = "5.2";
+    afterboxData.version = "5.3";
     afterboxData.thisScriptsFolder = new Folder((new File($.fileName)).path);
     afterboxData.etcPath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\etc\\";
     afterboxData.helpersPath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\helpers\\";
