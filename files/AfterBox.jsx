@@ -1,8 +1,8 @@
 ﻿#include "(afterbox)/update/json2.js";
-// afterbox.jsx
+// AfterBox.jsx
 //
 // Name: AfterBox for After Effects
-// Version: 5.1
+// Version: 5.2
 // Author: Aleksandar Kocic
 // Based on: Launch Pad.jsx script by After Effects crew
 //
@@ -21,7 +21,7 @@
     // Global variables
     var afterboxData = new Object();
     afterboxData.scriptName = "AfterBox";
-    afterboxData.version = "5.1";
+    afterboxData.version = "5.2";
     afterboxData.thisScriptsFolder = new Folder((new File($.fileName)).path);
     afterboxData.etcPath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\etc\\";
     afterboxData.helpersPath = afterboxData.thisScriptsFolder.fsName + "\\(afterbox)\\helpers\\";
@@ -270,7 +270,7 @@
 
 
     // updateFromGitHub()
-    // Clean the afterbox folder and update
+    // Clean the AfterBox folder and update
     function updateFromGitHub() {
         var tempFolder = new Folder(afterboxData.tempPath);
         if (tempFolder.exists == true) {
@@ -376,10 +376,21 @@
         for (var i = 0; i < allScripts.length; i++) {
             var scriptFile = allScripts[i];
             var ignore = false;
+
             var scriptFileName = scriptFile.toString().split(/(\\|\/)/g).pop();
             if (ignoreFiles.indexOf(scriptFileName) != -1) {
                 ignore = true;
             }
+
+            var first_line;
+            for (var i = 1; i <= 1; i++) {
+                first_line = File(scriptFile).readln();
+            }
+
+            if (first_line == "// experimental") {
+                ignore = true;
+            }
+
             if (ignore == false) {
                 loadFiles.push(scriptFile);
             }

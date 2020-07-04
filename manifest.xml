@@ -3,9 +3,9 @@
 <assemblyIdentity
     name="afterbox"
     processorArchitecture="x86"
-    version="5.1.0.0"
+    version="5.2.0.0"
     type="win32"/>
-<description>AfterBox for After Effects v5.1</description>
+<description>AfterBox for After Effects v5.2</description>
    <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
       <security>
       <requestedPrivileges>

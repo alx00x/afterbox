@@ -1,4 +1,6 @@
-﻿#include "../../update/json.js";
+﻿// experimental
+
+#include "../../update/json.js";
 // productionRender.jsx
 //
 // Name: productionRender
@@ -29,7 +31,7 @@
         return;
     }
 
-    // required afterbox check
+    // required AfterBox check
     var requiredAfterBoxVersion = 4.1;
     if (app.settings.haveSetting("AfterBox", "Version")) {
         var currentAfterBoxVersion = parseFloat(app.settings.getSetting("AfterBox", "Version"));

@@ -20,7 +20,7 @@ colors = {
     "blue": "#009CFF",
 }
 
-VERSION = "5.1"
+VERSION = "5.2"
 WINDOW_TITLE = "Install"
 WINDOW_OBJECT = "afterbox_window"
 
@@ -277,7 +277,7 @@ class Window(QtWidgets.QDialog):
         install_path = chooser.itemData(index)
         panels_path = os.path.join(install_path, "Scripts", "ScriptUI Panels")
 
-        jsx_path = os.path.join(panels_path, "afterbox.jsx")
+        jsx_path = os.path.join(panels_path, "AfterBox.jsx")
         script_folder = os.path.join(panels_path, "(afterbox)")
         if os.path.isfile(jsx_path) or os.path.isdir(script_folder):
             self.data["button"]["uninstall"].show()
@@ -318,7 +318,7 @@ class Window(QtWidgets.QDialog):
 
         files = list(pathlib.Path(resource("files")).rglob("*.*"))
         files_destination_root = destination + "/(afterbox)"
-        script_destination = destination + "/afterbox.jsx"
+        script_destination = destination + "/AfterBox.jsx"
 
         perm_script = resource("res/permissions.vbs")
         try:
@@ -382,7 +382,7 @@ class Window(QtWidgets.QDialog):
 
     def _uninstall(self, destination):
 
-        jsx_path = os.path.join(destination, "afterbox.jsx")
+        jsx_path = os.path.join(destination, "AfterBox.jsx")
         script_folder = os.path.join(destination, "(afterbox)")
 
         if os.path.isfile(jsx_path):

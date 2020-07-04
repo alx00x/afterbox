@@ -17,7 +17,7 @@
     cpvData.scriptVersion = "1.0";
     cpvData.scriptTitle = cpvData.scriptName + " v" + cpvData.scriptVersion;
 
-    cpvData.strUpdateAfterBox = { en: "You are using an older version of afterbox panel. Please update as soon as possible!" }
+    cpvData.strUpdateAfterBox = { en: "You are using an older version of AfterBox panel. Please update as soon as possible!" }
 
     // Localize
     function checkPanelVersion_localize(strVar) {
@@ -36,7 +36,7 @@
     // Main Functions
     //
     function checkPanelVersion_main() {
-        // get afterbox version from prefs file
+        // get AfterBox version from prefs file
         var currentVersion;
         if (app.settings.haveSetting("AfterBox", "Version")) {
             var currentVersion = parseFloat(app.settings.getSetting("AfterBox", "Version"));

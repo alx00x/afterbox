@@ -43,7 +43,7 @@
     a2sData.strRowsInfo = { en: "(this value is calculated automatically)" };
 
     a2sData.strWarning = { en: "Warning: Enabling this options for big and lengthy compositions could significantly increase the execution time. Setting smaller than 5 sample size is not recommended" };
-    a2sData.strPNGWarning = { en: "Warning: Could not find \"PNG Sequence\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under afterbox panel. Exporting as PSD for now." };
+    a2sData.strPNGWarning = { en: "Warning: Could not find \"PNG Sequence\" output template. It is highly recommended to either make a template by that name or import it by pressing [IMP REND] button under AfterBox panel. Exporting as PSD for now." };
     a2sData.strSpreadsheetErr = { en: "You need to specify output first." };
     a2sData.strOutputErr = { en: "Output is not valid." };
     a2sData.strColumnsErr = { en: "Cannot pack sprites at requested number of rows and columns. Try again." };

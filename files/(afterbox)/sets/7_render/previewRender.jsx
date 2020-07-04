@@ -17,7 +17,7 @@
         return;
     }
 
-    // required afterbox check
+    // required AfterBox check
     var requiredAfterBoxVersion = 4.1;
     if (app.settings.haveSetting("AfterBox", "Version")) {
         var currentAfterBoxVersion = parseFloat(app.settings.getSetting("AfterBox", "Version"));
@@ -26,7 +26,7 @@
     }
 
     if (currentAfterBoxVersion < requiredAfterBoxVersion) {
-        alert("This script requires afterbox version " + requiredAfterBoxVersion + " or later. Please update to use this script!");
+        alert("This script requires AfterBox version " + requiredAfterBoxVersion + " or later. Please update to use this script!");
         return;
     }
 
