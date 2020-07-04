@@ -42,7 +42,8 @@
     afterboxData.strOptions = "Options";
     afterboxData.strCheckForUpdates = "Check For Updates";
     afterboxData.strRepoURL = "Repo URL";
-    afterboxData.strIgnoreList = "Ignore list";
+    afterboxData.strIgnoreList = "Ignore List";
+    afterboxData.strShowExperimental = "Show Experimental";
     afterboxData.strChoose = "Choose";
 
     afterboxData.strInfo = "Info";
@@ -372,22 +373,21 @@
         var loadFiles = [];
         var allScripts = scanSubFolders(folder, /\.(jsx)$/i)[0];
         var ignoreFilesList = app.settings.getSetting("AfterBox", "Ignore List");
+        var showExperimental = (app.settings.getSetting("AfterBox", "Show Experimental") === "false") ? false : true;
         var ignoreFiles = ignoreFilesList.split(',');
         for (var i = 0; i < allScripts.length; i++) {
             var scriptFile = allScripts[i];
             var ignore = false;
 
+            if (showExperimental == false) {
+                var devIndicator = new File((scriptFile.toString().substring(0, scriptFile.toString().length - 3)) + "dev");
+                if (devIndicator.exists) {
+                    ignore = true;
+                }
+            }
+
             var scriptFileName = scriptFile.toString().split(/(\\|\/)/g).pop();
             if (ignoreFiles.indexOf(scriptFileName) != -1) {
-                ignore = true;
-            }
-
-            var first_line;
-            for (var i = 1; i <= 1; i++) {
-                first_line = File(scriptFile).readln();
-            }
-
-            if (first_line == "// experimental") {
                 ignore = true;
             }
 
@@ -450,6 +450,11 @@
                             txt: StaticText { text:'', preferredSize:[80,20] }, \
                             box: Checkbox { text:'" + afterboxData.strCheckForUpdates + "', alignment:['fill','top'] }, \
                         }, \
+                        dev: Group { \
+                            alignment:['fill','top'], \
+                            txt: StaticText { text:'', preferredSize:[80,20] }, \
+                            box: Checkbox { text:'" + afterboxData.strShowExperimental + "', alignment:['fill','top'] }, \
+                        }, \
                         rpo: Group { \
                             alignment:['fill','top'], \
                             txt: StaticText { text:'" + afterboxData.strRepoURL + "', preferredSize:[80,20] }, \
@@ -501,6 +506,11 @@
             if (app.settings.haveSetting("AfterBox", "Ignore List")) {
                 var ignoreSetting = app.settings.getSetting("AfterBox", "Ignore List");
                 pal.grp.opts.ign.fld.text = ignoreSetting;
+            }
+
+            if (app.settings.haveSetting("AfterBox", "Show Experimental")) {
+                var showExperimentalSetting = (app.settings.getSetting("AfterBox", "Show Experimental") === "false") ? false : true;
+                pal.grp.opts.dev.box.value = showExperimentalSetting;
             }
 
             pal.grp.opts.ign.btn.onClick = afterbox_doChooseUI;
@@ -625,6 +635,10 @@
         //save ignorelist setting
         var ignorelistSetting = afterbox_settingsPal.grp.opts.ign.fld.text;
         app.settings.saveSetting("AfterBox", "Ignore List", ignorelistSetting);
+
+        //save show experimental setting
+        var showExperimentalSetting = afterbox_settingsPal.grp.opts.dev.box.value.toString();
+        app.settings.saveSetting("AfterBox", "Show Experimental", showExperimentalSetting);
 
         //close config
         afterbox_settingsPal.close();
@@ -809,6 +823,9 @@
         if (!(app.settings.haveSetting("AfterBox", "Ignore List"))) {
             app.settings.saveSetting("AfterBox", "Ignore List", "");
         }
+        if (!(app.settings.haveSetting("AfterBox", "Show Experimental"))) {
+            app.settings.saveSetting("AfterBox", "Show Experimental", "false");
+        }
     }
 
     // main:
@@ -856,6 +873,10 @@
         // Get ignore list
         var ignoreListSetting = app.settings.getSetting("AfterBox", "Ignore List");
         afterboxData.ignoreList = [ignoreListSetting];
+
+        // Get show experimental setting
+        var showExperimentalSetting = app.settings.getSetting("AfterBox", "Show Experimental");
+        afterboxData.showExperimentalSetting = showExperimentalSetting
 
         // Gather regular scripts
         var setsFolder = new Folder(afterboxData.scriptsPath);
