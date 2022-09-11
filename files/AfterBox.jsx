@@ -86,7 +86,7 @@
     afterboxData.repoSha;
     afterboxData.repoBranch = "deploy";
 
-    afterboxData.repoURL = "https://github.com/koaleksa/afterbox";
+    afterboxData.repoURL = "https://github.com/alx00x/afterbox";
 
     afterboxData.localCount;
     afterboxData.localHash;
